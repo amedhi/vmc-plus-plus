@@ -3,8 +3,8 @@
 * All rights reserved.
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:46
-* Last Modified by:   amedhi
-* Last Modified time: 2017-01-30 22:17:52
+* Last Modified by:   Amal Medhi, amedhi@macbook
+* Last Modified time: 2017-02-01 21:51:45
 *----------------------------------------------------------------------------*/
 #ifndef MODEL_H
 #define MODEL_H
@@ -26,15 +26,15 @@ enum class model_id {
   UNDEFINED, HUBBARD, tJ
 };
 
-class Model : public std::vector<SiteTerm>,  public std::vector<BondTerm>
+class Hamiltonian : public std::vector<SiteTerm>,  public std::vector<BondTerm>
 {
 public:
   using siteterm_iterator = std::vector<SiteTerm>::const_iterator; 
   using bondterm_iterator = std::vector<BondTerm>::const_iterator; 
-  Model() {}
-  Model(const input::Parameters& inputs, const lattice::Lattice& lattice)
+  Hamiltonian() {}
+  Hamiltonian(const input::Parameters& inputs, const lattice::Lattice& lattice)
   { construct(inputs, lattice); }
-  ~Model() {}
+  ~Hamiltonian() {}
   int construct(const input::Parameters& inputs, const lattice::Lattice& lattice);
   int init(const lattice::Lattice& lattice);
   int define_model(const input::Parameters& inputs, const lattice::Lattice& lattice);
@@ -46,6 +46,8 @@ public:
     const input::Parameters& inputs)
     { parms_[pname] = inputs.set_value(pname, defval); return parms_.size(); }
   void update_parameters(const input::Parameters& inputs);
+  void change_parameter_value(const std::string& pname, const double& pval);
+  double get_parameter_value(const std::string& pname) const;
   unsigned add_constant(const std::string& cname, const double& val) 
     { constants_.insert({cname, val}); return constants_.size(); }
   unsigned add_siteterm(const std::string& name, const CouplingConstant& cc, const qn_op& op);

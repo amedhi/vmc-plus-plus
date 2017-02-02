@@ -41,16 +41,15 @@ private:
 };
 */
 
-class VMC : public lattice::graph::LatticeGraph, public model::Model, 
-                  public scheduler::Worker 
+class VMC : public scheduler::Worker
 {
 public:
   using SiteState = SiteBasisState;
   using state_idx = SiteBasisState::state_idx;
-  //Simulator() {};
+  //VMC() {}
   VMC(input::Parameters& parms); 
   ~VMC() {}
-  using Model::update_parameters;
+  //using Model::update_parameters;
   int start(input::Parameters& parms) override;
   void run(void) override {} 
   void finish(void) override {} 
@@ -59,9 +58,12 @@ public:
   static void print_copyright(std::ostream& os);
 
 private:
-  RandomNumber rng;
-  std::vector<SiteBasisState> state;
-  var::Wavefunction psi_var_;
+  lattice::graph::LatticeGraph graph_;
+  model::Hamiltonian model_;
+
+  //RandomNumber rng;
+  //std::vector<SiteBasisState> state;
+  var::Wavefunction wavefunc_;
   
   // mc parameters
   int measure_samples; 

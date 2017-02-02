@@ -4,7 +4,7 @@
 * Author: amedhi
 * Date:   2016-03-01 00:11:01
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2016-03-18 01:08:36
+* Last Modified time: 2017-02-02 14:44:22
 *----------------------------------------------------------------------------*/
 #ifndef GRAPH_H
 #define GRAPH_H
@@ -75,7 +75,7 @@ public:
     { this->operator[](*ei).type = new_val; }
 
   // getter functions
-  const Lattice& lattice(void) { return lattice_; }
+  const Lattice& lattice(void) const { return lattice_; }
 
   // vertex accessors
   const unsigned& num_sites(void) const { return num_vertices_; }
@@ -91,6 +91,7 @@ public:
   const unsigned& site_type(const site_descriptor& v) const { return this->operator[](v).type; }
   const unsigned& site_uid(const site_iterator& vi) const { return this->operator[](*vi).uid; }
   const unsigned& site_uid(const site_descriptor& v) const { return this->operator[](v).uid; }
+  const unsigned& site_uid(const unsigned& i) const { return this->operator[](i).uid; }
   const Vector3d& site_cellcord(const site_iterator& vi) const { return this->operator[](*vi).cell_coord; }
   const Vector3d& site_cellcord(const site_descriptor& v) const { return this->operator[](v).cell_coord; }
 

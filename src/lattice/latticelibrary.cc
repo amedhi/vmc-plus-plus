@@ -3,7 +3,7 @@
 * All rights reserved.
 * Date:   2016-01-17 21:32:15
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2016-03-18 00:46:47
+* Last Modified time: 2017-02-02 23:42:26
 *----------------------------------------------------------------------------*/
 #include <stdexcept>
 #include <iomanip>
@@ -144,6 +144,20 @@ int Lattice::finalize_lattice(void)
   for (unsigned i=0; i<unitcell.num_bond(); ++i) {
     std::cout << Unitcell::bond(i) << std::endl;
   }*/
+
+  // 'vector' & 'vector_id' attributes of the bonds
+  std::map<int,unsigned> vecid_map;
+  unsigned id=0;
+  for (unsigned i=0; i<Unitcell::num_bonds(); ++i) {
+    Vector3i ivec = Unitcell::bond(i).tgt().bravindex()-Unitcell::bond(i).src().bravindex();
+    int cell_id = ivec[0] + ivec[1]*extent[dim1].size + ivec[2]*num_layer_cells;
+    Unitcell::bond(i).set_vector_id(id);
+    Unitcell::bond(i).set_vector((ivec[0]*vector_a1()+ivec[1]*vector_a2()+ivec[2]*vector_a3()));
+    std::cout << "bond " << i << ": vector_id = " << id << "\n";
+    auto status = vecid_map.insert({cell_id, id});
+    if (status.second) id++;
+  }
+
   return 0;
 }
 
@@ -209,6 +223,7 @@ int Lattice::symmetrize_lattice(void)
       Unitcell::add_bond(b);
     }
   }
+
 
   //std::cout << unitcell.vector_a1() << "\n";
   //std::cout << unitcell.vector_a2() << "\n";

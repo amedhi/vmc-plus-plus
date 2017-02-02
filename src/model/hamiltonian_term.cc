@@ -3,8 +3,8 @@
 * All rights reserved.
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:50
-* Last Modified by:   amedhi
-* Last Modified time: 2017-01-30 19:12:33
+* Last Modified by:   Amal Medhi, amedhi@macbook
+* Last Modified time: 2017-02-02 18:07:33
 *----------------------------------------------------------------------------*/
 #include "hamiltonian_term.h"
 
@@ -203,6 +203,7 @@ BondTerm::BondTerm(const std::string& name, const CouplingConstant& cc, const qn
 {
   if (!cc.valid()) throw std::invalid_argument("BondTerm:: Invalid CouplingConstant");
   name_ = name;
+  op_ = op;
   size_ = size;
 
   // if the 'cc' is implicitly defined for all bond types 

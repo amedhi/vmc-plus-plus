@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-01-25 18:05:03
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2016-03-16 16:47:10
+* Last Modified time: 2017-02-02 23:41:20
 *----------------------------------------------------------------------------*/
 #ifndef LATTICE_H
 #define LATTICE_H
@@ -91,6 +91,8 @@ public:
   //void reset_src_offset(const Vector3i& idx) { src_offset_=idx; }
   //void reset_tgt_offset(const Vector3i& idx) { tgt_offset_=idx; }
   void reset_bravindex(const Vector3i& idx) { bravindex_=idx; }
+  void set_vector_id(const unsigned& id) { vector_id_=id; }
+  void set_vector(const Vector3d& R) { vector_=R; }
   //void shift_target_ids(const int& id_offset) { src_ += id_offset; tgt_ += id_offset; }
   void translate_by(const Vector3i& bravindex_offset) { bravindex_ += bravindex_offset; } 
   void connect(const Site& src, const Vector3i& src_offset, const Site& tgt, 
@@ -102,6 +104,8 @@ public:
   unsigned type(void) const {return type_;}
   unsigned src_id(void) const { return first.id(); }
   unsigned tgt_id(void) const { return second.id(); }
+  const Site& src(void) const { return first; }
+  const Site& tgt(void) const { return second; }
   int sign(void) const { return sign_; }
   Vector3i bravindex(void) const { return bravindex_; }
   //Vector3i src_offset(void) const { return src_offset_; }
@@ -113,6 +117,8 @@ private:
   int id_ {0};
   unsigned type_ {0};
   unsigned ngb_ {0};
+  unsigned vector_id_{0}; // integer id for the following vector
+  Vector3d vector_{Vector3d(0,0,0)}; // coordinate of 'tgt cell' wrt 'src cell'
   //unsigned src_ {0}; 
   //unsigned tgt_ {0}; 
   int sign_ {1}; // = -1 if across an antiperiodic boundary
@@ -154,6 +160,7 @@ public:
   const Vector3d& coord(void) const {return coord_;}
   const Site& site(const unsigned& i) const { return sites[i]; }
   const Bond& bond(const unsigned& i) const { return bonds[i]; }
+  Bond& bond(const unsigned& i) { return bonds[i]; }
   unsigned num_site_types(void) const { return sitetypes_map_.size(); }
   unsigned num_bond_types(void) const { return bondtypes_map_.size(); }
   std::map<unsigned,unsigned> sitetypes_map(void) const { return sitetypes_map_; }

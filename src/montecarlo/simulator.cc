@@ -3,8 +3,8 @@
 * All rights reserved.
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:50
-* Last Modified by:   amedhi
-* Last Modified time: 2017-01-30 20:45:54
+* Last Modified by:   Amal Medhi, amedhi@macbook
+* Last Modified time: 2017-02-01 22:20:53
 *----------------------------------------------------------------------------*/
 #include <iomanip>
 #include "simulator.h"
@@ -12,10 +12,11 @@
 namespace mc {
 
 VMC::VMC(input::Parameters& parms) 
-  : LatticeGraph(parms) 
-  , Model(parms, LatticeGraph::lattice()) 
-  , psi_var_(parms, LatticeGraph::lattice())
+  : graph_(parms) 
+  , model_(parms, graph_.lattice()) 
+  , wavefunc_(parms, graph_)
 {
+  //std::cout << "-----------hi----------\n";
   //Model::construct(LatticeGraph::lattice(), parms);
 }
 
@@ -24,8 +25,8 @@ int VMC::start(input::Parameters& parms)
   // this function must be override
   std::cout << "Simulator::start\n";
   //lattice::Lattice lattice(parms);
-  std::cout << "lattice: name = " << lattice().name() << "\n";
-  std::cout << "lattice: num sites = " << lattice().num_sites() << "\n";
+  std::cout << "lattice: name = " << graph_.lattice().name() << "\n";
+  std::cout << "lattice: num sites = " << graph_.lattice().num_sites() << "\n";
 
   return 0;
 }

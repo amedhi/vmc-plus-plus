@@ -3,8 +3,8 @@
 * All rights reserved.
 * Author: Amal Medhi
 * Date:   2016-03-11 13:02:35
-* Last Modified by:   amedhi
-* Last Modified time: 2017-01-30 22:15:43
+* Last Modified by:   Amal Medhi, amedhi@macbook
+* Last Modified time: 2017-02-01 22:20:37
 *----------------------------------------------------------------------------*/
 #include <cmath>
 #include "model.h"
@@ -12,7 +12,7 @@
 
 namespace model {
 
-int Model::define_model(const input::Parameters& inputs, const lattice::Lattice& lattice)
+int Hamiltonian::define_model(const input::Parameters& inputs, const lattice::Lattice& lattice)
 {
   //int info;
   //unsigned ntypes;
@@ -59,7 +59,7 @@ int Model::define_model(const input::Parameters& inputs, const lattice::Lattice&
   return 0;
 }
 
-int Model::construct(const input::Parameters& inputs, const lattice::Lattice& lattice)
+int Hamiltonian::construct(const input::Parameters& inputs, const lattice::Lattice& lattice)
 {
   init(lattice);
   define_model(inputs, lattice);
@@ -67,7 +67,7 @@ int Model::construct(const input::Parameters& inputs, const lattice::Lattice& la
   return 0;
 }
 
-int Model::init(const lattice::Lattice& lattice)
+int Hamiltonian::init(const lattice::Lattice& lattice)
 {
   // reset
   parms_.clear();

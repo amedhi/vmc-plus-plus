@@ -100,12 +100,14 @@ public:
   BondOperatorTerm(const std::string& name, const std::string& cc_expr, const qn_op& op);
   ~BondOperatorTerm() {}
   int eval_coupling_constant(const ModelParams& cvals, const ModelParams& pvals);
+  const qn_op& qn_operator(void) const { return op_; }
   const double& coupling(void) const { return cc_value_; }
 private:
   qn_op op_;
   std::string name_{""};
   std::string cc_expr_{""};
   double cc_value_{0.0};
+  //Matrix matrix_;
 };
 
 //class BondTerm : public std::unordered_map<unsigned, BondOperatorTerm>
@@ -120,10 +122,12 @@ public:
     const unsigned& size);
   ~BondTerm() {}
   void eval_coupling_constant(const ModelParams& cvals, const ModelParams& pvals);
+  const qn_op& qn_operator(void) const { return op_; }
   const double& coupling(const unsigned& bond_type) const; 
   const std::string& name(void) const { return name_; }
 private:
   std::string name_;
+  qn_op op_;
   //double null_element_{0.0};
   //double null_coupling_{0.0};
   unsigned size_{1};

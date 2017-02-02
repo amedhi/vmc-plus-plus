@@ -24,6 +24,8 @@ SRCS+= lattice/graph.cc
 SRCS+= model/hamiltonian_term.cc
 SRCS+= model/model.cc
 SRCS+= model/modellibrary.cc
+SRCS+= variational/blochbasis.cc
+SRCS+= variational/mf_model.cc
 SRCS+= variational/wavefunction.cc
 #SRCS+= observable/observables.cc
 SRCS+= montecarlo/random.cc
@@ -43,7 +45,8 @@ HDRS=scheduler/optionparser.h scheduler/cmdargs.h \
          lattice/constants.h lattice/lattice.h lattice/graph.h \
 	 montecarlo/simulator.h \
          model/modelparams.h  model/hamiltonian_term.h model/model.h \
-	 variational/wavefunction.h \
+	 variational/blochbasis.h \
+	 variational/mf_model.h variational/wavefunction.h \
          montecarlo/random.h montecarlo/sitebasisstate.h \
 	 simulation.h \
 #         model/qn.h model/quantum_operator.h model/sitebasis.h model/modelparams.h \
