@@ -3,7 +3,7 @@
 * All rights reserved.
 * Date:   2016-01-17 21:32:15
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-02 23:42:26
+* Last Modified time: 2017-02-03 22:47:27
 *----------------------------------------------------------------------------*/
 #include <stdexcept>
 #include <iomanip>
@@ -150,12 +150,16 @@ int Lattice::finalize_lattice(void)
   unsigned id=0;
   for (unsigned i=0; i<Unitcell::num_bonds(); ++i) {
     Vector3i ivec = Unitcell::bond(i).tgt().bravindex()-Unitcell::bond(i).src().bravindex();
-    int cell_id = ivec[0] + ivec[1]*extent[dim1].size + ivec[2]*num_layer_cells;
-    Unitcell::bond(i).set_vector_id(id);
+    int key = ivec[0] + ivec[1]*extent[dim1].size + ivec[2]*num_layer_cells;
+    auto it = vecid_map.find(key);
+    if (it != vecid_map.end()) Unitcell::bond(i).set_vector_id(it->second);
+    else {
+      vecid_map.insert({key, id});
+      Unitcell::bond(i).set_vector_id(id);
+      id++;
+    }
     Unitcell::bond(i).set_vector((ivec[0]*vector_a1()+ivec[1]*vector_a2()+ivec[2]*vector_a3()));
-    std::cout << "bond " << i << ": vector_id = " << id << "\n";
-    auto status = vecid_map.insert({cell_id, id});
-    if (status.second) id++;
+    //std::cout << "bond " << i << ": vector_id = " << bond(i).vector_id() << "\n";
   }
 
   return 0;

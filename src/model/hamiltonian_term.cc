@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:50
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-02 18:07:33
+* Last Modified time: 2017-02-04 00:40:52
 *----------------------------------------------------------------------------*/
 #include "hamiltonian_term.h"
 
@@ -98,150 +98,56 @@ void CouplingConstant::add_type(const value_type& val)
 }
 
 
-//-----------------------SiteOperatorTerm-------------------------
-SiteOperatorTerm::SiteOperatorTerm(const std::string& name, const std::string& cc_expr, 
-  const qn_op& op)
-  : op_{op}, name_{name}, cc_expr_{cc_expr}
-{
-}
 
-int SiteOperatorTerm::eval_coupling_constant(const ModelParams& cvals, const ModelParams& pvals)
+//-----------------------HamiltonianTerm-------------------------
+HamiltonianTerm::HamiltonianTerm(const std::string& name, 
+  const CouplingConstant& cc, const qn_op& op, const unsigned& size)
 {
-  if (cc_expr_.size()==0) {
-    cc_value_ = 0.0;
-    return 0;
-  }
-
-  // expression evaluator
-  expr::Expression expr;
-  expr::Expression::variables vars;
-  for (const auto& c : cvals) vars[c.first] = c.second;
-  for (const auto& p : pvals) vars[p.first] = p.second;
-  try { 
-    cc_value_ = expr.evaluate(cc_expr_, vars); 
-  }
-  catch (std::exception& e) 
-  { 
-    std::string msg = "SiteOperatorTerm::evaluate_coupling_constant:\n" + std::string(e.what());
-    throw std::runtime_error(msg);
-  }
-  return 0;
-}
-
-SiteTerm::SiteTerm(const std::string& name, const CouplingConstant& cc, 
-    const qn_op& op, const unsigned& size)
-{
-  if (!cc.valid()) throw std::invalid_argument("SiteTerm::Invalid CouplingConstant");
+  if (!cc.valid()) throw std::invalid_argument("HamiltonianTerm:: Invalid CouplingConstant");
+  op_ = op;
   name_ = name;
-  size_ = size;
+  cc_ = cc;
+  max_operand_types_ = size;
 
-  // if the 'cc' is implicitly defined for all site types 
-  if (cc.size()==1 && cc.begin()->first==CouplingConstant::global_type) {
-    std::string cc_expr = cc.begin()->second;
-    for (unsigned i=0; i<size_; ++i) {
-      std::string term_name = name + std::to_string(i);
-      this->operator[](i) = SiteOperatorTerm(term_name,cc_expr,op);
-    }
+  cc_values_.resize(max_operand_types_);
+  is_defined_.resize(max_operand_types_);
+  for (unsigned i=0; i<max_operand_types_; ++i) {
+    cc_values_[i] = 0.0;
+    is_defined_[i] = false;
+  }
+
+  // if the 'cc' is implicitly defined for all types 
+  if (cc_.size()==1 && cc_.begin()->first==CouplingConstant::global_type) {
+    for (unsigned i=0; i<max_operand_types_; ++i) is_defined_[i] = true;
   } 
   else {
-    // set "SiteOperatorTerm"-s only for those site types for which 'cc' is 
-    // explicitly defined
-    for (const auto& p : cc) {
-      std::string term_name = name + std::to_string(p.first);
-      std::string cc_expr = p.second;
-      //std::cout << p.first << " " << p.second << "\n";
-      this->operator[](p.first) = SiteOperatorTerm(term_name,cc_expr,op);
-      //insert({p.first, SiteOperatorTerm(term_name,p.second,op_expr,site)});
-    }
+    // operator is defined only for those types for which 'cc' is set explicitly
+    for (const auto& p : cc) is_defined_[p.first] = true;
   }
 }
 
-void SiteTerm::eval_coupling_constant(const ModelParams& cvals, const ModelParams& pvals)
+void HamiltonianTerm::eval_coupling_constant(const ModelParams& cvals, const ModelParams& pvals)
 {
-  for (auto& term : *this) term.eval_coupling_constant(cvals, pvals);
-}
-
-const double& SiteTerm::coupling(const unsigned& site_type) const
-{
-  return this->operator[](site_type).coupling();
-}
-
-
-//-----------------------BondOperatorTerm-------------------------
-BondOperatorTerm::BondOperatorTerm(const std::string& name, const std::string& cc_expr, 
-  const qn_op& op)
-  : op_{op}, name_{name}, cc_expr_{cc_expr}, cc_value_{0.0}
-{
-}
-
-int BondOperatorTerm::eval_coupling_constant(const ModelParams& cvals, const ModelParams& pvals)
-{
-  if (cc_expr_.size()==0) {
-    cc_value_ = 0.0;
-    return 0;
-  }
-  // expression evaluator
   expr::Expression expr;
   expr::Expression::variables vars;
   for (const auto& c : cvals) vars[c.first] = c.second;
   for (const auto& p : pvals) vars[p.first] = p.second;
   try { 
-    cc_value_ = expr.evaluate(cc_expr_, vars); 
-    //std::cout << "bterm: " << name_ << " = " << cc_value_ << "\n";
+    // if the 'cc' is implicitly defined for all types 
+    if (cc_.size()==1 && cc_.begin()->first==CouplingConstant::global_type) {
+      double val = expr.evaluate(cc_.begin()->second, vars);
+      for (auto& v : cc_values_) v = val;
+    }
+    else {
+      for (const auto& p : cc_) 
+        cc_values_[p.first] = expr.evaluate(p.second, vars); 
+    }
   }
   catch (std::exception& e) 
   { 
     std::string msg = "BondOperatorTerm::evaluate_coupling_constant:\n" + std::string(e.what());
     throw std::runtime_error(msg);
   }
-  return 0;
-}
-
-//-----------------------BondTerm-------------------------
-BondTerm::BondTerm(const std::string& name, const CouplingConstant& cc, const qn_op& op,
-    const unsigned& size)
-{
-  if (!cc.valid()) throw std::invalid_argument("BondTerm:: Invalid CouplingConstant");
-  name_ = name;
-  op_ = op;
-  size_ = size;
-
-  // if the 'cc' is implicitly defined for all bond types 
-  if (cc.size()==1 && cc.begin()->first==CouplingConstant::global_type) {
-    std::string cc_expr = cc.begin()->second;
-    for (unsigned i=0; i<size_; ++i) {
-      std::string term_name = name + std::to_string(i);
-      this->operator[](i) = BondOperatorTerm(term_name,cc_expr,op);
-    }
-  } 
-  else {
-    // set "BondOperatorTerm"-s only for those bond types for which 'cc' is 
-    // defined explicitly
-    for (const auto& p : cc) {
-      std::string term_name = name + std::to_string(p.first);
-      std::string cc_expr = p.second;
-      this->operator[](p.first) = BondOperatorTerm(term_name,cc_expr,op);
-      //insert({p.first, BondOperatorTerm(term_name,p.second,op_expr,src,tgt)});
-    }
-  }
-}
-
-void BondTerm::eval_coupling_constant(const ModelParams& cvals, const ModelParams& pvals)
-{
-  for (auto& term : *this) term.eval_coupling_constant(cvals, pvals);
-  //std::cout << "------hi--------\n"; //abort();
-  /*for (auto& elem : *this) {
-    elem.second.eval_coupling_constant(pvals);
-  }*/
-}
-
-const double& BondTerm::coupling(const unsigned& bond_type) const
-{
-  return this->operator[](bond_type).coupling();
-  /*const_iterator it=find(bond_type);
-  if (it != end()) return it->second.coupling();
-  else return null_coupling_;
-  */
 }
 
 

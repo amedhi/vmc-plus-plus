@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 14:51:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-02 17:36:07
+* Last Modified time: 2017-02-03 22:44:52
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef MF_MODEL_H
@@ -21,6 +21,22 @@
 
 namespace var {
 using name_value_pair = std::pair<std::string,double>;
+
+
+//class SiteTerm : public std::unordered_map<unsigned, SiteOperatorTerm>
+/*class UnitcellOperator:
+{
+public:
+  UnitcellOperator() {}
+  ~UnitcellOperator() {}
+  //const double& coupling(const unsigned& site_type) const; 
+  //const std::string& name(void) const { return name_; }
+private:
+  model::qn_op op_;
+  unsigned num_types_;
+  std::vector<Matrix> coeff_matrices_;
+  std::vector<Vector3d> bond_vectors_;
+};*/
 
 class MF_Model : public model::Hamiltonian
 {

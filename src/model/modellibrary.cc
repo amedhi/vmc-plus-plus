@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-11 13:02:35
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-01 22:20:37
+* Last Modified time: 2017-02-04 00:45:41
 *----------------------------------------------------------------------------*/
 #include <cmath>
 #include "model.h"
@@ -76,14 +76,14 @@ int Hamiltonian::init(const lattice::Lattice& lattice)
   sitetypes_map_ = lattice.sitetypes_map();
   bondtypes_map_ = lattice.bondtypes_map();
   // maps of a given bond type to the types of its target
-  bond_sites_map_.clear();
+  /*bond_sites_map_.clear();
   for (unsigned i=0; i<lattice.num_basis_bonds(); ++i) {
     lattice::Bond b = lattice.basis_bond(i);
     lattice::Site src = lattice.basis_site(b.src_id());
     lattice::Site tgt = lattice.basis_site(b.tgt_id());
     bond_sites_map_.insert({b.type(), std::make_pair(src.type(), tgt.type())});
     //std::cout << "bond_site_map = "<<b.type()<<" "<<src.type()<<" "<<tgt.type()<<"\n";
-  }
+  }*/
   return 0;
 }
 

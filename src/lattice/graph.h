@@ -4,7 +4,7 @@
 * Author: amedhi
 * Date:   2016-03-01 00:11:01
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-02 14:44:22
+* Last Modified time: 2017-02-03 06:58:53
 *----------------------------------------------------------------------------*/
 #ifndef GRAPH_H
 #define GRAPH_H
@@ -33,6 +33,7 @@ struct EdgeProperties {
   unsigned type; 
   unsigned stype; 
   int sign; 
+  unsigned vector_id; 
   Vector3d vector; 
 };
 
@@ -114,6 +115,15 @@ public:
   const unsigned& bond_type(const bond_iterator& ei) const { return this->operator[](*ei).type; }
   const unsigned& bond_type(const out_bond_iterator& ei) const { return this->operator[](*ei).type; }
   const unsigned& bond_type(const in_bond_iterator& ei) const { return this->operator[](*ei).type; }
+  const int& bond_sign(const bond_iterator& ei) const { return this->operator[](*ei).sign; }
+  const int& bond_sign(const in_bond_iterator& ei) const { return this->operator[](*ei).sign; }
+  const int& bond_sign(const out_bond_iterator& ei) const { return this->operator[](*ei).sign; }
+  const unsigned& vector_id(const bond_iterator& ei) const { return this->operator[](*ei).vector_id; }
+  const unsigned& vector_id(const in_bond_iterator& ei) const { return this->operator[](*ei).vector_id; }
+  const unsigned& vector_id(const out_bond_iterator& ei) const { return this->operator[](*ei).vector_id; }
+  const Vector3d& vector(const bond_iterator& ei) const { return this->operator[](*ei).vector; }
+  const Vector3d& vector(const in_bond_iterator& ei) const { return this->operator[](*ei).vector; }
+  const Vector3d& vector(const out_bond_iterator& ei) const { return this->operator[](*ei).vector; }
   site_descriptor source(const bond_iterator& ei) const { return boost::source(*ei, *this); }
   site_descriptor source(const out_bond_iterator& ei) const { return boost::source(*ei, *this); }
   site_descriptor source(const in_bond_iterator& ei) const { return boost::source(*ei, *this); }

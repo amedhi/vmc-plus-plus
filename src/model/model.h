@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:46
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-01 21:51:45
+* Last Modified time: 2017-02-04 00:45:29
 *----------------------------------------------------------------------------*/
 #ifndef MODEL_H
 #define MODEL_H
@@ -26,11 +26,11 @@ enum class model_id {
   UNDEFINED, HUBBARD, tJ
 };
 
-class Hamiltonian : public std::vector<SiteTerm>,  public std::vector<BondTerm>
+class Hamiltonian 
 {
 public:
-  using siteterm_iterator = std::vector<SiteTerm>::const_iterator; 
-  using bondterm_iterator = std::vector<BondTerm>::const_iterator; 
+  using siteterm_iterator = std::vector<HamiltonianTerm>::const_iterator; 
+  using bondterm_iterator = std::vector<HamiltonianTerm>::const_iterator; 
   Hamiltonian() {}
   Hamiltonian(const input::Parameters& inputs, const lattice::Lattice& lattice)
   { construct(inputs, lattice); }
@@ -64,29 +64,28 @@ public:
   const bondterm_iterator& bondterms_begin(void) const { return bt_begin_; }
   const bondterm_iterator& bondterms_end(void) const { return bt_end_; }
   std::pair<siteterm_iterator, siteterm_iterator> site_terms(void) const 
-    { return std::make_pair(std::vector<SiteTerm>::cbegin(), std::vector<SiteTerm>::cend()); }
+    { return std::make_pair(site_terms_.cbegin(), site_terms_.cend()); }
   std::pair<bondterm_iterator, bondterm_iterator> bond_terms(void) const 
-    { return std::make_pair(std::vector<BondTerm>::cbegin(), std::vector<BondTerm>::cend()); }
-  unsigned num_siteterms(void) const { return std::vector<SiteTerm>::size(); }
-  unsigned num_bondterms(void) const { return std::vector<BondTerm>::size(); }
+    { return std::make_pair(bond_terms_.cbegin(), bond_terms_.cend()); }
+  unsigned num_siteterms(void) const { return site_terms_.size(); }
+  unsigned num_bondterms(void) const { return bond_terms_.size(); }
   unsigned num_total_terms(void) const 
-    { return std::vector<SiteTerm>::size()+std::vector<BondTerm>::size(); }
+    { return site_terms_.size()+bond_terms_.size(); }
   void get_term_names(std::vector<std::string>& term_names) const;
   std::ostream& print_info(std::ostream& os) const { return os << info_str_.str(); }
-  const BondTerm::BondSiteMap& bond_sites_map(void) const { return bond_sites_map_; }
+  //const BondTerm::BondSiteMap& bond_sites_map(void) const { return bond_sites_map_; }
 
   //const SiteTerm& siteterm(const unsigned& i) const { return siteterms_[i]; };
   //const BondTerm& bondterm(const unsigned& i) const { return bondterms_[i]; };
 private:
   model_id mid {model_id::UNDEFINED};
-
-  void set_info_string(const lattice::Lattice& lattice); 
-
   std::string model_name;
   //BasisDescriptor basis_;
   std::map<unsigned, unsigned> sitetypes_map_;
   std::map<unsigned, unsigned> bondtypes_map_;
-  BondTerm::BondSiteMap bond_sites_map_;  
+  //BondTerm::BondSiteMap bond_sites_map_;  
+  std::vector<HamiltonianTerm> bond_terms_;
+  std::vector<HamiltonianTerm> site_terms_;
 
   bool has_siteterm_{false};
   bool has_bondterm_{false};
@@ -100,6 +99,7 @@ private:
   ModelParams constants_;
 
   std::ostringstream info_str_;
+  void set_info_string(const lattice::Lattice& lattice); 
 };
 
 

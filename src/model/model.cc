@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:50
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-01 22:25:28
+* Last Modified time: 2017-02-04 00:38:37
 *----------------------------------------------------------------------------*/
 #include "model.h"
 
@@ -64,8 +64,8 @@ unsigned Hamiltonian::add_siteterm(const std::string& name, const CouplingConsta
     }
   }
   unsigned num_sitetypes = sitetypes_map_.size();
-  this->std::vector<SiteTerm>::push_back(SiteTerm(name, cc_remapped, op, num_sitetypes));
-  return this->std::vector<SiteTerm>::size();
+  this->site_terms_.push_back(HamiltonianTerm(name, cc_remapped, op, num_sitetypes));
+  return this->site_terms_.size();
 }
 
 unsigned Hamiltonian::add_bondterm(const std::string& name, const CouplingConstant& cc, const qn_op& op)
@@ -93,8 +93,8 @@ unsigned Hamiltonian::add_bondterm(const std::string& name, const CouplingConsta
     }
   }
   unsigned num_bondtypes = bondtypes_map_.size();
-  std::vector<BondTerm>::push_back(BondTerm(name, cc_remapped, op, num_bondtypes));
-  return std::vector<BondTerm>::size();
+  bond_terms_.push_back(HamiltonianTerm(name, cc_remapped, op, num_bondtypes));
+  return bond_terms_.size();
 }
 
 int Hamiltonian::finalize(const lattice::Lattice& L)
@@ -107,19 +107,19 @@ int Hamiltonian::finalize(const lattice::Lattice& L)
   }*/
 
   // finalize the site terms
-  for (auto it=std::vector<SiteTerm>::begin(); it!=std::vector<SiteTerm>::end(); ++it) {
+  for (auto it=site_terms_.begin(); it!=site_terms_.end(); ++it) {
     it->eval_coupling_constant(constants_, parms_); 
   }
-  has_siteterm_ = (std::vector<SiteTerm>::size()>0);
-  st_begin_ = std::vector<SiteTerm>::cbegin();
-  st_end_ = std::vector<SiteTerm>::cend();
+  has_siteterm_ = (site_terms_.size()>0);
+  st_begin_ = site_terms_.cbegin();
+  st_end_ = site_terms_.cend();
   // finalize the bond terms
-  for (auto it=std::vector<BondTerm>::begin(); it!=std::vector<BondTerm>::end(); ++it) {
+  for (auto it=bond_terms_.begin(); it!=bond_terms_.end(); ++it) {
     it->eval_coupling_constant(constants_, parms_); 
   }
-  has_bondterm_ = (std::vector<BondTerm>::size()>0);
-  bt_begin_ = std::vector<BondTerm>::cbegin();
-  bt_end_ = std::vector<BondTerm>::cend();
+  has_bondterm_ = (bond_terms_.size()>0);
+  bt_begin_ = bond_terms_.cbegin();
+  bt_end_ = bond_terms_.cend();
 
 
   set_info_string(L);
@@ -137,10 +137,10 @@ void Hamiltonian::update_parameters(const input::Parameters& inputs)
   // update the parameter values
   for (auto& p : parms_) p.second = inputs.set_value(p.first, p.second);
   // update the model term couping constants
-  for (auto it=std::vector<SiteTerm>::begin(); it!=std::vector<SiteTerm>::end(); ++it) {
+  for (auto it=site_terms_.begin(); it!=site_terms_.end(); ++it) {
     it->eval_coupling_constant(constants_, parms_); 
   }
-  for (auto it=std::vector<BondTerm>::begin(); it!=std::vector<BondTerm>::end(); ++it) {
+  for (auto it=bond_terms_.begin(); it!=bond_terms_.end(); ++it) {
     it->eval_coupling_constant(constants_, parms_); 
   }
 }
@@ -155,9 +155,9 @@ double Hamiltonian::get_parameter_value(const std::string& pname) const
 void Hamiltonian::get_term_names(std::vector<std::string>& term_names) const
 {
   term_names.clear();
-  for (auto it=std::vector<BondTerm>::cbegin(); it!= std::vector<BondTerm>::cend(); ++it) 
+  for (auto it=bond_terms_.cbegin(); it!= bond_terms_.cend(); ++it) 
     term_names.push_back(it->name());
-  for (auto it=std::vector<SiteTerm>::cbegin(); it!= std::vector<SiteTerm>::cend(); ++it) 
+  for (auto it=site_terms_.cbegin(); it!= site_terms_.cend(); ++it) 
     term_names.push_back(it->name());
 }
 

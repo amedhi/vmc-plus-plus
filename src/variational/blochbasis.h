@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-01 21:13:21
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-02 15:56:54
+* Last Modified time: 2017-02-03 14:40:28
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef BLOCHBASIS_H
@@ -16,7 +16,7 @@
 
 namespace basis {
 
-using basis_state = unsigned; //lattice::graph::LatticeGraph::site_descriptor;
+using basis_state = lattice::graph::LatticeGraph::site_descriptor;
 using kpoint = Vector3d;
 
 class BlochBasis : public std::vector<kpoint>
@@ -28,6 +28,10 @@ public:
   const unsigned& num_kblock(void) const { return num_kpoint_; }
   const unsigned& block_dimension(void) const { return subspace_dimension_; }
   kpoint block_kvector(const unsigned& k) const { return operator[](k); }
+  const basis_state& state(const unsigned& idx) const 
+    { return subspace_basis_[idx]; }
+  const unsigned& representative_state_idx(const basis_state& s) const 
+    { return representative_state_idx_[s]; }
   //const basis_state& representative_state(const unsigned& site);
   /*
   unsigned dimension(void) const { return basis_states.size(); }
@@ -49,7 +53,7 @@ private:
   //std::vector<Vector3d> kpoints_;
   //std::vector<Vector3i> translation_vectors;
   std::vector<basis_state> subspace_basis_;
-  std::vector<unsigned> state_idx_;
+  std::vector<unsigned> representative_state_idx_;
   unsigned null_idx_;
 
   // helper functions

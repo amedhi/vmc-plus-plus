@@ -4,7 +4,7 @@
 * Author: amedhi
 * Date:   2016-03-01 00:11:01
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2016-03-17 23:52:15
+* Last Modified time: 2017-02-03 23:14:52
 *----------------------------------------------------------------------------*/
 #include "graph.h"
 
@@ -96,7 +96,9 @@ void LatticeGraph::construct_graph(void)
     this->operator[](e).type = b.type();
     this->operator[](e).stype = b.type();
     this->operator[](e).sign = b.sign();
-    this->operator[](e).vector = sites[b.tgt_id()].coord() - sites[b.src_id()].coord();
+    this->operator[](e).vector_id = b.vector_id();
+    //this->operator[](e).vector = sites[b.tgt_id()].coord() - sites[b.src_id()].coord();
+    this->operator[](e).vector = b.vector();
     //std::cout << "bond: " << vertex_index_map[source] << " --- " << vertex_index_map[target] << "\n";
     //std::cout << bonds[i].src_offset() << "\n";
     //std::cout << bonds[i].tgt_offset() << "\n\n";

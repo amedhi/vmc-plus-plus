@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-02 23:38:00
+* Last Modified time: 2017-02-03 14:49:34
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "mf_model.h"
@@ -45,10 +45,21 @@ void MF_Model::blochbasis_transform(const lattice::graph::LatticeGraph& graph)
   unsigned dim = kbasis_.block_dimension();
   Matrix ham(dim,dim);
   // bond terms
+  unsigned i, j;
+  lattice::graph::LatticeGraph::site_descriptor s, t;
+  lattice::graph::LatticeGraph::out_edge_iterator ei, ei_end;
   for (auto bterm=bondterms_begin(); bterm!=bondterms_end(); ++bterm) {
     switch (bterm->qn_operator()) {
       case qn_op::cdagicj_up:
       case qn_op::cdagicj_dn:
+        for (i=0; i<dim; ++i) {
+          s = kbasis_.state(i);
+          for (std::tie(ei, ei_end)=graph.out_bonds(s); ei != ei_end; ++ei) {
+            t = graph.target(ei);
+            j = kbasis_.representative_state_idx(t);
+            // mat(i,j) += bterm->coupling(graph.bond_type(ei));
+          }
+        }
       /*
         for (i=0; i<dim; ++i) {
           s = basis.site_basis(i);

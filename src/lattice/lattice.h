@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-01-25 18:05:03
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-02 23:41:20
+* Last Modified time: 2017-02-03 06:49:09
 *----------------------------------------------------------------------------*/
 #ifndef LATTICE_H
 #define LATTICE_H
@@ -100,12 +100,14 @@ public:
   //void connect(const unsigned& src_id, const Vector3i& src_offset, const unsigned& tgt_id, 
   //  const Vector3i& tgt_offset, const int& sign);
   // getter functions
-  int id(void) const { return id_; }
-  unsigned type(void) const {return type_;}
+  const int& id(void) const { return id_; }
+  const unsigned& type(void) const {return type_;}
   unsigned src_id(void) const { return first.id(); }
   unsigned tgt_id(void) const { return second.id(); }
   const Site& src(void) const { return first; }
   const Site& tgt(void) const { return second; }
+  const unsigned& vector_id(void) const { return vector_id_; }
+  const Vector3d& vector(void) const { return vector_; }
   int sign(void) const { return sign_; }
   Vector3i bravindex(void) const { return bravindex_; }
   //Vector3i src_offset(void) const { return src_offset_; }

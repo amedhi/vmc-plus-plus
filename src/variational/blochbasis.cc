@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-01 21:13:27
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-02 23:41:07
+* Last Modified time: 2017-02-03 14:45:24
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "blochbasis.h"
@@ -105,24 +105,22 @@ void BlochBasis::make_kpoints(const lattice::Lattice& lattice)
 void BlochBasis::make_subspace_basis(const lattice::graph::LatticeGraph& graph)
 {
   subspace_dimension_ = graph.lattice().num_basis_sites();
-  subspace_basis_.clear();
-  unsigned max_site_uid = 0;
-  std::set<basis_state> basis_set; // to check whether 'states' are unique
+  subspace_basis_.resize(subspace_dimension_);
   for (unsigned i=0; i<subspace_dimension_; ++i) {
-    unsigned s = graph.site_uid(i);
-    if (s > max_site_uid) max_site_uid = s;
-    subspace_basis_.push_back(s);
-    basis_set.insert(s);
-  }
-  if (basis_set.size() != subspace_dimension_) {
-    throw std::logic_error("BlochBasis::make_site_basis: unexpected graph property.");
+    basis_state s = graph.site(i);
+    unsigned uid = graph.site_uid(i);
+    if (s != graph.site(uid))
+      throw std::logic_error("BlochBasis::make_site_basis: unexpected graph property.");
+    subspace_basis_[i] = s; 
   }
   null_idx_ = subspace_basis_.size();
-  state_idx_.resize(max_site_uid+1);
-  for (auto& idx : state_idx_) idx = null_idx_;
-  for (unsigned i=0; i<subspace_basis_.size(); ++i) {
-    unsigned s = subspace_basis_[i];
-    state_idx_[s] = i;
+  // index of the 'representative state' of a site
+  representative_state_idx_.resize(graph.num_sites());
+  for (auto& idx : representative_state_idx_) idx = null_idx_;
+  for (unsigned i=0; i<graph.num_sites(); ++i) {
+    basis_state s = graph.site(i);
+    unsigned uid = graph.site_uid(i);
+    representative_state_idx_[s] = uid;
   }
 }
 
