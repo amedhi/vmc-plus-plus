@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:50
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-04 00:40:52
+* Last Modified time: 2017-02-05 11:51:57
 *----------------------------------------------------------------------------*/
 #include "hamiltonian_term.h"
 

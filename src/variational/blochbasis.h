@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-01 21:13:21
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-03 14:40:28
+* Last Modified time: 2017-02-05 12:34:24
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef BLOCHBASIS_H
@@ -23,12 +23,14 @@ class BlochBasis : public std::vector<kpoint>
 {
 public:
   // ctors
-  BlochBasis(const lattice::graph::LatticeGraph& graph);
+  BlochBasis() {}
+  BlochBasis(const lattice::graph::LatticeGraph& graph) { construct(graph); }
   ~BlochBasis() {}
-  const unsigned& num_kblock(void) const { return num_kpoint_; }
-  const unsigned& block_dimension(void) const { return subspace_dimension_; }
-  kpoint block_kvector(const unsigned& k) const { return operator[](k); }
-  const basis_state& state(const unsigned& idx) const 
+  void construct(const lattice::graph::LatticeGraph& graph);
+  const unsigned& num_kpoints(void) const { return num_kpoint_; }
+  const unsigned& subspace_dimension(void) const { return subspace_dimension_; }
+  kpoint kvector(const unsigned& k) const { return operator[](k); }
+  const basis_state& site_state(const unsigned& idx) const 
     { return subspace_basis_[idx]; }
   const unsigned& representative_state_idx(const basis_state& s) const 
     { return representative_state_idx_[s]; }

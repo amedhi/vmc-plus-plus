@@ -2,14 +2,14 @@
 * Author: Amal Medhi
 * Date:   2017-02-01 21:13:27
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-03 14:45:24
+* Last Modified time: 2017-02-05 11:59:55
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "blochbasis.h"
 
 namespace basis {
 
-BlochBasis::BlochBasis(const lattice::graph::LatticeGraph& graph)
+void BlochBasis::construct(const lattice::graph::LatticeGraph& graph)
 {
   make_kpoints(graph.lattice());
   make_subspace_basis(graph);
