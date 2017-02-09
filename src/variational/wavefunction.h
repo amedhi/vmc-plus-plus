@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 14:51:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-01 21:48:26
+* Last Modified time: 2017-02-06 16:08:39
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef WAVEFUNCTION_H
@@ -28,10 +28,14 @@ public:
   //Wavefunction() {}
   Wavefunction(const input::Parameters& inputs, const lattice::graph::LatticeGraph& graph);
   ~Wavefunction() {}
+  void update_amplitudes(const std::vector<double>& variatioanl_parm);
+  void compute_grade(const std::vector<double>& variatioanl_parm);
 private:
   MF_Model mf_model_;
   Matrix psi_up_;
   Matrix psi_dn_;
+
+  void compute_amplitudes(void);
 };
 
 

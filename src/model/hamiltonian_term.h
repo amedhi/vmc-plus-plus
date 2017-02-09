@@ -13,8 +13,8 @@
 //#include <unordered_map>
 #include <stdexcept>
 #include <Eigen/Core>
-//#include "sitebasis.h"
 #include "modelparams.h"
+#include "quantum_op.h"
 #include "../lattice/lattice.h"
 #include "../expression/expression.h"
 
@@ -63,19 +63,17 @@ class HamiltonianTerm
 {
 public:
   //using BondSiteMap = std::map<unsigned, std::pair<unsigned, unsigned> >;
-  HamiltonianTerm(const std::string& name, const CouplingConstant& cc, const qn_op& op,
+  HamiltonianTerm(const op::quantum_op& op, const CouplingConstant& cc, 
     const unsigned& size);
   ~HamiltonianTerm() {}
   void eval_coupling_constant(const ModelParams& cvals, const ModelParams& pvals);
-  const qn_op& qn_operator(void) const { return op_; }
+  const op::quantum_op& qn_operator(void) const { return op_; }
   bool is_defined_for(const unsigned& operand_type) const 
     { return is_defined_[operand_type]; }
   const double& coupling(const unsigned& operand_type) const
     { return cc_values_[operand_type]; }
-  const std::string& name(void) const { return name_; }
 private:
-  qn_op op_;
-  std::string name_;
+  op::quantum_op op_;
   CouplingConstant cc_;
   unsigned max_operand_types_;
   std::vector<bool> is_defined_; // operator defined for a given operand 'type'

@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-01-25 18:05:03
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-03 06:49:09
+* Last Modified time: 2017-02-06 11:32:26
 *----------------------------------------------------------------------------*/
 #ifndef LATTICE_H
 #define LATTICE_H

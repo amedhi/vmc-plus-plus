@@ -2,10 +2,12 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-05 13:26:25
+* Last Modified time: 2017-02-09 22:52:14
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "mf_model.h"
+#include <boost/algorithm/string.hpp>
+//#include "../xml/pugixml.hpp"
 
 namespace var {
 
@@ -13,29 +15,58 @@ MF_Model::MF_Model(const input::Parameters& inputs,
   const lattice::graph::LatticeGraph& graph)
   : blochbasis_(graph)
 {
+  // mean-field model
+  define_model(inputs, graph);
+  // 'unitcell representation' of the hamiltonian
+  build_unitcell_terms(graph);
+  // construct groundstate
+  if (bcs_type_) bcs_groundstate();
+  else fermisea_groundstate();
+}
+
+void MF_Model::define_model(const input::Parameters& inputs, const lattice::graph::LatticeGraph& graph)
+{
+  vparms_.clear();
+  using namespace model;
   double defval;
   std::string name;
   model::CouplingConstant cc;
-  
+  // mean-field order & model
   Model::init(graph.lattice());
-  // model parameters
-  Model::add_parameter(name="mu", defval=0.0, inputs);
-  Model::add_parameter(name="t", defval=1.0, inputs);
-  Model::add_parameter(name="delta_sc", defval=0.0, inputs);
-  // bond operator terms
-  Model::add_bondterm(name="upspin_hop", cc="-t", qn_op::cdagicj_up);
-  Model::add_bondterm(name="dnspin_hop", cc="-t", qn_op::cdagicj_dn);
-  Model::add_bondterm(name="sc_pairing", cc="delta_sc", qn_op::cdagiup_cdagjdn);
+  std::string order_name = inputs.set_value("mf_order", "NONE");
+  boost::to_upper(order_name);
+  if (order_name == "NONE") {
+    order_ = mf_order::none;
+    bcs_type_ = false;
+    add_parameter(name="mu", defval=0.0, inputs);
+    add_parameter(name="t", defval=1.0, inputs);
+    add_bondterm(cc="-t", op::upspin_hop());
+    add_bondterm(cc="-t", op::dnspin_hop());
+    make_variational({"mu"});
+  }
+  else if (order_name == "DWAVE_SC") {
+    order_ = mf_order::dsc;
+    bcs_type_ = true;
+    add_parameter(name="mu", defval=0.0, inputs);
+    add_parameter(name="t", defval=1.0, inputs);
+    add_bondterm(cc="-t", op::upspin_hop());
+    add_bondterm(cc="-t", op::dnspin_hop());
+    cc = CouplingConstant({0, "delta_sc"}, {1, "-delta_sc"});
+    add_bondterm(cc, op::pair_create());
+    make_variational({"delta_sc", "mu"});
+  }
+  else if (order_name == "SWAVE_SC") {
+    order_ = mf_order::ssc;
+    bcs_type_ = true;
+  }
+  else if (order_name == "DISORDERED_SC") {
+    order_ = mf_order::disorder_sc;
+    bcs_type_ = true;
+  }
+  else {
+    throw std::range_error("*error: mf_order: undefined order");
+  }
   Model::finalize(graph.lattice());
-
-  // variational parameters
-  vparms_.clear();
-  make_variational({"delta_sc", "mu"});
-
-  // 'unitcell representation' of the hamiltonian
-  uc_siteterms_.resize(Model::num_siteterms());
-  uc_bondterms_.resize(Model::num_bondterms());
-  build_unitcell_terms(graph);
 }
 
 void MF_Model::make_variational(const std::vector<std::string>& pnames)
@@ -45,7 +76,7 @@ void MF_Model::make_variational(const std::vector<std::string>& pnames)
   }
 }
 
-void MF_Model::build_blochbasis_groundstate(void)
+void MF_Model::build_kspace_groundstate(void)
 {
   std::vector<Matrix> ampliude_phi_;
   unsigned num_kpoints_ = blochbasis_.num_kpoints();
@@ -60,16 +91,17 @@ void MF_Model::build_blochbasis_groundstate(void)
         Vector3d delta = term.bond_vector(i);
         Mquad += term.coeff_matrix(i)*std::exp(ii()*kvec.dot(delta));
       }
-      // if uc_bondterms_[i].quadratic_term() {
-        //Mquad += 
+      //if (term.qn_operator().is_quadratic()) {
       //}
     }
-    Mquad += Mquad.conjugate();
+    //Mquad += Mquad.adjoint();
   }
 }
 
 void MF_Model::build_unitcell_terms(const lattice::graph::LatticeGraph& graph)
 {
+  uc_siteterms_.resize(Model::num_siteterms());
+  uc_bondterms_.resize(Model::num_bondterms());
   unsigned i = 0;
   for (auto sterm=siteterms_begin(); sterm!=siteterms_end(); ++sterm) {
     uc_siteterms_[i].build_siteterm(*sterm, graph);
@@ -140,6 +172,27 @@ void Unitcell_Term::build_siteterm(const model::HamiltonianTerm& hamterm,
   }
   bond_vectors_[0] = Vector3d(0,0,0);
 }
+
+
+/*void MF_Model::check_xml(void)
+{
+  std::cout << "Checking XML parser\n";
+  pugi::xml_document doc;
+  pugi::xml_parse_result result = doc.load_file("model.xml", pugi::parse_trim_pcdata);
+  //std::cout << "Load result: " << result.description() << ", mesh name: " << "\n"; 
+  pugi::xml_node model = doc.child("model");
+  //std::cout << model.child("parameter").attribute("default").value() << std::endl;
+  for (pugi::xml_node p = model.child("parameter"); p; p = p.next_sibling())
+  {
+    std::cout << "Parameter: ";
+    for (pugi::xml_attribute attr = p.first_attribute(); attr; attr = attr.next_attribute())
+    {
+      std::cout << attr.name() << " = " << attr.as_double() << "\n";
+    }
+    std::cout << std::endl;
+  }
+  std::cout << "---------------------------------\n\n";
+}*/
 
 
 

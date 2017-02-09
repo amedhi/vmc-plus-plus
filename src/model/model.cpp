@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:50
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-04 00:38:37
+* Last Modified time: 2017-02-06 12:33:34
 *----------------------------------------------------------------------------*/
 #include "model.h"
 
@@ -38,8 +38,7 @@ unsigned Hamiltonian::add_sitebasis(const unsigned& type, SiteBasis& sitebasis)
 */
 
 
-unsigned Hamiltonian::add_siteterm(const std::string& name, const CouplingConstant& cc,
-  const qn_op& op)
+unsigned Hamiltonian::add_siteterm(const CouplingConstant& cc, const op::quantum_op& op)
 {
   // remap site type values in 'cc'
   CouplingConstant cc_remapped = cc;
@@ -64,11 +63,11 @@ unsigned Hamiltonian::add_siteterm(const std::string& name, const CouplingConsta
     }
   }
   unsigned num_sitetypes = sitetypes_map_.size();
-  this->site_terms_.push_back(HamiltonianTerm(name, cc_remapped, op, num_sitetypes));
+  this->site_terms_.push_back(HamiltonianTerm(op, cc_remapped, num_sitetypes));
   return this->site_terms_.size();
 }
 
-unsigned Hamiltonian::add_bondterm(const std::string& name, const CouplingConstant& cc, const qn_op& op)
+unsigned Hamiltonian::add_bondterm(const CouplingConstant& cc, const op::quantum_op& op)
 {
   // remap bond type values in 'cc'
   CouplingConstant cc_remapped = cc;
@@ -93,7 +92,7 @@ unsigned Hamiltonian::add_bondterm(const std::string& name, const CouplingConsta
     }
   }
   unsigned num_bondtypes = bondtypes_map_.size();
-  bond_terms_.push_back(HamiltonianTerm(name, cc_remapped, op, num_bondtypes));
+  bond_terms_.push_back(HamiltonianTerm(op, cc_remapped, num_bondtypes));
   return bond_terms_.size();
 }
 
@@ -156,9 +155,9 @@ void Hamiltonian::get_term_names(std::vector<std::string>& term_names) const
 {
   term_names.clear();
   for (auto it=bond_terms_.cbegin(); it!= bond_terms_.cend(); ++it) 
-    term_names.push_back(it->name());
+    term_names.push_back(it->qn_operator().name());
   for (auto it=site_terms_.cbegin(); it!= site_terms_.cend(); ++it) 
-    term_names.push_back(it->name());
+    term_names.push_back(it->qn_operator().name());
 }
 
 void Hamiltonian::set_info_string(const lattice::Lattice& L) 

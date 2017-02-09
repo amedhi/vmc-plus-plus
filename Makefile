@@ -5,34 +5,36 @@
 include ./options.mk
 #-------------------------------------------------------------
 # Source files
-SRCS = scheduler/cmdargs.cc 
-SRCS+= scheduler/inputparams.cc 
-SRCS+= scheduler/taskparams.cc 
-SRCS+= scheduler/worker.cc 
-SRCS+= scheduler/master_scheduler.cc
-SRCS+= scheduler/scheduler.cc
-SRCS+= expression/expression.cc 
-SRCS+= expression/tokens.cc 
-SRCS+= expression/functions.cc
-SRCS+= expression/objects.cc
-SRCS+= lattice/lattice.cc
-SRCS+= lattice/latticelibrary.cc
-SRCS+= lattice/graph.cc
-#SRCS+= model/qn.cc
-#SRCS+= model/quantum_operator.cc
-#SRCS+= model/sitebasis.cc
-SRCS+= model/hamiltonian_term.cc
-SRCS+= model/model.cc
-SRCS+= model/modellibrary.cc
-SRCS+= variational/blochbasis.cc
-SRCS+= variational/mf_model.cc
-SRCS+= variational/wavefunction.cc
-#SRCS+= observable/observables.cc
-SRCS+= montecarlo/random.cc
-#SRCS+= montecarlo/observable_operator.cc
-#SRCS+= montecarlo/measurement.cc
-SRCS+= montecarlo/simulator.cc
-SRCS+= main.cc
+SRCS = scheduler/cmdargs.cpp 
+SRCS+= scheduler/inputparams.cpp 
+SRCS+= scheduler/taskparams.cpp 
+SRCS+= scheduler/worker.cpp 
+SRCS+= scheduler/master_scheduler.cpp
+SRCS+= scheduler/scheduler.cpp
+#SRCS+= xml/pugixml.cpp 
+SRCS+= expression/expression.cpp 
+SRCS+= expression/tokens.cpp 
+SRCS+= expression/functions.cpp
+SRCS+= expression/objects.cpp
+SRCS+= lattice/lattice.cpp
+SRCS+= lattice/latticelibrary.cpp
+SRCS+= lattice/graph.cpp
+#SRCS+= model/qn.cpp
+#SRCS+= model/quantum_operator.cpp
+#SRCS+= model/sitebasis.cpp
+SRCS+= model/hamiltonian_term.cpp
+SRCS+= model/model.cpp
+SRCS+= model/modellibrary.cpp
+SRCS+= variational/blochbasis.cpp
+SRCS+= variational/mf_model.cpp
+SRCS+= variational/bcsstate.cpp
+SRCS+= variational/wavefunction.cpp
+#SRCS+= observable/observables.cpp
+SRCS+= montecarlo/random.cpp
+#SRCS+= montecarlo/observable_operator.cpp
+#SRCS+= montecarlo/measurement.cpp
+SRCS+= montecarlo/simulator.cpp
+SRCS+= main.cpp
 VMC_SRCS = $(addprefix src/,$(SRCS))
 #-------------------------------------------------------------
 # Headers
@@ -44,7 +46,8 @@ HDRS=scheduler/optionparser.h scheduler/cmdargs.h \
          expression/pack.h \
          lattice/constants.h lattice/lattice.h lattice/graph.h \
 	 montecarlo/simulator.h \
-         model/modelparams.h  model/hamiltonian_term.h model/model.h \
+         model/modelparams.h  model/quantum_op.h \
+	 model/hamiltonian_term.h model/model.h \
 	 variational/blochbasis.h \
 	 variational/mf_model.h variational/wavefunction.h \
          montecarlo/random.h montecarlo/sitebasisstate.h \
@@ -64,7 +67,7 @@ ifeq ($(BUILD_DIR), $(CURDIR))
 endif
 
 # All .o files go to BULD_DIR
-OBJS=$(patsubst %.cc,$(BUILD_DIR)/%.o,$(VMC_SRCS))
+OBJS=$(patsubst %.cpp,$(BUILD_DIR)/%.o,$(VMC_SRCS))
 # GCC/Clang will create these .d files containing dependencies.
 DEPS=$(patsubst %.o,%.d,$(OBJS)) 
 # compiler flags
@@ -79,14 +82,14 @@ all: $(TAGT) #$(INCL_HDRS)
 $(TAGT): $(OBJS)
 	$(VMC_CXX) -o $(TAGT) $(OBJS) $(BOOST_LDFLAGS) $(BOOST_LIBS) 
 
-%.o: %.cc
+%.o: %.cpp
 	$(VMC_CXX) -c $(CXXBFLAGS) -o $@ $<
 
 
 # Include all .d files
 -include $(DEPS)
 
-$(BUILD_DIR)/%.o: %.cc
+$(BUILD_DIR)/%.o: %.cpp
 	@mkdir -p $(@D)
 	@echo "$(VMC_CXX) -c $(VMC_CXXBFLAGS) -o $(@F) $(<F)"
 	@$(VMC_CXX) -MMD -c $(VMC_CXXBFLAGS) -o $@ $<

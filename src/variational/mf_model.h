@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 14:51:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-05 13:24:26
+* Last Modified time: 2017-02-09 22:55:13
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef MF_MODEL_H
@@ -14,10 +14,13 @@
 #include <vector>
 #include <stdexcept>
 #include "../scheduler/task.h"
+#include "../model/quantum_op.h"
 #include "../model/model.h"
 #include "../lattice/graph.h"
 #include "blochbasis.h"
 #include "matrix.h"
+
+enum class mf_order {none, af, fm, ssc, dsc, pplusip, af_dsc, disorder_sc};
 
 constexpr std::complex<double> ii(void) { return std::complex<double>{0.0,static_cast<double>(1.0)}; }
 
@@ -36,9 +39,9 @@ public:
   const Vector3d& bond_vector(const unsigned& i) const { return bond_vectors_[i]; }
   const Matrix& coeff_matrix(const unsigned& i) const { return coeff_matrices_[i]; }
   //const double& coupling(const unsigned& site_type) const; 
-  //const std::string& name(void) const { return name_; }
+  const model::op::quantum_op& qn_operator(void) const { return op_; }
 private:
-  model::qn_op op_;
+  model::op::quantum_op op_;
   unsigned num_out_bonds_;
   std::vector<Matrix> coeff_matrices_;
   std::vector<Vector3d> bond_vectors_;
@@ -50,18 +53,24 @@ public:
   MF_Model(const input::Parameters& inputs, const lattice::graph::LatticeGraph& graph);
   ~MF_Model() {}
   //void update_parameters(const var_parm& vparms_);
-  void build_blochbasis_groundstate(void);
+  void build_kspace_groundstate(void);
   //void blochbasis_transform(const lattice::graph::LatticeGraph& graph);
 private:
-  using qn_op = model::qn_op;
   using Model = model::Hamiltonian;
+  mf_order order_;
+  bool bcs_type_;
   std::vector<name_value_pair> vparms_;
   std::vector<Unitcell_Term> uc_siteterms_;
   std::vector<Unitcell_Term> uc_bondterms_;
   basis::BlochBasis blochbasis_;
 
+  //void check_xml(void);
+  void define_model(const input::Parameters& inputs, const lattice::graph::LatticeGraph& graph);
+  void deine_pairing(const std::vector<std::string>& pnames);
   void make_variational(const std::vector<std::string>& pnames);
   void build_unitcell_terms(const lattice::graph::LatticeGraph& graph);
+  void bcs_groundstate(void); 
+  void fermisea_groundstate(void) {}
 };
 
 

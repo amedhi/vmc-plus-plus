@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-11 13:02:35
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-04 00:45:41
+* Last Modified time: 2017-02-06 12:39:23
 *----------------------------------------------------------------------------*/
 #include <cmath>
 #include "model.h"
@@ -35,9 +35,9 @@ int Hamiltonian::define_model(const input::Parameters& inputs, const lattice::La
     add_parameter(name="t", defval=1.0, inputs);
     add_parameter(name="U", defval=0.0, inputs);
     // bond operator terms
-    add_bondterm(name="upspin_hop", cc="-t", qn_op::cdagicj_up);
-    add_bondterm(name="dnspin_hop", cc="-t", qn_op::cdagicj_dn);
-    add_bondterm(name="hubbard_u", cc="U", qn_op::niup_nidn);
+    add_bondterm(cc="-t", op::upspin_hop());
+    add_bondterm(cc="-t", op::dnspin_hop());
+    add_bondterm(cc="U", op::hubbard_int());
   }
 
   else if (model_name == "T-J") {
@@ -46,9 +46,9 @@ int Hamiltonian::define_model(const input::Parameters& inputs, const lattice::La
     add_parameter(name="t", defval=1.0, inputs);
     add_parameter(name="J", defval=0.0, inputs);
     // bond operator terms
-    add_bondterm(name="upspin_hop", cc="-t", qn_op::cdagicj_up);
-    add_bondterm(name="dnspin_hop", cc="-t", qn_op::cdagicj_dn);
-    add_bondterm(name="sisj", cc="J", qn_op::sisj);
+    add_bondterm(cc="-t", op::upspin_hop());
+    add_bondterm(cc="-t", op::dnspin_hop());
+    add_bondterm(cc="J", op::sisj_plus());
   }
 
   /*------------- undefined lattice--------------*/

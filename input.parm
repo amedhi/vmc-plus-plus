@@ -29,8 +29,8 @@ delta_sc = 1.0
 #---------------------------------------------
 # Variational wavefunction
 #---------------------------------------------
+mf_order = "DWAVE_SC"
 x = 0.0
-wavefunction = "pSC"
 g = 1.0
 delta_sc = 1.0
 mu = 0.0

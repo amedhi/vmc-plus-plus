@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:50
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-05 11:51:57
+* Last Modified time: 2017-02-06 12:39:53
 *----------------------------------------------------------------------------*/
 #include "hamiltonian_term.h"
 
@@ -100,12 +100,11 @@ void CouplingConstant::add_type(const value_type& val)
 
 
 //-----------------------HamiltonianTerm-------------------------
-HamiltonianTerm::HamiltonianTerm(const std::string& name, 
-  const CouplingConstant& cc, const qn_op& op, const unsigned& size)
+HamiltonianTerm::HamiltonianTerm(const op::quantum_op& op, const CouplingConstant& cc, 
+  const unsigned& size)
+  : op_{op}
 {
   if (!cc.valid()) throw std::invalid_argument("HamiltonianTerm:: Invalid CouplingConstant");
-  op_ = op;
-  name_ = name;
   cc_ = cc;
   max_operand_types_ = size;
 

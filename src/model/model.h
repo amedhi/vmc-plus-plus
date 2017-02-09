@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:46
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-04 00:45:29
+* Last Modified time: 2017-02-06 12:33:11
 *----------------------------------------------------------------------------*/
 #ifndef MODEL_H
 #define MODEL_H
@@ -17,7 +17,6 @@
 #include <map>
 #include <stdexcept>
 #include "../lattice/lattice.h"
-//#include "sitebasis.h"
 #include "hamiltonian_term.h"
 
 namespace model {
@@ -50,8 +49,8 @@ public:
   double get_parameter_value(const std::string& pname) const;
   unsigned add_constant(const std::string& cname, const double& val) 
     { constants_.insert({cname, val}); return constants_.size(); }
-  unsigned add_siteterm(const std::string& name, const CouplingConstant& cc, const qn_op& op);
-  unsigned add_bondterm(const std::string& name, const CouplingConstant& cc, const qn_op& op);
+  unsigned add_siteterm(const CouplingConstant& cc, const op::quantum_op& op);
+  unsigned add_bondterm(const CouplingConstant& cc, const op::quantum_op& op);
 
   //const BasisDescriptor& basis(void) const { return basis_; }
   //const SiteBasis& site_basis(const unsigned& site_type) const { return basis_.at(site_type); }
