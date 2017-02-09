@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-09 22:20:27
+* Last Modified time: 2017-02-10 00:34:31
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "wavefunction.h"
@@ -26,6 +26,17 @@ Wavefunction::Wavefunction(const input::Parameters& inputs,
   // mf_model_.update(variational_parms);
   // compute_amlitudes()
 //}
+
+void Wavefunction::compute_amplitudes(void)
+{
+  if (mf_model_.is_pairing()) {
+
+  }
+  else {
+    
+  }
+}
+
 } // end namespace var
 
 

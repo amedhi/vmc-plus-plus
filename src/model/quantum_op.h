@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 19:03:43
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-09 21:54:12
+* Last Modified time: 2017-02-09 23:37:27
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef QUANTUM_OP_H
@@ -19,7 +19,7 @@ enum class op_id {
   cdagiup_cdagjdn, null
 };
 
-enum class op_type { quadratic, pairtype, quartic };
+enum class op_type { quadratic, pairing, quartic };
 
 namespace op {
 class quantum_op 
@@ -46,17 +46,17 @@ public:
     switch (type_) {
       case op_type::quadratic:
         is_quadratic_ = true;
-        is_pairtype_ = false;
+        is_pairing_ = false;
         is_quartic_ = false;
         break;
-      case op_type::pairtype:
+      case op_type::pairing:
         is_quadratic_ = false;
-        is_pairtype_ = true;
+        is_pairing_ = true;
         is_quartic_ = false;
         break;
       case op_type::quartic:
         is_quadratic_ = false;
-        is_pairtype_ = false;
+        is_pairing_ = false;
         is_quartic_ = true;
         break;
     }
@@ -69,7 +69,7 @@ public:
   const bool& spin_up(void) const { return spin_up_; }
   const bool& spin_dn(void) const { return spin_dn_; }
   const bool& is_quadratic(void) const { return is_quadratic_; }
-  const bool& is_pairtype(void) const { return is_pairtype_; }
+  const bool& is_pairing(void) const { return is_pairing_; }
   const bool& is_quartic(void) const { return is_quartic_; }
 private:
   std::string name_;
@@ -79,7 +79,7 @@ private:
   bool spin_up_;
   bool spin_dn_;
   bool is_quadratic_;
-  bool is_pairtype_;
+  bool is_pairing_;
   bool is_quartic_;
 };
 
@@ -98,7 +98,7 @@ public:
 class pair_create : public quantum_op
 {
 public:
-  pair_create() : quantum_op("pair_creation", op_id::cdagup_cdagdn, spin::UD, op_type::pairtype) {}
+  pair_create() : quantum_op("pair_creation", op_id::cdagup_cdagdn, spin::UD, op_type::pairing) {}
 };
 
 class sisj_plus : public quantum_op

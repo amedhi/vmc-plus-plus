@@ -3,7 +3,7 @@
 * All rights reserved.
 * Date:   2016-01-17 21:32:15
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-03 22:47:27
+* Last Modified time: 2017-02-10 00:05:09
 *----------------------------------------------------------------------------*/
 #include <stdexcept>
 #include <iomanip>
@@ -36,7 +36,7 @@ int Lattice::define_lattice(void)
 
     // add bonds
     add_bond(type=0, ngb=1, src=0, src_offset=pos(0,0,0), tgt=0, tgt_offset=pos(1,0,0));
-    add_bond(type=0, ngb=1, src=0, src_offset=pos(0,0,0), tgt=0, tgt_offset=pos(0,1,0));
+    add_bond(type=1, ngb=1, src=0, src_offset=pos(0,0,0), tgt=0, tgt_offset=pos(0,1,0));
   }
 
   else if (lname == "SIMPLE_CUBIC") {

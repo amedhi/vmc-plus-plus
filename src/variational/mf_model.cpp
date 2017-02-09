@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-09 22:52:14
+* Last Modified time: 2017-02-10 00:25:07
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "mf_model.h"
@@ -19,9 +19,13 @@ MF_Model::MF_Model(const input::Parameters& inputs,
   define_model(inputs, graph);
   // 'unitcell representation' of the hamiltonian
   build_unitcell_terms(graph);
-  // construct groundstate
-  if (bcs_type_) bcs_groundstate();
-  else fermisea_groundstate();
+
+  // kspace matrices
+  dim_ = blochbasis_.subspace_dimension();
+  quadratic_block_.resize(dim_,dim_);
+  pairing_block_.resize(dim_,dim_);
+  work1.resize(dim_,dim_);
+  work2.resize(dim_,dim_);
 }
 
 void MF_Model::define_model(const input::Parameters& inputs, const lattice::graph::LatticeGraph& graph)
@@ -37,7 +41,7 @@ void MF_Model::define_model(const input::Parameters& inputs, const lattice::grap
   boost::to_upper(order_name);
   if (order_name == "NONE") {
     order_ = mf_order::none;
-    bcs_type_ = false;
+    pairing_type_ = false;
     add_parameter(name="mu", defval=0.0, inputs);
     add_parameter(name="t", defval=1.0, inputs);
     add_bondterm(cc="-t", op::upspin_hop());
@@ -46,8 +50,9 @@ void MF_Model::define_model(const input::Parameters& inputs, const lattice::grap
   }
   else if (order_name == "DWAVE_SC") {
     order_ = mf_order::dsc;
-    bcs_type_ = true;
+    pairing_type_ = true;
     add_parameter(name="mu", defval=0.0, inputs);
+    add_parameter(name="delta_sc", defval=1.0, inputs);
     add_parameter(name="t", defval=1.0, inputs);
     add_bondterm(cc="-t", op::upspin_hop());
     add_bondterm(cc="-t", op::dnspin_hop());
@@ -57,11 +62,11 @@ void MF_Model::define_model(const input::Parameters& inputs, const lattice::grap
   }
   else if (order_name == "SWAVE_SC") {
     order_ = mf_order::ssc;
-    bcs_type_ = true;
+    pairing_type_ = true;
   }
   else if (order_name == "DISORDERED_SC") {
     order_ = mf_order::disorder_sc;
-    bcs_type_ = true;
+    pairing_type_ = true;
   }
   else {
     throw std::range_error("*error: mf_order: undefined order");
@@ -76,25 +81,31 @@ void MF_Model::make_variational(const std::vector<std::string>& pnames)
   }
 }
 
-void MF_Model::build_kspace_groundstate(void)
+void MF_Model::kspace_transorm(const unsigned& k)
 {
-  std::vector<Matrix> ampliude_phi_;
-  unsigned num_kpoints_ = blochbasis_.num_kpoints();
-  unsigned dim_ = blochbasis_.subspace_dimension();
-  Matrix Mpair(dim_, dim_);
-  Matrix Mquad(dim_, dim_);
-
-  for (unsigned k=0; k<num_kpoints_; ++k) {
-    Vector3d kvec = blochbasis_.kvector(k);
-    for (const auto& term : uc_bondterms_) {
+  work1 = Matrix::Zero(dim_,dim_);
+  work2 = Matrix::Zero(dim_,dim_);
+  Vector3d kvec = blochbasis_.kvector(k);
+  // bond terms
+  for (const auto& term : uc_bondterms_) {
+    if (term.qn_operator().is_quadratic()) {
       for (unsigned i=0; i<term.num_out_bonds(); ++i) {
         Vector3d delta = term.bond_vector(i);
-        Mquad += term.coeff_matrix(i)*std::exp(ii()*kvec.dot(delta));
+        work1 += term.coeff_matrix(i)*std::exp(ii()*kvec.dot(delta));
       }
-      //if (term.qn_operator().is_quadratic()) {
-      //}
     }
-    //Mquad += Mquad.adjoint();
+    if (term.qn_operator().is_pairing()) {
+      for (unsigned i=0; i<term.num_out_bonds(); ++i) {
+        Vector3d delta = term.bond_vector(i);
+        work2 += term.coeff_matrix(i)*std::exp(ii()*kvec.dot(delta));
+      }
+    }
+  }
+  quadratic_block_ = work1 + work1.adjoint();
+  pairing_block_ = work2 + work2.adjoint();
+  // site terms
+  for (const auto& term : uc_siteterms_) {
+    quadratic_block_ += term.coeff_matrix();
   }
 }
 
