@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-10 00:25:07
+* Last Modified time: 2017-02-10 16:56:51
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "mf_model.h"
@@ -13,7 +13,6 @@ namespace var {
 
 MF_Model::MF_Model(const input::Parameters& inputs, 
   const lattice::graph::LatticeGraph& graph)
-  : blochbasis_(graph)
 {
   // mean-field model
   define_model(inputs, graph);
@@ -21,11 +20,11 @@ MF_Model::MF_Model(const input::Parameters& inputs,
   build_unitcell_terms(graph);
 
   // kspace matrices
-  dim_ = blochbasis_.subspace_dimension();
-  quadratic_block_.resize(dim_,dim_);
+  dim_ = graph.lattice().num_basis_sites();
+  quadratic_block_up_.resize(dim_,dim_);
   pairing_block_.resize(dim_,dim_);
-  work1.resize(dim_,dim_);
-  work2.resize(dim_,dim_);
+  work.resize(dim_,dim_);
+  //work2.resize(dim_,dim_);
 }
 
 void MF_Model::define_model(const input::Parameters& inputs, const lattice::graph::LatticeGraph& graph)
@@ -81,32 +80,45 @@ void MF_Model::make_variational(const std::vector<std::string>& pnames)
   }
 }
 
-void MF_Model::kspace_transorm(const unsigned& k)
+void MF_Model::construct_kspace_block(const Vector3d& kvec)
 {
-  work1 = Matrix::Zero(dim_,dim_);
-  work2 = Matrix::Zero(dim_,dim_);
-  Vector3d kvec = blochbasis_.kvector(k);
+  work = Matrix::Zero(dim_,dim_);
+  //work2 = Matrix::Zero(dim_,dim_);
+  pairing_block_ = Matrix::Zero(dim_,dim_);
   // bond terms
   for (const auto& term : uc_bondterms_) {
-    if (term.qn_operator().is_quadratic()) {
+    if (term.qn_operator().is_quadratic() && term.qn_operator().spin_up()) {
       for (unsigned i=0; i<term.num_out_bonds(); ++i) {
         Vector3d delta = term.bond_vector(i);
-        work1 += term.coeff_matrix(i)*std::exp(ii()*kvec.dot(delta));
+        work += term.coeff_matrix(i) * std::exp(ii()*kvec.dot(delta));
       }
     }
     if (term.qn_operator().is_pairing()) {
       for (unsigned i=0; i<term.num_out_bonds(); ++i) {
         Vector3d delta = term.bond_vector(i);
-        work2 += term.coeff_matrix(i)*std::exp(ii()*kvec.dot(delta));
+        auto exp_ikdotdelta = std::exp(ii()*kvec.dot(delta));
+        pairing_block_ += term.coeff_matrix(i) * exp_ikdotdelta;
+        // assuming 'singlet pairing', see notes
+        pairing_block_ += term.coeff_matrix(i).transpose() * std::conj(exp_ikdotdelta);
       }
     }
   }
-  quadratic_block_ = work1 + work1.adjoint();
-  pairing_block_ = work2 + work2.adjoint();
-  // site terms
+  // add hermitian conjugate part
+  quadratic_block_up_ = work + work.adjoint();
+  // site terms 
   for (const auto& term : uc_siteterms_) {
-    quadratic_block_ += term.coeff_matrix();
+    if (term.qn_operator().spin_up()) {
+      quadratic_block_up_ += term.coeff_matrix();
+    }
   }
+  // pairing part normalization
+  pairing_block_ *= 0.5;
+
+  //quadratic_block_up_ += work1.adjoint();
+  //pairing_block_ = work2;
+  //pairing_block_ += work2.adjoint();
+  // site terms
+  //std::cout << "ek = " << quadratic_block_(0,0) << "\n";
 }
 
 void MF_Model::build_unitcell_terms(const lattice::graph::LatticeGraph& graph)
@@ -146,6 +158,7 @@ void Unitcell_Term::build_bondterm(const model::HamiltonianTerm& hamterm,
     }
   }
   num_out_bonds_++;
+  //std::cout << "num_out_bonds_ = " << num_out_bonds_ << "\n";
   bond_vectors_.resize(num_out_bonds_);
   coeff_matrices_.resize(num_out_bonds_);
   for (auto& M : coeff_matrices_) {
@@ -161,6 +174,7 @@ void Unitcell_Term::build_bondterm(const model::HamiltonianTerm& hamterm,
       unsigned t = graph.target(ei);
       unsigned j = graph.site_uid(t);
       coeff_matrices_[id](i,j) += hamterm.coupling(graph.bond_type(ei));
+      //std::cout << id << " " << coeff_matrices_[id](i,j) << "\n";
       bond_vectors_[id] = graph.vector(ei);
     }
   }

@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 14:51:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-10 00:24:46
+* Last Modified time: 2017-02-10 16:42:19
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef MF_MODEL_H
@@ -54,22 +54,22 @@ public:
   ~MF_Model() {}
   //void update_parameters(const var_parm& vparms_);
   const bool& is_pairing(void) const { return pairing_type_; }
-  void kspace_transorm(const unsigned& k);
-  const Matrix& quadratic_block(void) const { return quadratic_block_; }
-  const Matrix& pairing_block(void) const { return pairing_block_; }
+  void construct_kspace_block(const Vector3d& kvec);
+  const Matrix& quadratic_upspin_part(void) const { return quadratic_block_up_; }
+  const Matrix& pairing_part(void) const { return pairing_block_; }
 private:
   using Model = model::Hamiltonian;
   mf_order order_;
   bool pairing_type_;
-  basis::BlochBasis blochbasis_;
   std::vector<name_value_pair> vparms_;
   std::vector<Unitcell_Term> uc_siteterms_;
   std::vector<Unitcell_Term> uc_bondterms_;
   // matrices in kspace representation
   unsigned dim_;
-  Matrix quadratic_block_;
+  Matrix quadratic_block_up_;
+  Matrix quadratic_block_dn_;
   Matrix pairing_block_;
-  Matrix work1, work2;
+  Matrix work; //, work2;
 
   //void check_xml(void);
   void define_model(const input::Parameters& inputs, const lattice::graph::LatticeGraph& graph);

@@ -16,7 +16,7 @@ lattice = "SQUARE"
 lsize1 = 4
 lsize2 = 4
 bc1 = "periodic"
-bc2 = "periodic"
+bc2 = "antiperiodic"
 
 #---------------------------------------------
 # Model:
