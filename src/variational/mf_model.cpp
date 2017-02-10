@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-10 16:56:51
+* Last Modified time: 2017-02-10 21:33:20
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "mf_model.h"
@@ -82,9 +82,9 @@ void MF_Model::make_variational(const std::vector<std::string>& pnames)
 
 void MF_Model::construct_kspace_block(const Vector3d& kvec)
 {
-  work = Matrix::Zero(dim_,dim_);
+  work.setZero(); 
   //work2 = Matrix::Zero(dim_,dim_);
-  pairing_block_ = Matrix::Zero(dim_,dim_);
+  pairing_block_.setZero();
   // bond terms
   for (const auto& term : uc_bondterms_) {
     if (term.qn_operator().is_quadratic() && term.qn_operator().spin_up()) {
@@ -96,10 +96,7 @@ void MF_Model::construct_kspace_block(const Vector3d& kvec)
     if (term.qn_operator().is_pairing()) {
       for (unsigned i=0; i<term.num_out_bonds(); ++i) {
         Vector3d delta = term.bond_vector(i);
-        auto exp_ikdotdelta = std::exp(ii()*kvec.dot(delta));
-        pairing_block_ += term.coeff_matrix(i) * exp_ikdotdelta;
-        // assuming 'singlet pairing', see notes
-        pairing_block_ += term.coeff_matrix(i).transpose() * std::conj(exp_ikdotdelta);
+        pairing_block_ += term.coeff_matrix(i) * std::exp(ii()*kvec.dot(delta));
       }
     }
   }
@@ -111,8 +108,6 @@ void MF_Model::construct_kspace_block(const Vector3d& kvec)
       quadratic_block_up_ += term.coeff_matrix();
     }
   }
-  // pairing part normalization
-  pairing_block_ *= 0.5;
 
   //quadratic_block_up_ += work1.adjoint();
   //pairing_block_ = work2;

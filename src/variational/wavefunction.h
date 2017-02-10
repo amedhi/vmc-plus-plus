@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 14:51:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-10 17:40:04
+* Last Modified time: 2017-02-10 23:32:28
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef WAVEFUNCTION_H
@@ -22,6 +22,8 @@
 
 namespace var {
 
+enum class wf_type {fermisea, bcs_oneband, bcs_multiband};
+
 // Wavefunction in 'Wannier space' (amplitudes in Wannier representation)
 class Wavefunction 
 {
@@ -36,22 +38,30 @@ private:
   basis::BlochBasis blochbasis_;
   unsigned num_kpoints_;
   unsigned block_dim_;
+  wf_type type_;
   // BCS_state bcs_state_;
   // FS_state fermisea_;
   Matrix psi_up_;
   Matrix psi_dn_;
 
   // matrices & solvers
+  double bcs_large_number_;
+  Matrix mat_work;
+  Matrix mat_delta_k;
+  Matrix mat_dphi_k;
   std::vector<Matrix> cphi_k;
-  Matrix delk_mat;
-  Matrix dphi_mat;
-  Matrix delta_k;
   Eigen::SelfAdjointEigenSolver<Matrix> hk;
   Eigen::SelfAdjointEigenSolver<Matrix> hminusk;
-  Eigen::SelfAdjointEigenSolver<Matrix> hk_solver;
-  Eigen::SelfAdjointEigenSolver<Matrix> bdg_solver;
 
-  void compute_amplitudes(void);
+  void compute_amplitudes(const lattice::graph::LatticeGraph& graph);
+  void pair_amplitudes(const lattice::graph::LatticeGraph& graph);
+  void fermisea_amplitudes(const lattice::graph::LatticeGraph& graph) {}
+  //void (Wavefunction::*construct_groundstate)(void);
+  void bcs_init(void);
+  void bcs_oneband(void);
+  void bcs_multiband(void);
+  void bcs_disordered(void);
+  void fermisea(void) {}
 };
 
 

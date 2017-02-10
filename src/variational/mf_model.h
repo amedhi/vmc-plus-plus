@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 14:51:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-10 16:42:19
+* Last Modified time: 2017-02-10 20:57:43
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef MF_MODEL_H
@@ -55,7 +55,7 @@ public:
   //void update_parameters(const var_parm& vparms_);
   const bool& is_pairing(void) const { return pairing_type_; }
   void construct_kspace_block(const Vector3d& kvec);
-  const Matrix& quadratic_upspin_part(void) const { return quadratic_block_up_; }
+  const Matrix& quadratic_spinup_block(void) const { return quadratic_block_up_; }
   const Matrix& pairing_part(void) const { return pairing_block_; }
 private:
   using Model = model::Hamiltonian;
