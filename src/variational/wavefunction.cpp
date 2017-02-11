@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-11 13:24:15
+* Last Modified time: 2017-02-12 00:02:17
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "wavefunction.h"
@@ -22,7 +22,7 @@ Wavefunction::Wavefunction(const input::Parameters& inputs,
 {
   set_particle_num(inputs);
   if (mf_model_.is_pairing()) {
-    bcs_init();
+    bcs_init(graph);
     if (block_dim_==1) type_ = wf_type::bcs_oneband;
     else type_ = wf_type::bcs_multiband;
   }
@@ -82,7 +82,7 @@ void Wavefunction::set_particle_num(const input::Parameters& inputs)
   band_filling_ = 1.0-inputs.set_value("x", 0.0);
   int num_sites = static_cast<int>(num_sites_);
   if (mf_model_.is_pairing()) {
-    int n = static_cast<int>(std::round(band_filling_*num_sites));
+    int n = static_cast<int>(std::round(0.5*band_filling_*num_sites));
     if (n<0 || n>num_sites) throw std::range_error("Wavefunction:: hole doping 'x' out-of-range");
     num_upspins_ = static_cast<unsigned>(n);
     num_dnspins_ = num_upspins_;
@@ -90,9 +90,8 @@ void Wavefunction::set_particle_num(const input::Parameters& inputs)
     band_filling_ = static_cast<double>(2*n)/num_sites;
   }
   else{
-    int num_states = 2*num_sites;
-    int n = static_cast<int>(std::round(band_filling_*num_states));
-    if (n<0 || n>num_states) throw std::range_error("Wavefunction:: hole doping 'x' out-of-range");
+    int n = static_cast<int>(std::round(band_filling_*num_sites));
+    if (n<0 || n>2*num_sites) throw std::range_error("Wavefunction:: hole doping 'x' out-of-range");
     num_spins_ = static_cast<unsigned>(n);
     num_dnspins_ = num_spins_/2;
     num_upspins_ = num_spins_ - num_dnspins_;

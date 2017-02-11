@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 14:51:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-11 12:05:40
+* Last Modified time: 2017-02-11 23:37:02
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef MF_MODEL_H
@@ -52,6 +52,7 @@ class MF_Model : public model::Hamiltonian
 public:
   MF_Model(const input::Parameters& inputs, const lattice::graph::LatticeGraph& graph);
   ~MF_Model() {}
+  void update_mu(const double& mu, const lattice::graph::LatticeGraph& graph);
   //void update_parameters(const var_parm& vparms_);
   const bool& is_pairing(void) const { return pairing_type_; }
   const bool& need_noninteracting_mu(void) const { return need_noninteracting_mu_; }

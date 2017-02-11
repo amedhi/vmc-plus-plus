@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 14:51:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-11 13:26:35
+* Last Modified time: 2017-02-11 23:37:14
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef WAVEFUNCTION_H
@@ -64,7 +64,7 @@ private:
   void pair_amplitudes(const lattice::graph::LatticeGraph& graph);
   void fermisea_amplitudes(const lattice::graph::LatticeGraph& graph) {}
   //void (Wavefunction::*construct_groundstate)(void);
-  void bcs_init(void);
+  void bcs_init(const lattice::graph::LatticeGraph& graph);
   void bcs_oneband(void);
   void bcs_multiband(void);
   void bcs_disordered(void);

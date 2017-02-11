@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:46
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-11 11:52:57
+* Last Modified time: 2017-02-11 23:00:33
 *----------------------------------------------------------------------------*/
 #ifndef MODEL_H
 #define MODEL_H
@@ -44,9 +44,14 @@ public:
   unsigned add_parameter(const std::string& pname, const double& defval, 
     const input::Parameters& inputs)
     { parms_[pname] = inputs.set_value(pname, defval); return parms_.size(); }
+  unsigned add_parameter(const std::string& pname, const double& defval, 
+    const input::Parameters& inputs, int& info)
+    { parms_[pname] = inputs.set_value(pname, defval, info); return parms_.size(); }
   unsigned add_parameter(const std::string& pname, const double& val) 
     { parms_[pname] = val; return parms_.size(); }
   void update_parameters(const input::Parameters& inputs);
+  void update_parameter(const std::string& pname, const double& val) 
+    { parms_.at(pname) = val; }
   void change_parameter_value(const std::string& pname, const double& pval);
   double get_parameter_value(const std::string& pname) const;
   unsigned add_constant(const std::string& cname, const double& val) 

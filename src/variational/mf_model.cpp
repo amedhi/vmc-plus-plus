@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-11 13:07:43
+* Last Modified time: 2017-02-11 23:34:51
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "mf_model.h"
@@ -41,11 +41,10 @@ void MF_Model::define_model(const input::Parameters& inputs, const lattice::grap
 
   // chemical potential
   int info;
-  double mu = inputs.set_value("mu", 0.0, info);
+  add_parameter(name="mu", defval=0.0, inputs, info);
   if (info == 0) need_noninteracting_mu_ = false;
   else need_noninteracting_mu_ = true;
   if (inputs.set_value("mu_variational", false, info)) make_variational({"mu"});
-  add_parameter(name="mu", mu);
 
   // assuming spin up-down symmetry, down-spin operators are not specified 
   if (order_name == "NONE") {
@@ -87,6 +86,22 @@ void MF_Model::make_variational(const std::vector<std::string>& pnames)
   }
 }
 
+void MF_Model::build_unitcell_terms(const lattice::graph::LatticeGraph& graph)
+{
+  uc_siteterms_.resize(Model::num_siteterms());
+  uc_bondterms_.resize(Model::num_bondterms());
+  unsigned i = 0;
+  for (auto sterm=siteterms_begin(); sterm!=siteterms_end(); ++sterm) {
+    uc_siteterms_[i].build_siteterm(*sterm, graph);
+    i++;
+  }
+  i = 0;
+  for (auto bterm=bondterms_begin(); bterm!=bondterms_end(); ++bterm) {
+    uc_bondterms_[i].build_bondterm(*bterm, graph);
+    i++;
+  }
+}
+
 void MF_Model::construct_kspace_block(const Vector3d& kvec)
 {
   work.setZero(); 
@@ -123,21 +138,16 @@ void MF_Model::construct_kspace_block(const Vector3d& kvec)
   //std::cout << "ek = " << quadratic_block_(0,0) << "\n";
 }
 
-void MF_Model::build_unitcell_terms(const lattice::graph::LatticeGraph& graph)
+void MF_Model::update_mu(const double& mu, const lattice::graph::LatticeGraph& graph)
 {
-  uc_siteterms_.resize(Model::num_siteterms());
-  uc_bondterms_.resize(Model::num_bondterms());
+  Model::update_parameter("mu", mu);
   unsigned i = 0;
   for (auto sterm=siteterms_begin(); sterm!=siteterms_end(); ++sterm) {
     uc_siteterms_[i].build_siteterm(*sterm, graph);
     i++;
   }
-  i = 0;
-  for (auto bterm=bondterms_begin(); bterm!=bondterms_end(); ++bterm) {
-    uc_bondterms_[i].build_bondterm(*bterm, graph);
-    i++;
-  }
 }
+
 
 /* Write a bond term like,
  H = \sum_{Ia,Jb}c^{\dag}_{Ia} t_{Ia,Jb} c_{Jb}

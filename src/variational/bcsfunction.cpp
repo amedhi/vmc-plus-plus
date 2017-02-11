@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-09 22:48:45
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-11 13:48:54
+* Last Modified time: 2017-02-12 00:02:53
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include <algorithm>
@@ -10,7 +10,7 @@
 
 namespace var {
 
-void Wavefunction::bcs_init(void)
+void Wavefunction::bcs_init(const lattice::graph::LatticeGraph& graph)
 {
   // resizing
   mat_work.resize(block_dim_,block_dim_);
@@ -23,7 +23,8 @@ void Wavefunction::bcs_init(void)
   bcs_large_number_ = 1.0E+2;
   if (mf_model_.need_noninteracting_mu()) {
     double mu = get_noninteracting_mu();
-    //mf_model_.update_mu(mu); 
+    //std::cout << "mu = " << mu << "\n";
+    mf_model_.update_mu(mu, graph); 
   }
 }
 
@@ -106,10 +107,12 @@ double Wavefunction::get_noninteracting_mu(void)
     ek.insert(ek.end(),hk.eigenvalues().data(),hk.eigenvalues().data()+hk.eigenvalues().size());
   }
   std::sort(ek.begin(),ek.end());
-  if (num_spins_ < num_sites_)
-    return 0.5*(ek[num_spins_-1]+ek[num_spins_]);
+  //for (const auto& e : ek) std::cout << e << "\n";
+  //std::cout << "spins = " << num_spins_ << "\n";
+  if (num_upspins_ < num_sites_)
+    return 0.5*(ek[num_upspins_-1]+ek[num_upspins_]);
   else
-    return ek[num_spins_-1];
+    return ek[num_upspins_-1];
 }
 
 } // end namespace var
