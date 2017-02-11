@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 19:03:43
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-09 23:37:27
+* Last Modified time: 2017-02-11 11:58:44
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef QUANTUM_OP_H
@@ -81,6 +81,18 @@ private:
   bool is_quadratic_;
   bool is_pairing_;
   bool is_quartic_;
+};
+
+class ni_up : public quantum_op
+{
+public:
+  ni_up() : quantum_op("ni_up", op_id::ni_up, spin::UP, op_type::quadratic) {}
+};
+
+class ni_dn : public quantum_op
+{
+public:
+  ni_dn() : quantum_op("ni_dn", op_id::ni_dn, spin::DN, op_type::quadratic) {}
 };
 
 class upspin_hop : public quantum_op

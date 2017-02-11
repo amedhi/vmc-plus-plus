@@ -2,9 +2,10 @@
 * Author: Amal Medhi
 * Date:   2017-02-09 22:48:45
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-10 23:32:08
+* Last Modified time: 2017-02-11 13:48:54
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
+#include <algorithm>
 #include "wavefunction.h"
 
 namespace var {
@@ -18,7 +19,12 @@ void Wavefunction::bcs_init(void)
   mat_dphi_k.resize(block_dim_,block_dim_);
   cphi_k.resize(num_kpoints_);
   for (unsigned k=0; k<num_kpoints_; ++k) cphi_k[k].resize(block_dim_,block_dim_);
-  bcs_large_number_ = 1.0E+3;
+
+  bcs_large_number_ = 1.0E+2;
+  if (mf_model_.need_noninteracting_mu()) {
+    double mu = get_noninteracting_mu();
+    //mf_model_.update_mu(mu); 
+  }
 }
 
 void Wavefunction::bcs_oneband(void)
@@ -27,20 +33,18 @@ void Wavefunction::bcs_oneband(void)
   for (unsigned k=0; k<num_kpoints_; ++k) {
     Vector3d kvec = blochbasis_.kvector(k);
     mf_model_.construct_kspace_block(kvec);
-    hk.compute(mf_model_.quadratic_spinup_block());
-    double ek = hk.eigenvalues()[0];
+    double ek = std::real(mf_model_.quadratic_spinup_block()(0,0)); 
     auto delta_k = mf_model_.pairing_part()(0,0);
     mf_model_.construct_kspace_block(-kvec);
-    hminusk.compute(mf_model_.quadratic_spinup_block());
-    ek += hminusk.eigenvalues()[0];
+    ek += std::real(mf_model_.quadratic_spinup_block()(0,0));;
     delta_k += mf_model_.pairing_part()(0,0);
     double deltak_sq = std::norm(delta_k);
     double ek_plus_Ek = ek + std::sqrt(ek*ek + 4.0*deltak_sq);
-    if (ek_plus_Ek>1.0E-12) {
-      cphi_k[k](0,0) = delta_k/ek_plus_Ek;
+    if (deltak_sq<1.0E-12 && ek<0.0) {
+      cphi_k[k](0,0) = bcs_large_number_ * std::exp(ii()*std::arg(delta_k));
     }
     else {
-      cphi_k[k](0,0) = bcs_large_number_ * std::exp(ii()*std::arg(delta_k));
+      cphi_k[k](0,0) = delta_k/ek_plus_Ek;
     }
   }
 }
@@ -72,15 +76,17 @@ void Wavefunction::bcs_multiband(void)
       double ek = hk.eigenvalues()[i] + hminusk.eigenvalues()[i];
       double deltak_sq = std::norm(mat_delta_k(i,i));
       double ek_plus_Ek = ek + std::sqrt(ek*ek + 4.0*deltak_sq);
-      if (ek_plus_Ek>1.0E-12) {
-        mat_dphi_k(i,i) = mat_delta_k(i,i)/ek_plus_Ek;
+      if (deltak_sq<1.0E-12 && ek<0.0) {
+        mat_dphi_k(i,i) = bcs_large_number_ * std::exp(ii()*std::arg(mat_delta_k(i,i)));
       }
       else {
-        mat_dphi_k(i,i) = bcs_large_number_ * std::exp(ii()*std::arg(mat_delta_k(i,i)));
+        mat_dphi_k(i,i) = mat_delta_k(i,i)/ek_plus_Ek;
       }
     }
     // bcs ampitudes in original basis 
-    cphi_k[k] = hk.eigenvectors() * mat_dphi_k.diagonal() * hminusk.eigenvectors().transpose();
+    for (unsigned i=0; i<block_dim_; ++i) 
+      mat_work.col(i) = hk.eigenvectors().col(i) * mat_dphi_k(i,i);
+    cphi_k[k] = mat_work * hminusk.eigenvectors().transpose();
     //std::cout << delta_k << "\n";
   } 
 }
@@ -90,6 +96,21 @@ void Wavefunction::bcs_disordered(void)
   
 }
 
+double Wavefunction::get_noninteracting_mu(void)
+{
+  std::vector<double> ek;
+  for (unsigned k=0; k<num_kpoints_; ++k) {
+    Vector3d kvec = blochbasis_.kvector(k);
+    mf_model_.construct_kspace_block(kvec);
+    hk.compute(mf_model_.quadratic_spinup_block(), Eigen::EigenvaluesOnly);
+    ek.insert(ek.end(),hk.eigenvalues().data(),hk.eigenvalues().data()+hk.eigenvalues().size());
+  }
+  std::sort(ek.begin(),ek.end());
+  if (num_spins_ < num_sites_)
+    return 0.5*(ek[num_spins_-1]+ek[num_spins_]);
+  else
+    return ek[num_spins_-1];
+}
 
 } // end namespace var
 

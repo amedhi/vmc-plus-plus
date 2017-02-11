@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-10 23:17:31
+* Last Modified time: 2017-02-11 13:24:15
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "wavefunction.h"
@@ -15,7 +15,12 @@ Wavefunction::Wavefunction(const input::Parameters& inputs,
   , blochbasis_(graph)
   , num_kpoints_(blochbasis_.num_kpoints())
   , block_dim_(blochbasis_.subspace_dimension())
+  , num_sites_(graph.num_sites())
+  , num_spins_(0)
+  , num_upspins_(0)
+  , num_dnspins_(0)
 {
+  set_particle_num(inputs);
   if (mf_model_.is_pairing()) {
     bcs_init();
     if (block_dim_==1) type_ = wf_type::bcs_oneband;
@@ -24,6 +29,7 @@ Wavefunction::Wavefunction(const input::Parameters& inputs,
   else {
     type_ = wf_type::fermisea;
   }
+  psi_up_.resize(num_sites_,num_sites_);
   compute_amplitudes(graph);
 }
 
@@ -54,12 +60,11 @@ void Wavefunction::compute_amplitudes(const lattice::graph::LatticeGraph& graph)
 
 void Wavefunction::pair_amplitudes(const lattice::graph::LatticeGraph& graph)
 {
-  unsigned num_sites = graph.num_sites();
   double one_by_nk = 1.0/static_cast<double>(num_kpoints_);
-  for (unsigned i=0; i<num_sites; ++i) {
+  for (unsigned i=0; i<num_sites_; ++i) {
     unsigned m = graph.site_uid(i);
     auto Ri = graph.site_cellcord(i);
-    for (unsigned j=0; j<num_sites; ++j) {
+    for (unsigned j=0; j<num_sites_; ++j) {
       unsigned n = graph.site_uid(j);
       auto Rj = graph.site_cellcord(j);
       std::complex<double> ksum(0.0);
@@ -72,6 +77,27 @@ void Wavefunction::pair_amplitudes(const lattice::graph::LatticeGraph& graph)
   }
 }
 
+void Wavefunction::set_particle_num(const input::Parameters& inputs)
+{
+  band_filling_ = 1.0-inputs.set_value("x", 0.0);
+  int num_sites = static_cast<int>(num_sites_);
+  if (mf_model_.is_pairing()) {
+    int n = static_cast<int>(std::round(band_filling_*num_sites));
+    if (n<0 || n>num_sites) throw std::range_error("Wavefunction:: hole doping 'x' out-of-range");
+    num_upspins_ = static_cast<unsigned>(n);
+    num_dnspins_ = num_upspins_;
+    num_spins_ = num_upspins_ + num_dnspins_;
+    band_filling_ = static_cast<double>(2*n)/num_sites;
+  }
+  else{
+    int num_states = 2*num_sites;
+    int n = static_cast<int>(std::round(band_filling_*num_states));
+    if (n<0 || n>num_states) throw std::range_error("Wavefunction:: hole doping 'x' out-of-range");
+    num_spins_ = static_cast<unsigned>(n);
+    num_dnspins_ = num_spins_/2;
+    num_upspins_ = num_spins_ - num_dnspins_;
+  }
+}
 
 } // end namespace var
 

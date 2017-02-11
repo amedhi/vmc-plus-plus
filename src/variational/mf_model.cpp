@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-10 21:33:20
+* Last Modified time: 2017-02-11 13:07:43
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "mf_model.h"
@@ -38,26 +38,33 @@ void MF_Model::define_model(const input::Parameters& inputs, const lattice::grap
   Model::init(graph.lattice());
   std::string order_name = inputs.set_value("mf_order", "NONE");
   boost::to_upper(order_name);
+
+  // chemical potential
+  int info;
+  double mu = inputs.set_value("mu", 0.0, info);
+  if (info == 0) need_noninteracting_mu_ = false;
+  else need_noninteracting_mu_ = true;
+  if (inputs.set_value("mu_variational", false, info)) make_variational({"mu"});
+  add_parameter(name="mu", mu);
+
+  // assuming spin up-down symmetry, down-spin operators are not specified 
   if (order_name == "NONE") {
     order_ = mf_order::none;
     pairing_type_ = false;
-    add_parameter(name="mu", defval=0.0, inputs);
     add_parameter(name="t", defval=1.0, inputs);
     add_bondterm(cc="-t", op::upspin_hop());
-    add_bondterm(cc="-t", op::dnspin_hop());
-    make_variational({"mu"});
+    add_siteterm(cc="-mu", op::ni_up());
   }
   else if (order_name == "DWAVE_SC") {
     order_ = mf_order::dsc;
     pairing_type_ = true;
-    add_parameter(name="mu", defval=0.0, inputs);
-    add_parameter(name="delta_sc", defval=1.0, inputs);
     add_parameter(name="t", defval=1.0, inputs);
+    add_parameter(name="delta_sc", defval=1.0, inputs);
     add_bondterm(cc="-t", op::upspin_hop());
-    add_bondterm(cc="-t", op::dnspin_hop());
+    add_siteterm(cc="-mu", op::ni_up());
     cc = CouplingConstant({0, "delta_sc"}, {1, "-delta_sc"});
     add_bondterm(cc, op::pair_create());
-    make_variational({"delta_sc", "mu"});
+    make_variational({"delta_sc"});
   }
   else if (order_name == "SWAVE_SC") {
     order_ = mf_order::ssc;

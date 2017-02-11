@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 14:51:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-10 23:32:28
+* Last Modified time: 2017-02-11 13:26:35
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef WAVEFUNCTION_H
@@ -34,11 +34,16 @@ public:
   void update_amplitudes(const std::vector<double>& variatioanl_parm);
   void compute_grade(const std::vector<double>& variatioanl_parm);
 private:
+  wf_type type_;
   MF_Model mf_model_;
   basis::BlochBasis blochbasis_;
   unsigned num_kpoints_;
   unsigned block_dim_;
-  wf_type type_;
+  unsigned num_sites_;
+  unsigned num_spins_;
+  unsigned num_upspins_;
+  unsigned num_dnspins_;
+  double band_filling_;
   // BCS_state bcs_state_;
   // FS_state fermisea_;
   Matrix psi_up_;
@@ -53,6 +58,8 @@ private:
   Eigen::SelfAdjointEigenSolver<Matrix> hk;
   Eigen::SelfAdjointEigenSolver<Matrix> hminusk;
 
+  void set_particle_num(const input::Parameters& inputs);
+  double get_noninteracting_mu(void);
   void compute_amplitudes(const lattice::graph::LatticeGraph& graph);
   void pair_amplitudes(const lattice::graph::LatticeGraph& graph);
   void fermisea_amplitudes(const lattice::graph::LatticeGraph& graph) {}
