@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-09 22:48:45
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-12 00:02:53
+* Last Modified time: 2017-02-12 12:48:25
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include <algorithm>
@@ -39,14 +39,19 @@ void Wavefunction::bcs_oneband(void)
     mf_model_.construct_kspace_block(-kvec);
     ek += std::real(mf_model_.quadratic_spinup_block()(0,0));;
     delta_k += mf_model_.pairing_part()(0,0);
+    delta_k *= 0.5;
     double deltak_sq = std::norm(delta_k);
     double ek_plus_Ek = ek + std::sqrt(ek*ek + 4.0*deltak_sq);
     if (deltak_sq<1.0E-12 && ek<0.0) {
       cphi_k[k](0,0) = bcs_large_number_ * std::exp(ii()*std::arg(delta_k));
     }
     else {
-      cphi_k[k](0,0) = delta_k/ek_plus_Ek;
+      cphi_k[k](0,0) = 2.0*delta_k/ek_plus_Ek;
     }
+    //std::cout << ek << "\n";
+    //std::cout << delta_k << "\n";
+    //std::cout << k << " " << cphi_k[k](0,0) << "\n";
+    //getchar();
   }
 }
 
@@ -67,7 +72,7 @@ void Wavefunction::bcs_multiband(void)
     mf_model_.construct_kspace_block(-kvec);
     hminusk.compute(mf_model_.quadratic_spinup_block());
     // assuming 'singlet pairing', see notes
-    mat_work = mat_delta_k + mf_model_.pairing_part().transpose();
+    mat_work = 0.5*(mat_delta_k + mf_model_.pairing_part().transpose());
     // transform pairing part
     mat_delta_k = hk.eigenvectors().adjoint() * mat_work * 
       hminusk.eigenvectors().conjugate();
@@ -81,7 +86,7 @@ void Wavefunction::bcs_multiband(void)
         mat_dphi_k(i,i) = bcs_large_number_ * std::exp(ii()*std::arg(mat_delta_k(i,i)));
       }
       else {
-        mat_dphi_k(i,i) = mat_delta_k(i,i)/ek_plus_Ek;
+        mat_dphi_k(i,i) = 2.0*mat_delta_k(i,i)/ek_plus_Ek;
       }
     }
     // bcs ampitudes in original basis 

@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:50
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-06 12:33:34
+* Last Modified time: 2017-02-12 12:43:41
 *----------------------------------------------------------------------------*/
 #include "model.h"
 
@@ -131,10 +131,22 @@ void Hamiltonian::change_parameter_value(const std::string& pname, const double&
   if (it != parms_.end()) it->second = pval;
 }
 
+void Hamiltonian::update_parameter(const std::string& pname, const double& val)
+{
+  // update one parameter
+  parms_.at(pname) = val; 
+  update_coupling_constants();
+}
+
 void Hamiltonian::update_parameters(const input::Parameters& inputs)
 {
   // update the parameter values
   for (auto& p : parms_) p.second = inputs.set_value(p.first, p.second);
+  update_coupling_constants();
+}
+
+void Hamiltonian::update_coupling_constants(void)
+{
   // update the model term couping constants
   for (auto it=site_terms_.begin(); it!=site_terms_.end(); ++it) {
     it->eval_coupling_constant(constants_, parms_); 

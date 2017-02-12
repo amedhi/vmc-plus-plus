@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-12 00:02:17
+* Last Modified time: 2017-02-12 12:47:48
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "wavefunction.h"
@@ -55,7 +55,6 @@ void Wavefunction::compute_amplitudes(const lattice::graph::LatticeGraph& graph)
       fermisea_amplitudes(graph); 
       break;
   }
-  //(this->*construct_groundstate)();
 }
 
 void Wavefunction::pair_amplitudes(const lattice::graph::LatticeGraph& graph)
@@ -73,6 +72,8 @@ void Wavefunction::pair_amplitudes(const lattice::graph::LatticeGraph& graph)
         ksum += cphi_k[k](m,n) * std::exp(ii()*kvec.dot(Ri-Rj));
       }
       psi_up_(i,j) = ksum * one_by_nk;
+      //std::cout << psi_up_(i,j) << "\n"; 
+      //getchar();
     }
   }
 }

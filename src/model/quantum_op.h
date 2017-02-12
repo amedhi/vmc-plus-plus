@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 19:03:43
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-11 11:58:44
+* Last Modified time: 2017-02-12 12:48:38
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef QUANTUM_OP_H
