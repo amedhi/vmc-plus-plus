@@ -4,7 +4,7 @@
 int main(int argc, const char *argv[])
 {
   try {
-	 return scheduler::start(argc, argv, scheduler::Task<mc::VMC>());
+	 return scheduler::start(argc, argv, scheduler::Task<vmc::VMC>());
   }
   catch (std::exception& e) {
     std::cout << e.what() << std::endl;

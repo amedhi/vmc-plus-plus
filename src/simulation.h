@@ -7,6 +7,6 @@
 #define __CMC_PLUS_PLUS_H
 
 #include "./scheduler/scheduler.h"
-#include "./montecarlo/simulator.h"
+#include "./vmc/vmc.h"
 
 #endif

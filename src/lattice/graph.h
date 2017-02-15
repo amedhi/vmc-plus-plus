@@ -4,7 +4,7 @@
 * Author: amedhi
 * Date:   2016-03-01 00:11:01
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-06 11:32:29
+* Last Modified time: 2017-02-15 12:26:30
 *----------------------------------------------------------------------------*/
 #ifndef GRAPH_H
 #define GRAPH_H
@@ -58,12 +58,12 @@ public:
 
   // ctors
   LatticeGraph() { clear(); }
-  LatticeGraph(input::Parameters& parms); 
-  LatticeGraph(const Lattice& lattice);
+  LatticeGraph(const input::Parameters& parms); 
+  //LatticeGraph(const Lattice& lattice);
   ~LatticeGraph() {}
 
   // setter functions
-  void construct(input::Parameters& parms); 
+  void construct(const input::Parameters& parms); 
   void change_type_value(const site_descriptor& v, const unsigned& new_val) 
     { this->operator[](v).type = new_val; }
   void change_type_value(const site_iterator& vi, const unsigned& new_val) 

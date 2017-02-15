@@ -3,10 +3,11 @@
 * All rights reserved.
 * Author: Amal Medhi
 *----------------------------------------------------------------------------*/
-#ifndef SIMULATOR_H
-#define SIMULATOR_H
+#ifndef VMC_H
+#define VMC_H
 
 #include <iostream>
+/*
 #include <fstream>
 #include <string>
 #include <cmath>
@@ -14,16 +15,18 @@
 #include <array>
 #include <Eigen/Core>
 #include "../scheduler/worker.h"
-#include "./random.h"
+//#include "./random.h"
 #include "../lattice/lattice.h"
 #include "../lattice/graph.h"
 #include "../model/model.h"
 #include "../variational/wavefunction.h"
 //#include "../observable/observables.h"
-#include "sitebasisstate.h"
+//#include "sitebasisstate.h"
 //#include "observable_operator.h"
+*/
+#include "./simulator.h"
 
-namespace mc {
+namespace vmc {
 
 /*class Simulator : public scheduler::Worker
 {
@@ -44,10 +47,10 @@ private:
 class VMC : public scheduler::Worker
 {
 public:
-  using SiteState = SiteBasisState;
-  using state_idx = SiteBasisState::state_idx;
+  //using SiteState = SiteBasisState;
+  //using state_idx = SiteBasisState::state_idx;
   //VMC() {}
-  VMC(input::Parameters& parms); 
+  VMC(const input::Parameters& parms); 
   ~VMC() {}
   //using Model::update_parameters;
   int start(input::Parameters& parms) override;
@@ -58,12 +61,12 @@ public:
   static void print_copyright(std::ostream& os);
 
 private:
-  lattice::graph::LatticeGraph graph_;
-  model::Hamiltonian model_;
+  //lattice::graph::LatticeGraph graph_;
+  //model::Hamiltonian model_;
+  Simulator simulator;
 
-  //RandomNumber rng;
+
   //std::vector<SiteBasisState> state;
-  var::Wavefunction wavefunc_;
   
   // mc parameters
   int measure_samples; 

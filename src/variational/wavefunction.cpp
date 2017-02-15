@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-12 12:47:48
+* Last Modified time: 2017-02-15 23:11:03
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "wavefunction.h"
@@ -97,6 +97,15 @@ void Wavefunction::set_particle_num(const input::Parameters& inputs)
     num_dnspins_ = num_spins_/2;
     num_upspins_ = num_spins_ - num_dnspins_;
   }
+}
+
+Matrix Wavefunction::amplitudes(const std::vector<unsigned>& Rup, const std::vector<unsigned>& Rdn) const
+{
+  Matrix M(Rup.size(), Rdn.size());
+  for (unsigned i=0; i<Rup.size(); ++i)
+    for (unsigned j=0; j<Rdn.size(); ++j)
+      M(i,j) =psi_up_(Rup[i],Rdn[j]);
+  return M;
 }
 
 } // end namespace var

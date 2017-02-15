@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 14:51:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-11 23:37:14
+* Last Modified time: 2017-02-15 23:06:14
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef WAVEFUNCTION_H
@@ -33,6 +33,10 @@ public:
   ~Wavefunction() {}
   void update_amplitudes(const std::vector<double>& variatioanl_parm);
   void compute_grade(const std::vector<double>& variatioanl_parm);
+  const unsigned& num_upspins(void) const { return num_upspins_; }
+  const unsigned& num_dnspins(void) const { return num_dnspins_; }
+  Matrix amplitudes(const std::vector<unsigned>& Rup,  
+    const std::vector<unsigned>& Rdn) const;
 private:
   wf_type type_;
   MF_Model mf_model_;

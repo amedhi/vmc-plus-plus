@@ -30,10 +30,12 @@ SRCS+= variational/mf_model.cpp
 SRCS+= variational/bcsfunction.cpp
 SRCS+= variational/wavefunction.cpp
 #SRCS+= observable/observables.cpp
-SRCS+= montecarlo/random.cpp
 #SRCS+= montecarlo/observable_operator.cpp
 #SRCS+= montecarlo/measurement.cpp
-SRCS+= montecarlo/simulator.cpp
+SRCS+= vmc/random.cpp
+SRCS+= vmc/basisstate.cpp
+SRCS+= vmc/simulator.cpp
+SRCS+= vmc/vmc.cpp
 SRCS+= main.cpp
 VMC_SRCS = $(addprefix src/,$(SRCS))
 #-------------------------------------------------------------
@@ -50,7 +52,10 @@ HDRS=scheduler/optionparser.h scheduler/cmdargs.h \
 	 model/hamiltonian_term.h model/model.h \
 	 variational/blochbasis.h \
 	 variational/mf_model.h variational/wavefunction.h \
-         montecarlo/random.h montecarlo/sitebasisstate.h \
+	 vmc/random.h \
+	 vmc/basisstate.h \
+	 vmc/simulator.h \
+	 vmc/vmc.h \
 	 simulation.h \
 #         model/qn.h model/quantum_operator.h model/sitebasis.h model/modelparams.h \
 #         observable/mcdata.h observable/observables.h \

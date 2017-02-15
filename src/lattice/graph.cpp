@@ -4,7 +4,7 @@
 * Author: amedhi
 * Date:   2016-03-01 00:11:01
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-03 23:14:52
+* Last Modified time: 2017-02-15 12:26:28
 *----------------------------------------------------------------------------*/
 #include "graph.h"
 
@@ -17,12 +17,12 @@ namespace graph {
 //  construct(lattice);
 //}
 
-LatticeGraph::LatticeGraph(input::Parameters& parms) : lattice_(parms)
+LatticeGraph::LatticeGraph(const input::Parameters& parms) : lattice_(parms)
 {
   construct_graph();
 } 
 
-void LatticeGraph::construct(input::Parameters& parms) 
+void LatticeGraph::construct(const input::Parameters& parms) 
 {
   lattice_.construct(parms);
   construct_graph();

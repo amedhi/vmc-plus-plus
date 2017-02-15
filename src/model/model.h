@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:46
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-12 12:46:58
+* Last Modified time: 2017-02-15 20:35:12
 *----------------------------------------------------------------------------*/
 #ifndef MODEL_H
 #define MODEL_H
@@ -62,6 +62,7 @@ public:
   //const SiteBasis& site_basis(const unsigned& site_type) const { return basis_.at(site_type); }
   //unsigned sitebasis_dimension(const unsigned& site_type) const
   //{ return basis_.dimension(site_type); }
+  const bool& double_occupancy(void) const { return double_occupancy_; }
   const bool& has_siteterm(void) const { return has_siteterm_; }
   const bool& has_bondterm(void) const { return has_bondterm_; }
   const siteterm_iterator& siteterms_begin(void) const { return st_begin_; }
@@ -92,6 +93,7 @@ private:
   std::vector<HamiltonianTerm> bond_terms_;
   std::vector<HamiltonianTerm> site_terms_;
 
+  bool double_occupancy_{true};
   bool has_siteterm_{false};
   bool has_bondterm_{false};
   siteterm_iterator st_begin_;
