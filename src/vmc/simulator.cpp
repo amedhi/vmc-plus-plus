@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:20:56
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-16 13:15:43
+* Last Modified time: 2017-02-16 13:24:11
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "simulator.h"
@@ -23,6 +23,27 @@ Simulator::Simulator(const input::Parameters& parms)
   num_data_samples = parms.set_value("data_samples", 0);
   num_warmup_steps = parms.set_value("warmup_steps", 0);
   min_interval = parms.set_value("min_interval", 0);
+}
+
+int Simulator::run(const input::Parameters& parms)
+{
+  int stat = init_config();
+  if (stat != 0) return -1;
+  // run simulation
+  int num_measurement = 0;
+  int count = min_interval;
+  // warmup run
+  for (int n=0; n<num_warmup_steps; ++n) update_state();
+  // measuring run
+  while (num_measurement < num_data_samples) {
+    update_state();
+    if (count++ == min_interval) {
+      count = 0;
+      ++num_measurement;
+      do_measurements();
+    }
+  }
+  return 0;
 }
 
 int Simulator::init_config(void) 
@@ -63,26 +84,6 @@ int Simulator::init_config(void)
   return 0;
 }
 
-int Simulator::run(const input::Parameters& parms)
-{
-  int stat = init_config();
-  if (stat != 0) return -1;
-  // run simulation
-  int num_measurement = 0;
-  int count = min_interval;
-  // warmup run
-  for (int n=0; n<num_warmup_steps; ++n) update_state();
-  // measuring run
-  while (num_measurement < num_data_samples) {
-    update_state();
-    if (count++ == min_interval) {
-      count = 0;
-      ++num_measurement;
-      do_measurements();
-    }
-  }
-  return 0;
-}
 
 int Simulator::update_state(void)
 {

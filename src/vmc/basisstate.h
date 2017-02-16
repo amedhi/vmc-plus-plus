@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-13 10:16:02
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-16 13:02:55
+* Last Modified time: 2017-02-16 17:18:34
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef BASISSTATE_H
@@ -17,9 +17,9 @@
 
 namespace vmc {
 
-enum {MAX_SITES=1000};
-
 enum class spin {UP, DN};
+
+enum class move_type {upspin_hop, dnspin_hop, exchange, null};
 
 class SiteState : public std::bitset<2>
 {
@@ -38,8 +38,12 @@ public:
   void put_dnhole(const unsigned& n) {reset(spin_DN_); id_.second=n;} 
   const unsigned& upspin_id(void) const { return id_.first; }
   const unsigned& dnspin_id(void) const { return id_.second; }
+  const unsigned& uphole_id(void) const { return id_.first; }
+  const unsigned& dnhole_id(void) const { return id_.second; }
   bool have_upspin(void) const { return test(spin_UP_); }  
   bool have_dnspin(void) const { return test(spin_DN_); }  
+  bool have_uphole(void) const { return !test(spin_UP_); }  
+  bool have_dnhole(void) const { return !test(spin_DN_); }  
   bool is_full(void) const { return all(); }  
   bool is_empty(void) const { return none(); }  
   bool is_not_empty(void) const { return any(); }  
@@ -63,7 +67,8 @@ public:
   void init_spins(const unsigned& num_upspins, const unsigned& num_dnspins, 
     const bool& allow_dbloccupancy=true); 
   void set_random(void);
-  std::pair<int,int> random_upspin_hop(void);
+  const std::pair<int,int>& random_upspin_hop(void);
+  void accept_last_move(void);
   const std::vector<int>& upspin_sites(void) const { return upspin_pos_; }
   const std::vector<int>& dnspin_sites(void) const { return dnspin_pos_; }
   RandomGenerator& rng(void) const { return rng_; }
@@ -83,6 +88,14 @@ private:
   std::vector<int> dnspin_pos_;
   std::vector<int> uphole_pos_;
   std::vector<int> dnhole_pos_;
+
+  // update moves
+  move_type proposed_move;
+  move_type accepted_move;
+  std::pair<int,int> spin_site_pair;
+  std::pair<int,int> spin_spin_pair;
+  int move_hole;
+
   void clear(void); 
 };
 
