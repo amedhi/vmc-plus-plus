@@ -68,10 +68,6 @@ private:
 
   //std::vector<SiteBasisState> state;
   
-  // mc parameters
-  int measure_samples; 
-  int warmup;
-  int min_interval;
 
   // observables
   /*Observables observables;

@@ -3,8 +3,8 @@
 * Copyright (C) 2015-2015 by Amal Medhi <amedhi@iisertvm.ac.in>.
 * All rights reserved.
 * Date:   2015-08-17 13:33:19
-* Last Modified by:   amedhi
-* Last Modified time: 2015-09-28 22:48:00
+* Last Modified by:   Amal Medhi, amedhi@macbook
+* Last Modified time: 2017-02-16 11:10:43
 *----------------------------------------------------------------------------*/
 // File: scheduler.h 
 // Definition of the Scheduler class.
@@ -47,7 +47,7 @@ public:
   MasterScheduler(int argc, const char *argv[], const AbstractTask& theTask);
   //MasterScheduler(int argc, const char *argv[], const Task&);
   MasterScheduler() = delete;
-  ~MasterScheduler() {};
+  ~MasterScheduler() { delete [] theWorker; };
   int run(void) override;
 
 private:

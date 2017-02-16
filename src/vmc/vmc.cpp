@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:50
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-15 11:44:51
+* Last Modified time: 2017-02-16 11:05:12
 *----------------------------------------------------------------------------*/
 #include <iomanip>
 #include "vmc.h"
@@ -19,12 +19,8 @@ VMC::VMC(const input::Parameters& parms) : simulator(parms)
 
 int VMC::start(input::Parameters& parms) 
 {
-  // this function must be override
-  std::cout << "Simulator::start\n";
-  //lattice::Lattice lattice(parms);
-  //std::cout << "lattice: name = " << graph_.lattice().name() << "\n";
-  //std::cout << "lattice: num sites = " << graph_.lattice().num_sites() << "\n";
-
+  std::cout << "Simulator::run\n";
+  simulator.run(parms);
 
   return 0;
 }

@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-13 10:16:02
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-15 23:01:38
+* Last Modified time: 2017-02-16 13:02:55
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef BASISSTATE_H
@@ -60,26 +60,29 @@ public:
   ~BasisState() {} 
   void set_vaccuum(const unsigned& num_sites, const bool& allow_dbl=true);
   void allow_double_occupancy(const bool& allow);
-  void init_random(const unsigned& num_upspins, const unsigned& num_dnspins,
-    RandomGenerator& rng, const bool& allow_double_occupancy=true);
-  bool create_upspin(const unsigned& site);
-  bool create_dnspin(const unsigned& site);
-  void init(const unsigned& num_sites); 
-  void hop_upspin(const unsigned& i, const unsigned& s);
-  const std::vector<unsigned>& upspin_pos(void) const { return upspin_pos_; }
-  const std::vector<unsigned>& dnspin_pos(void) const { return dnspin_pos_; }
+  void init_spins(const unsigned& num_upspins, const unsigned& num_dnspins, 
+    const bool& allow_dbloccupancy=true); 
+  void set_random(void);
+  std::pair<int,int> random_upspin_hop(void);
+  const std::vector<int>& upspin_sites(void) const { return upspin_pos_; }
+  const std::vector<int>& dnspin_sites(void) const { return dnspin_pos_; }
+  RandomGenerator& rng(void) const { return rng_; }
   //const SiteState& upspin(unsigned)
   //bool annihilate(i,sigma);
   //bool hop(i,j,sigma);
   friend std::ostream& operator<<(std::ostream& os, const BasisState& bs);
 private:
-  enum {max_sites=1000};
+  mutable RandomGenerator rng_;
   unsigned num_sites_{0};
+  unsigned num_upspins_{0};
+  unsigned num_dnspins_{0};
+  unsigned num_upholes_{0};
+  unsigned num_dnholes_{0};
   bool double_occupancy_{true};
-  std::vector<unsigned> upspin_pos_;
-  std::vector<unsigned> dnspin_pos_;
-  std::vector<unsigned> uphole_pos_;
-  std::vector<unsigned> dnhole_pos_;
+  std::vector<int> upspin_pos_;
+  std::vector<int> dnspin_pos_;
+  std::vector<int> uphole_pos_;
+  std::vector<int> dnhole_pos_;
   void clear(void); 
 };
 
