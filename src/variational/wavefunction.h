@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 14:51:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-16 07:05:27
+* Last Modified time: 2017-02-16 22:11:06
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef WAVEFUNCTION_H
@@ -37,6 +37,10 @@ public:
   const unsigned& num_dnspins(void) const { return num_dnspins_; }
   void get_amplitudes(Matrix& psi, const std::vector<int>& row,  
     const std::vector<int>& col) const;
+  void get_amplitudes(ColVector& psi_vec, const int& irow,  
+    const std::vector<int>& col) const;
+  void get_amplitudes(RowVector& psi_vec, const std::vector<int>& row,
+    const int& icol) const;
 private:
   wf_type type_;
   MF_Model mf_model_;

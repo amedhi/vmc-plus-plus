@@ -29,6 +29,7 @@ J = 1.0
 # Variational wavefunction
 #---------------------------------------------
 mf_order = "DWAVE_SC"
+gutzwiller_proj = "YES"
 x = 0.2
 g = 1.0
 delta_sc = 1.0
@@ -44,7 +45,7 @@ Magnetization = "No"
 #---------------------------------------------
 # Monte Carlo parameters
 #---------------------------------------------
-rng_seed = 1  # (=0 No seed, >0 time_seed)
+rng_seed = 0  # (=0 No seed, >0 time_seed)
 data_samples = 100
 warmup_steps = 100
 min_interval = 5

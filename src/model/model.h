@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:46
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-16 11:11:07
+* Last Modified time: 2017-02-16 22:32:49
 *----------------------------------------------------------------------------*/
 #ifndef MODEL_H
 #define MODEL_H
@@ -57,6 +57,7 @@ public:
     { constants_.insert({cname, val}); return constants_.size(); }
   unsigned add_siteterm(const CouplingConstant& cc, const op::quantum_op& op);
   unsigned add_bondterm(const CouplingConstant& cc, const op::quantum_op& op);
+  void set_no_dbloccupancy(void) { double_occupancy_=false; }
 
   //const BasisDescriptor& basis(void) const { return basis_; }
   //const SiteBasis& site_basis(const unsigned& site_type) const { return basis_.at(site_type); }

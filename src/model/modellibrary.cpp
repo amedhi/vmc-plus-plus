@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-11 13:02:35
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-06 12:39:23
+* Last Modified time: 2017-02-16 22:32:53
 *----------------------------------------------------------------------------*/
 #include <cmath>
 #include "model.h"
@@ -42,6 +42,7 @@ int Hamiltonian::define_model(const input::Parameters& inputs, const lattice::La
 
   else if (model_name == "T-J") {
     mid = model_id::tJ;
+    set_no_dbloccupancy();
     // model parameters
     add_parameter(name="t", defval=1.0, inputs);
     add_parameter(name="J", defval=0.0, inputs);

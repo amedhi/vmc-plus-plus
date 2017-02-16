@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-13 10:16:02
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-16 17:18:34
+* Last Modified time: 2017-02-16 23:58:37
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef BASISSTATE_H
@@ -68,9 +68,12 @@ public:
     const bool& allow_dbloccupancy=true); 
   void set_random(void);
   const std::pair<int,int>& random_upspin_hop(void);
+  const std::pair<int,int>& random_dnspin_hop(void);
+  const int& dblocc_count(void) const { return num_dblocc_sites_; }
+  const int& dblocc_increament(void) const { return dblocc_increament_; }
   void accept_last_move(void);
-  const std::vector<int>& upspin_sites(void) const { return upspin_pos_; }
-  const std::vector<int>& dnspin_sites(void) const { return dnspin_pos_; }
+  const std::vector<int>& upspin_sites(void) const { return upspin_sites_; }
+  const std::vector<int>& dnspin_sites(void) const { return dnspin_sites_; }
   RandomGenerator& rng(void) const { return rng_; }
   //const SiteState& upspin(unsigned)
   //bool annihilate(i,sigma);
@@ -83,11 +86,12 @@ private:
   unsigned num_dnspins_{0};
   unsigned num_upholes_{0};
   unsigned num_dnholes_{0};
+  int num_dblocc_sites_{0};
   bool double_occupancy_{true};
-  std::vector<int> upspin_pos_;
-  std::vector<int> dnspin_pos_;
-  std::vector<int> uphole_pos_;
-  std::vector<int> dnhole_pos_;
+  std::vector<int> upspin_sites_;
+  std::vector<int> dnspin_sites_;
+  std::vector<int> uphole_sites_;
+  std::vector<int> dnhole_sites_;
 
   // update moves
   move_type proposed_move;
@@ -95,6 +99,7 @@ private:
   std::pair<int,int> spin_site_pair;
   std::pair<int,int> spin_spin_pair;
   int move_hole;
+  int dblocc_increament_{0};
 
   void clear(void); 
 };
