@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:19:36
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-16 23:53:07
+* Last Modified time: 2017-02-17 11:27:24
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef SIMULATOR_H
@@ -39,17 +39,32 @@ private:
   Matrix psi_inv;
   ColVector psi_row;
   RowVector psi_col;
-  unsigned num_sites;
-  unsigned num_upspins;
-  unsigned num_dnspins;
+  unsigned num_sites_;
+  unsigned num_upspins_;
+  unsigned num_dnspins_;
 
   // mc parameters
-  int num_data_samples; 
-  int num_warmup_steps;
-  int min_interval;
+  enum move_t {uphop, dnhop, exch, end};
+  int num_measure_steps_{0}; 
+  int num_warmup_steps_{0};
+  int min_interval_{0};
+  int max_interval_{0};
+  int num_updates_{0};
+  //int num_total_steps_{0};
+  int num_uphop_moves_{0};
+  int num_dnhop_moves_{0};
+  int num_exchange_moves_{0};
+  int refresh_cycle_{100};
+  long num_proposed_moves_[move_t::end];
+  long num_accepted_moves_[move_t::end];
+  long last_proposed_moves_;
+  long last_accepted_moves_;
 
   // helper methods
   int update_state(void);
+  int set_run_parameters(void);
+  double accept_ratio(void);
+  void reset_accept_ratio(void);
   int do_upspin_hop(void);
   int do_dnspin_hop(void);
   int do_measurements(void);

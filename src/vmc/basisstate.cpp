@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-13 10:20:28
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-17 00:00:12
+* Last Modified time: 2017-02-17 09:33:33
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "basisstate.h"
@@ -149,7 +149,8 @@ void BasisState::set_random(void)
       dh++;
     }
   }
-  // in addition, in case of 'no double occupancy':
+  // in addition, in case of 'no double occupancy' 
+  // (put block on singly occupied sites):
   if (!double_occupancy_) {
     for (unsigned i=0; i<num_upspins_; ++i) {
       if (operator[](uphole_sites_[i]).have_dnspin())
@@ -183,12 +184,14 @@ const std::pair<int,int>& BasisState::random_upspin_hop(void)
   move_hole = rng_.random_uphole();
   //std::cout << " rng test = " << spin_site_pair.first << "\n";
   spin_site_pair.second = uphole_sites_[move_hole]; 
-  if (spin_site_pair.second < 0) 
-    proposed_move=move_type::null;
+  if (spin_site_pair.second < 0) {
+    proposed_move = move_type::null;
+    dblocc_increament_ = 0;
+  }
   else {
     proposed_move=move_type::upspin_hop;
     // double occupancy count
-    dblocc_increament_=operator[](spin_site_pair.second).count(); // must be 0 or 1
+    dblocc_increament_ = operator[](spin_site_pair.second).count(); // must be 0 or 1
     if (operator[](upspin_sites_[spin_site_pair.first]).count() == 2)
       dblocc_increament_--;
   }
@@ -200,12 +203,14 @@ const std::pair<int,int>& BasisState::random_dnspin_hop(void)
   spin_site_pair.first = rng_.random_dnspin();
   move_hole = rng_.random_dnhole();
   spin_site_pair.second = dnhole_sites_[move_hole]; 
-  if (spin_site_pair.second < 0) 
-    proposed_move=move_type::null;
+  if (spin_site_pair.second < 0) {
+    proposed_move = move_type::null;
+    dblocc_increament_ = 0;
+  }
   else {
     proposed_move=move_type::dnspin_hop;
     // double occupancy count
-    dblocc_increament_=operator[](spin_site_pair.second).count(); // must be 0 or 1
+    dblocc_increament_ = operator[](spin_site_pair.second).count(); // must be 0 or 1
     if (operator[](dnspin_sites_[spin_site_pair.first]).count() == 2)
       dblocc_increament_--;
   }

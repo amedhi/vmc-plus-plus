@@ -23,7 +23,7 @@ bc2 = "antiperiodic"
 #---------------------------------------------
 model = "t-J"
 t = 1.0
-J = 1.0
+J = 0.35
 
 #---------------------------------------------
 # Variational wavefunction
@@ -46,10 +46,10 @@ Magnetization = "No"
 # Monte Carlo parameters
 #---------------------------------------------
 rng_seed = 0  # (=0 No seed, >0 time_seed)
-data_samples = 100
+measure_steps = 100
 warmup_steps = 100
-min_interval = 5
-max_interval = 20
+min_interval = 2
+max_interval = 5
 
 
 
