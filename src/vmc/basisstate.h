@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-13 10:16:02
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-16 23:58:37
+* Last Modified time: 2017-02-17 21:43:24
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef BASISSTATE_H
@@ -19,7 +19,7 @@ namespace vmc {
 
 enum class spin {UP, DN};
 
-enum class move_type {upspin_hop, dnspin_hop, exchange, null};
+enum class move_t {upspin_hop, dnspin_hop, exchange, null};
 
 class SiteState : public std::bitset<2>
 {
@@ -67,8 +67,10 @@ public:
   void init_spins(const unsigned& num_upspins, const unsigned& num_dnspins, 
     const bool& allow_dbloccupancy=true); 
   void set_random(void);
-  const std::pair<int,int>& random_upspin_hop(void);
-  const std::pair<int,int>& random_dnspin_hop(void);
+  std::pair<int,int> gen_upspin_hop(void);
+  std::pair<int,int> gen_dnspin_hop(void);
+  std::pair<int,int> gen_exchange_move(void);
+  std::pair<int,int> exchange_move_part(void);
   const int& dblocc_count(void) const { return num_dblocc_sites_; }
   const int& dblocc_increament(void) const { return dblocc_increament_; }
   void accept_last_move(void);
@@ -88,18 +90,22 @@ private:
   unsigned num_dnholes_{0};
   int num_dblocc_sites_{0};
   bool double_occupancy_{true};
+  int site_capacity_{2};
   std::vector<int> upspin_sites_;
   std::vector<int> dnspin_sites_;
   std::vector<int> uphole_sites_;
   std::vector<int> dnhole_sites_;
 
   // update moves
-  move_type proposed_move;
-  move_type accepted_move;
-  std::pair<int,int> spin_site_pair;
-  std::pair<int,int> spin_spin_pair;
-  int move_hole;
+  move_t proposed_move_;
   int dblocc_increament_{0};
+  //move_type accepted_move;
+  int mv_upspin_;
+  int mv_uphole_;
+  int up_tosite_;
+  int mv_dnspin_;
+  int mv_dnhole_;
+  int dn_tosite_;
 
   void clear(void); 
 };

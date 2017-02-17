@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-16 22:07:34
+* Last Modified time: 2017-02-17 21:40:13
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "wavefunction.h"
@@ -119,6 +119,12 @@ void Wavefunction::get_amplitudes(RowVector& psi_vec, const std::vector<int>& ro
 {
   for (int j=0; j<row.size(); ++j)
     psi_vec[j] = psi_up_(row[j],icol);
+}
+
+void Wavefunction::get_amplitudes(amplitude_t& elem, const int& irow, 
+  const int& jcol) const
+{
+  elem = psi_up_(irow,jcol);
 }
 
 } // end namespace var

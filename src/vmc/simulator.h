@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:19:36
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-17 11:27:24
+* Last Modified time: 2017-02-17 22:38:54
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef SIMULATOR_H
@@ -39,6 +39,7 @@ private:
   Matrix psi_inv;
   ColVector psi_row;
   RowVector psi_col;
+  RowVector inv_row;
   unsigned num_sites_;
   unsigned num_upspins_;
   unsigned num_dnspins_;
@@ -67,6 +68,11 @@ private:
   void reset_accept_ratio(void);
   int do_upspin_hop(void);
   int do_dnspin_hop(void);
+  int do_spin_exchange(void);
+  int inv_update_upspin(const int& upspin, const ColVector& psi_row, 
+    const amplitude_t& det_ratio);
+  int inv_update_dnspin(const int& dnspin, const RowVector& psi_col, 
+    const amplitude_t& det_ratio);
   int do_measurements(void);
 };
 

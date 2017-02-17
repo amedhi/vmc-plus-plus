@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 14:51:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-16 22:11:06
+* Last Modified time: 2017-02-17 21:39:22
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef WAVEFUNCTION_H
@@ -41,6 +41,7 @@ public:
     const std::vector<int>& col) const;
   void get_amplitudes(RowVector& psi_vec, const std::vector<int>& row,
     const int& icol) const;
+  void get_amplitudes(amplitude_t& elem, const int& irow, const int& jcol) const;
 private:
   wf_type type_;
   MF_Model mf_model_;
