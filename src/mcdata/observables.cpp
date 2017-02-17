@@ -10,38 +10,26 @@ namespace mc {
 
 Observables::Observables() 
   : energy_("Energy")
-  , energy_sq_("Energy^2")
-  , magn_("Magnetization")
-  , magn_sq_("Magnetization^2")
-  , potts_magn_("PottsMagn")
-  , potts_magn_sq_("PottsMagn^2")
-  , strain_("Strain")
-  , strain_sq_("Strain^2")
-  , energy_terms_("EnergyTerms")
-  , energy_terms_sq_("EnergyTerms^2")
+  //, energy_sq_("Energy^2")
+  //, magn_("Magnetization")
+  //, magn_sq_("Magnetization^2")
 {
   push_back(energy_);
-  push_back(energy_sq_);
-  push_back(magn_);
-  push_back(magn_sq_);
-  push_back(potts_magn_);
-  push_back(potts_magn_sq_);
-  push_back(strain_);
-  push_back(strain_sq_);
-  push_back(energy_terms_);
-  push_back(energy_terms_sq_);
+  //push_back(energy_sq_);
+  //push_back(magn_);
+  //push_back(magn_sq_);
 }
 
-void Observables::init(input::Parameters& parms, const model::Model& model,
+void Observables::init(const input::Parameters& parms, const model::Hamiltonian& model,
   void (&print_copyright)(std::ostream& os))
 {
   // energy_terms details 
   std::vector<std::string> elem_names;
   model.get_term_names(elem_names);
-  energy_terms_.set_elements(elem_names.size(), elem_names);
+  energy_.set_elements(elem_names.size(), elem_names);
   // energy_terms_sq details 
-  for (auto& name : elem_names) name += "2";
-  energy_terms_sq_.set_elements(elem_names.size(), elem_names);
+  //for (auto& name : elem_names) name += "2";
+  //energy_terms_sq_.set_elements(elem_names.size(), elem_names);
 
   // actual init of observables
   for (auto& obs : *this) {
@@ -87,14 +75,14 @@ void Observables::as_function_of(const std::string& xparm_name)
 void Observables::print(const std::map<std::string, double> xparms) 
 {
   if (xparms.size() != num_xparms_) 
-    throw std::range_error("Observables::print: 'x-parameters' size mismatch");
+    throw std::range_error("* Observables::print: 'x-parameters' size mismatch");
   for (auto& obs : *this) obs.get().print_result(xparms); 
 }
 
 void Observables::print(const double& xparm_val) 
 {
   if (num_xparms_ != 1) 
-    throw std::range_error("Observables::print: no 'x-parameter' was set initially");
+    throw std::range_error("* Observables::print: no 'x-parameter' was set initially");
   single_xparm_.begin()->second = xparm_val;
   for (auto& obs : *this) obs.get().print_result(single_xparm_); 
 }
@@ -102,7 +90,7 @@ void Observables::print(const double& xparm_val)
 int ScalarObservable::print_heading(const std::map<std::string, double> xparms) 
 {
   if (!is_on()) return 1;
-  if (!fs_) throw std::runtime_error("ScalarObservable::print_heading: file not open");
+  if (!fs_) throw std::runtime_error("* ScalarObservable::print_heading: file not open");
   fs_ << "# Results: " << name() << "\n";
   fs_ << "#" << std::string(72, '-') << "\n";
   fs_ << std::left;
@@ -122,7 +110,7 @@ int ScalarObservable::print_heading(const std::map<std::string, double> xparms)
 int ScalarObservable::print_result(const std::map<std::string, double> xparms) 
 {
   if (!is_on()) return 1;
-  if (!fs_) throw std::runtime_error("ScalarObservable::print: file not open");
+  if (!fs_) throw std::runtime_error("* ScalarObservable::print: file not open");
   fs_ << std::right;
   fs_ << std::scientific << std::uppercase << std::setprecision(6);
   for (const auto& p : xparms) 
@@ -135,7 +123,7 @@ int ScalarObservable::print_result(const std::map<std::string, double> xparms)
 int VectorObservable::print_heading(const std::map<std::string, double> xparms) 
 {
   if (!is_on()) return 1;
-  if (!fs_) throw std::runtime_error("VectorObservable::print_heading: file not open");
+  if (!fs_) throw std::runtime_error("* VectorObservable::print_heading: file not open");
   fs_ << "# Results: " << name() << "\n";
   fs_ << "#" << std::string(72, '-') << "\n";
   fs_ << "# ";
@@ -153,7 +141,7 @@ int VectorObservable::print_heading(const std::map<std::string, double> xparms)
 int VectorObservable::print_result(const std::map<std::string, double> xparms) 
 {
   if (!is_on()) return 1;
-  if (!fs_) throw std::runtime_error("VectorObservable::print: file not open");
+  if (!fs_) throw std::runtime_error("* VectorObservable::print: file not open");
   fs_ << std::right;
   fs_ << std::scientific << std::uppercase << std::setprecision(6);
   for (const auto& p : xparms) 
@@ -165,7 +153,7 @@ int VectorObservable::print_result(const std::map<std::string, double> xparms)
   return 0;
 } 
 
-void ObservableBase::init(input::Parameters& parms)
+void ObservableBase::init(const input::Parameters& parms)
 {
   int no_warn;
   onoff_ = parms.set_value(name(), false, no_warn);
@@ -185,16 +173,16 @@ void ObservableBase::init(input::Parameters& parms)
   }
 } 
 
-void ScalarObservable::init(input::Parameters& parms)
+void ScalarObservable::init(const input::Parameters& parms)
 {
   ObservableBase::init(parms);
   if (is_on()) data_.init(name());
 } 
 
-void VectorObservable::init(input::Parameters& parms)
+void VectorObservable::init(const input::Parameters& parms)
 {
   if (size_==0) 
-    throw std::logic_error("VectorObservable::init: can't initialize zero size observable");
+    throw std::logic_error("* VectorObservable::init: can't initialize zero size observable");
   ObservableBase::init(parms);
   if (is_on()) data_.init(name(),size_);
 } 

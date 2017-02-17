@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:20:56
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-17 22:41:24
+* Last Modified time: 2017-02-17 23:31:09
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "simulator.h"
@@ -25,6 +25,9 @@ Simulator::Simulator(const input::Parameters& parms)
   num_warmup_steps_ = parms.set_value("warmup_steps", 0);
   min_interval_ = parms.set_value("min_interval", 0);
   max_interval_ = parms.set_value("max_interval", 0);
+
+  // observables
+  observables_.init(parms, model, print_copyright);
 }
 
 int Simulator::run(const input::Parameters& parms)
@@ -37,6 +40,7 @@ int Simulator::run(const input::Parameters& parms)
   // warmup run
   for (int n=0; n<num_warmup_steps_; ++n) update_state();
   // measuring run
+  observables_.reset();
   while (num_measurement < num_measure_steps_) {
     update_state();
     if (count >= min_interval_) {
@@ -285,16 +289,17 @@ void Simulator::reset_accept_ratio(void)
   last_accepted_moves_ = 0;
 }
 
-int Simulator::do_measurements(void)
+void Simulator::print_copyright(std::ostream& os)
 {
-  return 0;
+  os << "#" << std::string(72,'-') << "\n";
+  os << "#" << " Program: VMC Simulation\n";
+  os << "#" << "          (c) Amal Medhi <amedhi@iisertvm.ac.in>\n";
+  os << "#" << std::string(72,'-') << "\n";
 }
 
-} // end namespace simulator
 
 
-
-
+} // end namespace vmc
 
 
 

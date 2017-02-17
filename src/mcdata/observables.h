@@ -13,12 +13,10 @@
 #include <stdexcept>
 #include <fstream>
 #include <iomanip>
-#include <Eigen/Core>
-#include "../scheduler/inputparams.h"
+#include "../scheduler/task.h"
 #include "../lattice/lattice.h"
 #include "../model/model.h"
-#include "mcdata.h"
-//#include "observable_operator.h"
+#include "./mcdata.h"
 
 namespace mc {
 
@@ -30,7 +28,7 @@ class ObservableBase
 public:
   ObservableBase(const std::string& name) : name_{name} {}
   ~ObservableBase() { fs_.close(); }
-  virtual void init(input::Parameters& parms); 
+  virtual void init(const input::Parameters& parms); 
   virtual void reset(void) {}
   virtual int print_heading(const std::map<std::string, double> xparms) { return -1; }
   virtual int print_result(const std::map<std::string, double> xparms) { return -1; }
@@ -54,7 +52,7 @@ class ScalarObservable : public ObservableBase
 public:
   ScalarObservable(const std::string& name) : ObservableBase(name) {}
   ~ScalarObservable() {}
-  void init(input::Parameters& parms) override; 
+  void init(const input::Parameters& parms) override; 
   inline void operator<<(const double& data) { data_ << data; }
   int print_heading(const std::map<std::string, double> xparms) override;
   int print_result(const std::map<std::string, double> xparms) override;
@@ -72,7 +70,7 @@ public:
   ~VectorObservable() {}
   void set_elements(const unsigned& size, const std::vector<std::string>& elem_names)
     { size_=size; elem_names_=elem_names; }
-  void init(input::Parameters& parms) override; 
+  void init(const input::Parameters& parms) override; 
   inline void operator<<(const VectorData& data) { data_ << data; }
   int print_heading(const std::map<std::string, double> xparms) override;
   int print_result(const std::map<std::string, double> xparms) override;
@@ -90,18 +88,12 @@ class Observables : public std::vector<std::reference_wrapper<ObservableBase> >
 public:
   Observables();
   ~Observables() {}
-  void init(input::Parameters& parms, const model::Model& model, 
+  void init(const input::Parameters& parms, const model::Hamiltonian& model, 
     void (&print_copyright)(std::ostream& os));
-  inline ScalarObservable& energy(void) { return energy_; }
-  inline ScalarObservable& energy_sq(void) { return energy_sq_; }
-  inline ScalarObservable& magn(void) { return magn_; }
-  inline ScalarObservable& magn_sq(void) { return magn_sq_; }
-  inline ScalarObservable& potts_magn(void) { return potts_magn_; }
-  inline ScalarObservable& potts_magn_sq(void) { return potts_magn_sq_; }
-  inline ScalarObservable& strain(void) { return strain_; }
-  inline ScalarObservable& strain_sq(void) { return strain_sq_; }
-  inline VectorObservable& energy_terms(void) { return energy_terms_; }
-  inline VectorObservable& energy_terms_sq(void) { return energy_terms_sq_; }
+  //inline ScalarObservable& magn(void) { return magn_; }
+  //inline ScalarObservable& magn_sq(void) { return magn_sq_; }
+  inline VectorObservable& energy(void) { return energy_; }
+  //inline VectorObservable& energy_sq(void) { return energy_sq_; }
   void reset(void) { for (auto& obs : *this) obs.get().reset(); }
   //inline SiteObsOperator& magn_op(void) { return magn_op_; } 
   //inline SiteObsOperator& potts_magn_op(void) { return potts_magn_op_; } 
@@ -114,24 +106,13 @@ public:
   void print(const std::map<std::string, double> xparms); 
   void print(const double& xparm_val);
 private:
-  ScalarObservable energy_;
-  ScalarObservable energy_sq_;
-  ScalarObservable magn_;
-  ScalarObservable magn_sq_;
-  ScalarObservable potts_magn_;
-  ScalarObservable potts_magn_sq_;
-  ScalarObservable strain_;
-  ScalarObservable strain_sq_;
-  VectorObservable energy_terms_;
-  VectorObservable energy_terms_sq_;
-  //SiteObsOperator magn_op_;
-  //SiteObsOperator potts_magn_op_;
-  //SiteObsOperator strain_op_;
-  //model::BasisDescriptor basis_;
+  //ScalarObservable magn_;
+  //ScalarObservable magn_sq_;
+  VectorObservable energy_;
+  //VectorObservable energy_sq_;
   unsigned num_xparms_{0};
   std::map<std::string, double> single_xparm_;
 };
-
 
 
 } // end namespace mc

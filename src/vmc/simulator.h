@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:19:36
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-17 22:38:54
+* Last Modified time: 2017-02-17 23:21:44
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef SIMULATOR_H
@@ -15,6 +15,7 @@
 #include "../variational/wavefunction.h"
 #include "../variational/projector.h"
 #include "../variational/matrix.h"
+#include "../mcdata/observables.h"
 #include "./random.h"
 #include "./basisstate.h"
 
@@ -29,6 +30,7 @@ public:
   ~Simulator() {}
   int init_config(void);
   int run(const input::Parameters& parms);
+  static void print_copyright(std::ostream& os);
 private:
   lattice::graph::LatticeGraph graph;
   model::Hamiltonian model;
@@ -43,6 +45,10 @@ private:
   unsigned num_sites_;
   unsigned num_upspins_;
   unsigned num_dnspins_;
+
+  // observables
+  mc::Observables observables_;
+  //mc::VectorData energy_;
 
   // mc parameters
   enum move_t {uphop, dnhop, exch, end};

@@ -19,9 +19,6 @@ SRCS+= expression/objects.cpp
 SRCS+= lattice/lattice.cpp
 SRCS+= lattice/latticelibrary.cpp
 SRCS+= lattice/graph.cpp
-#SRCS+= model/qn.cpp
-#SRCS+= model/quantum_operator.cpp
-#SRCS+= model/sitebasis.cpp
 SRCS+= model/hamiltonian_term.cpp
 SRCS+= model/model.cpp
 SRCS+= model/modellibrary.cpp
@@ -30,12 +27,12 @@ SRCS+= variational/mf_model.cpp
 SRCS+= variational/bcsfunction.cpp
 SRCS+= variational/wavefunction.cpp
 SRCS+= variational/projector.cpp
-#SRCS+= observable/observables.cpp
-#SRCS+= montecarlo/observable_operator.cpp
+SRCS+= mcdata/observables.cpp
 #SRCS+= montecarlo/measurement.cpp
 SRCS+= vmc/random.cpp
 SRCS+= vmc/basisstate.cpp
 SRCS+= vmc/simulator.cpp
+SRCS+= vmc/measurement.cpp
 SRCS+= vmc/vmc.cpp
 SRCS+= main.cpp
 VMC_SRCS = $(addprefix src/,$(SRCS))
@@ -54,6 +51,7 @@ HDRS=scheduler/optionparser.h scheduler/cmdargs.h \
 	 variational/blochbasis.h \
 	 variational/mf_model.h variational/wavefunction.h \
 	 variational/projector.h \
+	 mcdata/mcdata.h mcdata/observables.h \
 	 vmc/random.h \
 	 vmc/basisstate.h \
 	 vmc/simulator.h \
