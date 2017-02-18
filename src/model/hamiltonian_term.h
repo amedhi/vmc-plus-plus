@@ -63,7 +63,7 @@ class HamiltonianTerm
 {
 public:
   //using BondSiteMap = std::map<unsigned, std::pair<unsigned, unsigned> >;
-  HamiltonianTerm(const op::quantum_op& op, const CouplingConstant& cc, 
+  HamiltonianTerm(const std::string& name, const op::quantum_op& op, const CouplingConstant& cc, 
     const unsigned& size);
   ~HamiltonianTerm() {}
   void eval_coupling_constant(const ModelParams& cvals, const ModelParams& pvals);
@@ -72,7 +72,9 @@ public:
     { return is_defined_[operand_type]; }
   const double& coupling(const unsigned& operand_type) const
     { return cc_values_[operand_type]; }
+  const std::string& name(void) const { return name_; }
 private:
+  std::string name_;
   op::quantum_op op_;
   CouplingConstant cc_;
   unsigned max_operand_types_;

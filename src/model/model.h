@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:46
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-16 22:32:49
+* Last Modified time: 2017-02-18 07:46:14
 *----------------------------------------------------------------------------*/
 #ifndef MODEL_H
 #define MODEL_H
@@ -55,8 +55,8 @@ public:
   double get_parameter_value(const std::string& pname) const;
   unsigned add_constant(const std::string& cname, const double& val) 
     { constants_.insert({cname, val}); return constants_.size(); }
-  unsigned add_siteterm(const CouplingConstant& cc, const op::quantum_op& op);
-  unsigned add_bondterm(const CouplingConstant& cc, const op::quantum_op& op);
+  unsigned add_siteterm(const std::string& name, const CouplingConstant& cc, const op::quantum_op& op);
+  unsigned add_bondterm(const std::string& name, const CouplingConstant& cc, const op::quantum_op& op);
   void set_no_dbloccupancy(void) { double_occupancy_=false; }
 
   //const BasisDescriptor& basis(void) const { return basis_; }
@@ -78,6 +78,7 @@ public:
   unsigned num_bondterms(void) const { return bond_terms_.size(); }
   unsigned num_total_terms(void) const 
     { return site_terms_.size()+bond_terms_.size(); }
+  unsigned num_terms(void) const { return term_names_.size(); }
   void get_term_names(std::vector<std::string>& term_names) const;
   std::ostream& print_info(std::ostream& os) const { return os << info_str_.str(); }
   //const BondTerm::BondSiteMap& bond_sites_map(void) const { return bond_sites_map_; }
@@ -93,6 +94,8 @@ private:
   //BondTerm::BondSiteMap bond_sites_map_;  
   std::vector<HamiltonianTerm> bond_terms_;
   std::vector<HamiltonianTerm> site_terms_;
+  // term names (ignoring spin index)
+  std::map<op_id,std::string> term_names_;
 
   bool double_occupancy_{true};
   bool has_siteterm_{false};

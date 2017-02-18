@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-12 12:48:35
+* Last Modified time: 2017-02-18 07:01:13
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "mf_model.h"
@@ -51,18 +51,18 @@ void MF_Model::define_model(const input::Parameters& inputs, const lattice::grap
     order_ = mf_order::none;
     pairing_type_ = false;
     add_parameter(name="t", defval=1.0, inputs);
-    add_bondterm(cc="-t", op::upspin_hop());
-    add_siteterm(cc="-mu", op::ni_up());
+    add_bondterm(name="hopping", cc="-t", op::upspin_hop());
+    add_siteterm(name="mu_term", cc="-mu", op::ni_up());
   }
   else if (order_name == "DWAVE_SC") {
     order_ = mf_order::dsc;
     pairing_type_ = true;
     add_parameter(name="t", defval=1.0, inputs);
     add_parameter(name="delta_sc", defval=1.0, inputs);
-    add_bondterm(cc="-t", op::upspin_hop());
-    add_siteterm(cc="-mu", op::ni_up());
+    add_bondterm(name="hopping", cc="-t", op::upspin_hop());
+    add_siteterm(name="mu_term", cc="-mu", op::ni_up());
     cc = CouplingConstant({0, "delta_sc"}, {1, "-delta_sc"});
-    add_bondterm(cc, op::pair_create());
+    add_bondterm(name="pairing", cc, op::pair_create());
     make_variational({"delta_sc"});
   }
   else if (order_name == "SWAVE_SC") {

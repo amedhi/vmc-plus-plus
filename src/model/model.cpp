@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:50
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-12 12:43:41
+* Last Modified time: 2017-02-18 07:43:44
 *----------------------------------------------------------------------------*/
 #include "model.h"
 
@@ -38,7 +38,8 @@ unsigned Hamiltonian::add_sitebasis(const unsigned& type, SiteBasis& sitebasis)
 */
 
 
-unsigned Hamiltonian::add_siteterm(const CouplingConstant& cc, const op::quantum_op& op)
+unsigned Hamiltonian::add_siteterm(const std::string& name, const CouplingConstant& cc, 
+  const op::quantum_op& op)
 {
   // remap site type values in 'cc'
   CouplingConstant cc_remapped = cc;
@@ -63,11 +64,12 @@ unsigned Hamiltonian::add_siteterm(const CouplingConstant& cc, const op::quantum
     }
   }
   unsigned num_sitetypes = sitetypes_map_.size();
-  this->site_terms_.push_back(HamiltonianTerm(op, cc_remapped, num_sitetypes));
+  this->site_terms_.push_back(HamiltonianTerm(name,op,cc_remapped,num_sitetypes));
   return this->site_terms_.size();
 }
 
-unsigned Hamiltonian::add_bondterm(const CouplingConstant& cc, const op::quantum_op& op)
+unsigned Hamiltonian::add_bondterm(const std::string& name, const CouplingConstant& cc,
+  const op::quantum_op& op)
 {
   // remap bond type values in 'cc'
   CouplingConstant cc_remapped = cc;
@@ -92,7 +94,7 @@ unsigned Hamiltonian::add_bondterm(const CouplingConstant& cc, const op::quantum
     }
   }
   unsigned num_bondtypes = bondtypes_map_.size();
-  bond_terms_.push_back(HamiltonianTerm(op, cc_remapped, num_bondtypes));
+  bond_terms_.push_back(HamiltonianTerm(name, op, cc_remapped, num_bondtypes));
   return bond_terms_.size();
 }
 
@@ -104,7 +106,6 @@ int Hamiltonian::finalize(const lattice::Lattice& L)
     if (basis_.find(site_type) == basis_.end()) 
       throw std::range_error("modellibrary:: 'sitebasis' not defined for all 'site type'-s");
   }*/
-
   // finalize the site terms
   for (auto it=site_terms_.begin(); it!=site_terms_.end(); ++it) {
     it->eval_coupling_constant(constants_, parms_); 
@@ -119,8 +120,13 @@ int Hamiltonian::finalize(const lattice::Lattice& L)
   has_bondterm_ = (bond_terms_.size()>0);
   bt_begin_ = bond_terms_.cbegin();
   bt_end_ = bond_terms_.cend();
-
-
+  // term names (ignoring spin index)
+  term_names_.clear();
+  for (auto it=bond_terms_.cbegin(); it!= bond_terms_.cend(); ++it) 
+    term_names_.insert({it->qn_operator().id(),it->name()}); 
+  for (auto it=site_terms_.cbegin(); it!= site_terms_.cend(); ++it) 
+    term_names_.insert({it->qn_operator().id(),it->name()}); 
+  // info string
   set_info_string(L);
   return 0;
 }
@@ -166,10 +172,12 @@ double Hamiltonian::get_parameter_value(const std::string& pname) const
 void Hamiltonian::get_term_names(std::vector<std::string>& term_names) const
 {
   term_names.clear();
-  for (auto it=bond_terms_.cbegin(); it!= bond_terms_.cend(); ++it) 
+  for (const auto& elem : term_names_) term_names.push_back(elem.second);
+  /*for (auto it=bond_terms_.cbegin(); it!= bond_terms_.cend(); ++it) 
     term_names.push_back(it->qn_operator().name());
   for (auto it=site_terms_.cbegin(); it!= site_terms_.cend(); ++it) 
     term_names.push_back(it->qn_operator().name());
+   */
 }
 
 void Hamiltonian::set_info_string(const lattice::Lattice& L) 
