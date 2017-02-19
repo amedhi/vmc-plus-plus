@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 19:03:43
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-18 07:15:01
+* Last Modified time: 2017-02-18 22:12:37
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef QUANTUM_OP_H
@@ -12,10 +12,11 @@
 
 namespace model {
 
-enum class spin { UP, DN, UD };
+enum class spin { UP, DN, UD, SIGMA, SINGLET };
 
 enum class op_id {
-  ni_sigma, ni, cdagc_sigma, sisj, sisj_plus, niup_nidn, cdagup_cdagdn, null
+  ni_sigma, ni, cdagc_up, cdagc_dn, cdagc_sigma, sisj, sisj_plus, 
+  niup_nidn, cdagup_cdagdn, null
 };
 
 enum class op_type { quadratic, pairing, quartic };
@@ -35,6 +36,10 @@ public:
         break;
       case spin::DN:
         spin_up_ = false;
+        spin_dn_ = true;
+        break;
+      case spin::SIGMA:
+        spin_up_ = true;
         spin_dn_ = true;
         break;
       default:
@@ -94,22 +99,28 @@ public:
   ni_dn() : quantum_op("ni_dn", op_id::ni_sigma, spin::DN, op_type::quadratic) {}
 };
 
+class spin_hop : public quantum_op
+{
+public:
+  spin_hop() : quantum_op("spin_hop", op_id::cdagc_sigma, spin::SIGMA, op_type::quadratic) {}
+};
+
 class upspin_hop : public quantum_op
 {
 public:
-  upspin_hop() : quantum_op("upspin_hop", op_id::cdagc_sigma, spin::UP, op_type::quadratic) {}
+  upspin_hop() : quantum_op("upspin_hop", op_id::cdagc_up, spin::UP, op_type::quadratic) {}
 };
 
 class dnspin_hop : public quantum_op
 {
 public:
-  dnspin_hop() : quantum_op("dnspin_hop", op_id::cdagc_sigma, spin::DN, op_type::quadratic) {}
+  dnspin_hop() : quantum_op("dnspin_hop", op_id::cdagc_dn, spin::DN, op_type::quadratic) {}
 };
 
 class pair_create : public quantum_op
 {
 public:
-  pair_create() : quantum_op("pair_creation", op_id::cdagup_cdagdn, spin::UD, op_type::pairing) {}
+  pair_create() : quantum_op("pair_creation", op_id::cdagup_cdagdn, spin::SINGLET, op_type::pairing) {}
 };
 
 class sisj_plus : public quantum_op

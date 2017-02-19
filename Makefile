@@ -31,6 +31,7 @@ SRCS+= mcdata/observables.cpp
 #SRCS+= montecarlo/measurement.cpp
 SRCS+= vmc/random.cpp
 SRCS+= vmc/basisstate.cpp
+SRCS+= vmc/sysconfig.cpp
 SRCS+= vmc/simulator.cpp
 SRCS+= vmc/measurement.cpp
 SRCS+= vmc/vmc.cpp
@@ -52,8 +53,7 @@ HDRS=scheduler/optionparser.h scheduler/cmdargs.h \
 	 variational/mf_model.h variational/wavefunction.h \
 	 variational/projector.h \
 	 mcdata/mcdata.h mcdata/observables.h \
-	 vmc/random.h \
-	 vmc/basisstate.h \
+	 vmc/random.h  vmc/basisstate.h vmc/sysconfig.h \
 	 vmc/simulator.h \
 	 vmc/vmc.h \
 	 simulation.h \
@@ -81,11 +81,13 @@ CXXFLAGS = $(VMC_INCLUDEFLAGS) $(OPTIMIZATIONS)
 #VMC_INCLDIR=$(VMC_INCLUDE)/cmc
 #INCL_HDRS = $(addprefix $(VMC_INCLDIR)/, $(VMC_HDRS))
 
+# $(BOOST_LDFLAGS) $(BOOST_LIBS) 
+
 .PHONY: all
 all: $(TAGT) #$(INCL_HDRS)
 
 $(TAGT): $(OBJS)
-	$(VMC_CXX) -o $(TAGT) $(OBJS) $(BOOST_LDFLAGS) $(BOOST_LIBS) 
+	$(VMC_CXX) -o $(TAGT) $(OBJS) $(VMC_BLDFLAGS) $(VMC_BLIBS)  
 
 %.o: %.cpp
 	$(VMC_CXX) -c $(CXXBFLAGS) -o $@ $<

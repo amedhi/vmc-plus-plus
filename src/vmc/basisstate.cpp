@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-13 10:20:28
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-17 22:53:12
+* Last Modified time: 2017-02-19 10:06:39
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "basisstate.h"
@@ -58,14 +58,10 @@ void BasisState::clear(void)
   dnspin_sites_.clear();
 } 
 
-void BasisState::init_spins(const unsigned& num_upspins, const unsigned& num_dnspins, 
-    const bool& allow_dbloccupancy)
+void BasisState::init_spins(const unsigned& num_upspins, const unsigned& num_dnspins)
 {
   num_upspins_ = num_upspins;
   num_dnspins_ = num_dnspins;
-  double_occupancy_ = allow_dbloccupancy;
-  if (double_occupancy_) site_capacity_ = 2;
-  else site_capacity_ = 1;
   if (num_upspins_>num_sites_ || num_dnspins_>num_sites_)
     throw std::range_error("* BasisState::init_spins: spin number exceed capacity");
   if (!double_occupancy_ && (num_upspins_+num_dnspins_)>num_sites_)

@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-18 07:01:13
+* Last Modified time: 2017-02-18 22:12:21
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "mf_model.h"
@@ -51,7 +51,7 @@ void MF_Model::define_model(const input::Parameters& inputs, const lattice::grap
     order_ = mf_order::none;
     pairing_type_ = false;
     add_parameter(name="t", defval=1.0, inputs);
-    add_bondterm(name="hopping", cc="-t", op::upspin_hop());
+    add_bondterm(name="hopping", cc="-t", op::spin_hop());
     add_siteterm(name="mu_term", cc="-mu", op::ni_up());
   }
   else if (order_name == "DWAVE_SC") {
@@ -59,7 +59,7 @@ void MF_Model::define_model(const input::Parameters& inputs, const lattice::grap
     pairing_type_ = true;
     add_parameter(name="t", defval=1.0, inputs);
     add_parameter(name="delta_sc", defval=1.0, inputs);
-    add_bondterm(name="hopping", cc="-t", op::upspin_hop());
+    add_bondterm(name="hopping", cc="-t", op::spin_hop());
     add_siteterm(name="mu_term", cc="-mu", op::ni_up());
     cc = CouplingConstant({0, "delta_sc"}, {1, "-delta_sc"});
     add_bondterm(name="pairing", cc, op::pair_create());

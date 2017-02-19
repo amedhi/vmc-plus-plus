@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:50
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-18 07:43:44
+* Last Modified time: 2017-02-19 09:39:47
 *----------------------------------------------------------------------------*/
 #include "model.h"
 
@@ -120,12 +120,7 @@ int Hamiltonian::finalize(const lattice::Lattice& L)
   has_bondterm_ = (bond_terms_.size()>0);
   bt_begin_ = bond_terms_.cbegin();
   bt_end_ = bond_terms_.cend();
-  // term names (ignoring spin index)
-  term_names_.clear();
-  for (auto it=bond_terms_.cbegin(); it!= bond_terms_.cend(); ++it) 
-    term_names_.insert({it->qn_operator().id(),it->name()}); 
-  for (auto it=site_terms_.cbegin(); it!= site_terms_.cend(); ++it) 
-    term_names_.insert({it->qn_operator().id(),it->name()}); 
+
   // info string
   set_info_string(L);
   return 0;
@@ -172,12 +167,10 @@ double Hamiltonian::get_parameter_value(const std::string& pname) const
 void Hamiltonian::get_term_names(std::vector<std::string>& term_names) const
 {
   term_names.clear();
-  for (const auto& elem : term_names_) term_names.push_back(elem.second);
-  /*for (auto it=bond_terms_.cbegin(); it!= bond_terms_.cend(); ++it) 
-    term_names.push_back(it->qn_operator().name());
-  for (auto it=site_terms_.cbegin(); it!= site_terms_.cend(); ++it) 
-    term_names.push_back(it->qn_operator().name());
-   */
+  for (auto it=bond_terms_.cbegin(); it!=bond_terms_.cend(); ++it) 
+    term_names.push_back(it->name());
+  for (auto it=site_terms_.cbegin(); it!=site_terms_.cend(); ++it) 
+    term_names.push_back(it->name());
 }
 
 void Hamiltonian::set_info_string(const lattice::Lattice& L) 
@@ -190,7 +183,7 @@ void Hamiltonian::set_info_string(const lattice::Lattice& L)
   info_str_ << static_cast<int>(L.bc2_periodicity()) << "-";
   info_str_ << static_cast<int>(L.bc3_periodicity()) << ")\n";
   info_str_ << "# No of sites = " << L.num_sites() << "\n";
-  info_str_ << "# Hamiltonian: " << model_name << "\n";
+  info_str_ << "# Model: " << model_name << "\n";
   info_str_.precision(6);
   info_str_.setf(std::ios_base::fixed);
   for (const auto& p : parms_) 

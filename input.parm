@@ -13,27 +13,29 @@ print_level = -2 #-2
 # Lattice:
 #---------------------------------------------
 lattice = "SQUARE" 
-lsize1 = 4
-lsize2 = 4
+lsize1 = 10
+lsize2 = 10
 bc1 = "periodic"
 bc2 = "antiperiodic"
 
 #---------------------------------------------
 # Model:
 #---------------------------------------------
-model = "t-J"
+#model = "t-J"
+model = "HUBBARD"
 t = 1.0
 J = 0.35
+U = 8.0
 
 #---------------------------------------------
 # Variational wavefunction
 #---------------------------------------------
 mf_order = "DWAVE_SC"
 gutzwiller_proj = "YES"
-x = 0.2
-g = 1.0
-delta_sc = 1.0
-mu = 0.0
+x = 0.16
+g = 0.3037
+delta_sc = 0.08
+mu = -0.4263
 
 
 #---------------------------------------------
@@ -45,8 +47,8 @@ Magnetization = "No"
 #---------------------------------------------
 # Monte Carlo parameters
 #---------------------------------------------
-rng_seed = 0  # (=0 No seed, >0 time_seed)
-measure_steps = 100
+rng_seed = 1  # (=0 No seed, >0 time_seed)
+measure_steps = 1000
 warmup_steps = 100
 min_interval = 2
 max_interval = 5

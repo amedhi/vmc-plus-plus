@@ -2,13 +2,16 @@
 * Author: Amal Medhi
 * Date:   2017-01-16 22:12:57
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-17 00:02:04
+* Last Modified time: 2017-02-19 14:46:50
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
+//#define EIGEN_USE_MKL_ALL
 #include <Eigen/Core>
 
 #ifndef MATRIX_H
 #define MATRIX_H
+
+// use mkl libraries
 
 using Vector3i = Eigen::Vector3i;
 using Vector3d = Eigen::Vector3d;

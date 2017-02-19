@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-13 10:16:02
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-17 22:53:15
+* Last Modified time: 2017-02-19 11:13:40
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef BASISSTATE_H
@@ -47,12 +47,13 @@ public:
   bool is_full(void) const { return all(); }  
   bool is_empty(void) const { return none(); }  
   bool is_not_empty(void) const { return any(); }  
+  int occupancy(void) const { return count(); }  
 private:
   using size_t = std::size_t;
   unsigned null_id_{100000};
   std::pair<unsigned,unsigned> id_;
-  unsigned spin_UP_;
-  unsigned spin_DN_;
+  unsigned spin_UP_{0};
+  unsigned spin_DN_{1};
 };
 
 class BasisState : public std::vector<SiteState> 
@@ -64,15 +65,16 @@ public:
   ~BasisState() {} 
   void set_vaccuum(const unsigned& num_sites, const bool& allow_dbl=true);
   void allow_double_occupancy(const bool& allow);
-  void init_spins(const unsigned& num_upspins, const unsigned& num_dnspins, 
-    const bool& allow_dbloccupancy=true); 
+  void init_spins(const unsigned& num_upspins, const unsigned& num_dnspins);
   void set_random(void);
+  const bool& double_occupancy(void) const { return double_occupancy_; }
   std::pair<int,int> gen_upspin_hop(void);
   std::pair<int,int> gen_dnspin_hop(void);
   std::pair<int,int> gen_exchange_move(void);
   std::pair<int,int> exchange_move_part(void);
   const int& dblocc_count(void) const { return num_dblocc_sites_; }
   const int& dblocc_increament(void) const { return dblocc_increament_; }
+  const int& site_capacity(void) const { return site_capacity_; }
   void accept_last_move(void);
   const std::vector<int>& upspin_sites(void) const { return upspin_sites_; }
   const std::vector<int>& dnspin_sites(void) const { return dnspin_sites_; }
