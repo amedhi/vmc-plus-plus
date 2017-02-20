@@ -5,8 +5,8 @@
 * Last Modified time: 2017-02-20 05:23:09
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
-//#define EIGEN_USE_MKL_ALL
 #include <Eigen/Core>
+//#define EIGEN_USE_MKL_ALL
 
 #ifndef MATRIX_H
 #define MATRIX_H
