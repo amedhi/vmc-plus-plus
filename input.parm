@@ -13,29 +13,29 @@ print_level = -2 #-2
 # Lattice:
 #---------------------------------------------
 lattice = "SQUARE" 
-lsize1 = 10
-lsize2 = 10
+lsize1 = 8
+lsize2 = 8
 bc1 = "periodic"
 bc2 = "antiperiodic"
 
 #---------------------------------------------
 # Model:
 #---------------------------------------------
-#model = "t-J"
-model = "HUBBARD"
+model = "t-J"
+#model = "HUBBARD"
 t = 1.0
 J = 0.35
-U = 8.0
+#U = 8.0
 
 #---------------------------------------------
 # Variational wavefunction
 #---------------------------------------------
 mf_order = "DWAVE_SC"
-gutzwiller_proj = "YES"
-x = 0.16
-g = 0.3037
-delta_sc = 0.08
-mu = -0.4263
+gutzwiller_proj = "NO"
+hole_doping = 0.20
+g = 1.0
+delta_sc = 0.5
+mu = 0.0
 
 
 #---------------------------------------------

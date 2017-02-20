@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 14:51:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-17 22:53:21
+* Last Modified time: 2017-02-20 06:37:29
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef WAVEFUNCTION_H
@@ -31,10 +31,13 @@ public:
   //Wavefunction() {}
   Wavefunction(const input::Parameters& inputs, const lattice::graph::LatticeGraph& graph);
   ~Wavefunction() {}
+  const std::vector<vparm_t>& variational_parms(void) { return mf_model_.variational_parms(); }
+  int compute(const input::Parameters& inputs, const lattice::graph::LatticeGraph& graph);
   void update_amplitudes(const std::vector<double>& variatioanl_parm);
   void compute_grade(const std::vector<double>& variatioanl_parm);
   const unsigned& num_upspins(void) const { return num_upspins_; }
   const unsigned& num_dnspins(void) const { return num_dnspins_; }
+  const double& hole_doping(void) const { return hole_doping_; }
   void get_amplitudes(Matrix& psi, const std::vector<int>& row,  
     const std::vector<int>& col) const;
   void get_amplitudes(ColVector& psi_vec, const int& irow,  
@@ -52,6 +55,7 @@ private:
   unsigned num_spins_;
   unsigned num_upspins_;
   unsigned num_dnspins_;
+  double hole_doping_;
   double band_filling_;
   // BCS_state bcs_state_;
   // FS_state fermisea_;
@@ -67,9 +71,9 @@ private:
   Eigen::SelfAdjointEigenSolver<Matrix> hk;
   Eigen::SelfAdjointEigenSolver<Matrix> hminusk;
 
+  int compute_amplitudes(const lattice::graph::LatticeGraph& graph);
   void set_particle_num(const input::Parameters& inputs);
   double get_noninteracting_mu(void);
-  void compute_amplitudes(const lattice::graph::LatticeGraph& graph);
   void pair_amplitudes(const lattice::graph::LatticeGraph& graph);
   void fermisea_amplitudes(const lattice::graph::LatticeGraph& graph) {}
   //void (Wavefunction::*construct_groundstate)(void);

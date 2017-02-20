@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-18 13:54:54
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-19 15:38:21
+* Last Modified time: 2017-02-20 05:38:09
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef SYSCONFIG_H
@@ -27,7 +27,7 @@ public:
   SysConfig(const input::Parameters& parms, const lattice::graph::LatticeGraph& graph, 
     const model::Hamiltonian& model);
   ~SysConfig() {}
-  int init(const input::Parameters& parms);
+  int init(const input::Parameters& parms,const lattice::graph::LatticeGraph& graph);
   int update_state(void);
   double accept_ratio(void);
   void reset_accept_ratio(void);
@@ -36,6 +36,7 @@ public:
   amplitude_t apply(const model::op::quantum_op& qn_op, const unsigned& site_i) const;
   int apply_niup_nidn(const unsigned& i) const;
   const int& num_updates(void) const { return num_updates_; }
+  const var::Wavefunction& wavefunc(void) const { return wf; }
 private:
   var::Wavefunction wf;
   var::WavefunProjector projector;

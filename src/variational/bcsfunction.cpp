@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-09 22:48:45
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-12 12:48:25
+* Last Modified time: 2017-02-20 06:02:18
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include <algorithm>
@@ -21,11 +21,6 @@ void Wavefunction::bcs_init(const lattice::graph::LatticeGraph& graph)
   for (unsigned k=0; k<num_kpoints_; ++k) cphi_k[k].resize(block_dim_,block_dim_);
 
   bcs_large_number_ = 1.0E+2;
-  if (mf_model_.need_noninteracting_mu()) {
-    double mu = get_noninteracting_mu();
-    //std::cout << "mu = " << mu << "\n";
-    mf_model_.update_mu(mu, graph); 
-  }
 }
 
 void Wavefunction::bcs_oneband(void)

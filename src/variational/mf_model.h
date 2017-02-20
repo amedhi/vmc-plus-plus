@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 14:51:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-12 12:48:29
+* Last Modified time: 2017-02-20 06:35:23
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef MF_MODEL_H
@@ -25,7 +25,7 @@ enum class mf_order {none, af, fm, ssc, dsc, pplusip, af_dsc, disorder_sc};
 constexpr std::complex<double> ii(void) { return std::complex<double>{0.0,static_cast<double>(1.0)}; }
 
 namespace var {
-using name_value_pair = std::pair<std::string,double>;
+using vparm_t = std::pair<std::string,double>;
 
 //class SiteTerm : public std::unordered_map<unsigned, SiteOperatorTerm>
 class Unitcell_Term
@@ -52,6 +52,8 @@ class MF_Model : public model::Hamiltonian
 public:
   MF_Model(const input::Parameters& inputs, const lattice::graph::LatticeGraph& graph);
   ~MF_Model() {}
+  const std::vector<vparm_t>& variational_parms(void) { return vparms_; }
+  void update(const input::Parameters& inputs, const lattice::graph::LatticeGraph& graph);
   void update_mu(const double& mu, const lattice::graph::LatticeGraph& graph);
   //void update_parameters(const var_parm& vparms_);
   const bool& is_pairing(void) const { return pairing_type_; }
@@ -64,7 +66,7 @@ private:
   mf_order order_;
   bool pairing_type_;
   bool need_noninteracting_mu_;
-  std::vector<name_value_pair> vparms_;
+  std::vector<vparm_t> vparms_;
   std::vector<Unitcell_Term> uc_siteterms_;
   std::vector<Unitcell_Term> uc_bondterms_;
   // matrices in kspace representation

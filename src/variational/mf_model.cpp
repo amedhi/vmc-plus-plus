@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-18 22:12:21
+* Last Modified time: 2017-02-20 06:35:37
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "mf_model.h"
@@ -14,6 +14,7 @@ namespace var {
 MF_Model::MF_Model(const input::Parameters& inputs, 
   const lattice::graph::LatticeGraph& graph)
 {
+  vparms_.clear();
   // mean-field model
   define_model(inputs, graph);
   // 'unitcell representation' of the hamiltonian
@@ -29,7 +30,6 @@ MF_Model::MF_Model(const input::Parameters& inputs,
 
 void MF_Model::define_model(const input::Parameters& inputs, const lattice::graph::LatticeGraph& graph)
 {
-  vparms_.clear();
   using namespace model;
   double defval;
   std::string name;
@@ -77,6 +77,12 @@ void MF_Model::define_model(const input::Parameters& inputs, const lattice::grap
     throw std::range_error("*error: mf_order: undefined order");
   }
   Model::finalize(graph.lattice());
+}
+
+void MF_Model::update(const input::Parameters& inputs, const lattice::graph::LatticeGraph& graph)
+{
+  Model::update_parameters(inputs);
+  build_unitcell_terms(graph);
 }
 
 void MF_Model::make_variational(const std::vector<std::string>& pnames)

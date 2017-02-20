@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-17 22:53:18
+* Last Modified time: 2017-02-20 06:02:24
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "wavefunction.h"
@@ -20,7 +20,6 @@ Wavefunction::Wavefunction(const input::Parameters& inputs,
   , num_upspins_(0)
   , num_dnspins_(0)
 {
-  set_particle_num(inputs);
   if (mf_model_.is_pairing()) {
     bcs_init(graph);
     if (block_dim_==1) type_ = wf_type::bcs_oneband;
@@ -30,16 +29,22 @@ Wavefunction::Wavefunction(const input::Parameters& inputs,
     type_ = wf_type::fermisea;
   }
   psi_up_.resize(num_sites_,num_sites_);
-  compute_amplitudes(graph);
 }
 
-//Wavefunction::update(const std::vector<double>& vparms)
-//{
-  // mf_model_.update(variational_parms);
-  // compute_amlitudes()
-//}
+int Wavefunction::compute(const input::Parameters& inputs, const lattice::graph::LatticeGraph& graph)
+{
+  set_particle_num(inputs);
+  mf_model_.update(inputs,graph);
+  if (mf_model_.need_noninteracting_mu()) {
+    double mu = get_noninteracting_mu();
+    //std::cout << "mu = " << mu << "\n";
+    mf_model_.update_mu(mu, graph); 
+  }
+  compute_amplitudes(graph);
+  return 0;
+}
 
-void Wavefunction::compute_amplitudes(const lattice::graph::LatticeGraph& graph)
+int Wavefunction::compute_amplitudes(const lattice::graph::LatticeGraph& graph)
 {
   switch (type_) {
     case wf_type::bcs_oneband: 
@@ -55,6 +60,7 @@ void Wavefunction::compute_amplitudes(const lattice::graph::LatticeGraph& graph)
       fermisea_amplitudes(graph); 
       break;
   }
+  return 0;
 }
 
 void Wavefunction::pair_amplitudes(const lattice::graph::LatticeGraph& graph)
@@ -80,11 +86,12 @@ void Wavefunction::pair_amplitudes(const lattice::graph::LatticeGraph& graph)
 
 void Wavefunction::set_particle_num(const input::Parameters& inputs)
 {
-  band_filling_ = 1.0-inputs.set_value("x", 0.0);
+  hole_doping_ = inputs.set_value("hole_doping", 0.0);
+  band_filling_ = 1.0-hole_doping_;
   int num_sites = static_cast<int>(num_sites_);
   if (mf_model_.is_pairing()) {
     int n = static_cast<int>(std::round(0.5*band_filling_*num_sites));
-    if (n<0 || n>num_sites) throw std::range_error("Wavefunction:: hole doping 'x' out-of-range");
+    if (n<0 || n>num_sites) throw std::range_error("Wavefunction:: hole doping out-of-range");
     num_upspins_ = static_cast<unsigned>(n);
     num_dnspins_ = num_upspins_;
     num_spins_ = num_upspins_ + num_dnspins_;
@@ -92,11 +99,13 @@ void Wavefunction::set_particle_num(const input::Parameters& inputs)
   }
   else{
     int n = static_cast<int>(std::round(band_filling_*num_sites));
-    if (n<0 || n>2*num_sites) throw std::range_error("Wavefunction:: hole doping 'x' out-of-range");
+    if (n<0 || n>2*num_sites) throw std::range_error("Wavefunction:: hole doping out-of-range");
     num_spins_ = static_cast<unsigned>(n);
     num_dnspins_ = num_spins_/2;
     num_upspins_ = num_spins_ - num_dnspins_;
+    band_filling_ = static_cast<double>(n)/num_sites;
   }
+  hole_doping_ = 1.0 - band_filling_;
 }
 
 void Wavefunction::get_amplitudes(Matrix& psi, const std::vector<int>& row, 

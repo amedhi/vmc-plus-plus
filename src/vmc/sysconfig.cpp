@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-18 14:01:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-19 14:12:19
+* Last Modified time: 2017-02-20 06:07:39
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "./sysconfig.h"
@@ -19,11 +19,12 @@ SysConfig::SysConfig(const input::Parameters& parms,
 {
 }
 
-int SysConfig::init(const input::Parameters& parms)
+int SysConfig::init(const input::Parameters& parms,const lattice::graph::LatticeGraph& graph)
 {
+  if (num_sites_==0) return -1;
+  wf.compute(parms, graph);
   num_upspins_ = wf.num_upspins();
   num_dnspins_ = wf.num_dnspins();
-  if (num_sites_==0) return -1;
   if (num_upspins_==0 && num_dnspins_==0) return -1;
   if (num_upspins_ != num_dnspins_) 
     throw std::range_error("*SysConfig::init: unequal UP & DN spin case not implemented");

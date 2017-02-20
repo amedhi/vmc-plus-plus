@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:20:56
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-19 15:37:48
+* Last Modified time: 2017-02-20 05:39:01
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "simulator.h"
@@ -32,7 +32,7 @@ Simulator::Simulator(const input::Parameters& parms)
 
 int Simulator::run(const input::Parameters& parms)
 {
-  int stat = config.init(parms);
+  int stat = config.init(parms, graph);
   if (stat != 0) return -1;
   // run simulation
   int num_measurement = 0;
@@ -54,7 +54,7 @@ int Simulator::run(const input::Parameters& parms)
     count++;
   }
   // output
-  observables_.print(0.0);
+  observables_.print(config.wavefunc().hole_doping());
   std::cout << "total steps = " << config.num_updates() << "\n";
   return 0;
 }
