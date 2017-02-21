@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-20 10:18:07
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-21 10:08:30
+* Last Modified time: 2017-02-21 22:56:19
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef VARPARM_H
@@ -15,7 +15,47 @@
 #include "../scheduler/task.h"
 
 namespace var {
+using parm_vector = std::vector<double>;
+using name_id_map = std::map<std::string,unsigned>; 
+class varparm_t
+{
+public:
+  varparm_t() : val_{0.0}, lb_{0.0}, ub_{0.0} {}
+  varparm_t(const double& val, const double& lb, const double& ub)
+  : val_{val}, lb_{lb}, ub_{ub} {}
+  ~varparm_t() {}
+  bool change_value(const double& newval) 
+  {
+    if (newval<lb_ || newval>ub_) return false;
+    val_ = newval; return true;
+  }
+  void set_name(const name_id_map::const_iterator& it ) { map_it_=it; }
+  const double& value(void) const { return val_; }
+  const double& lbound(void) const { return lb_; }
+  const double& ubound(void) const { return ub_; }
+  const std::string& name(void) const { return map_it_->first; }
+private:
+  double val_;
+  double lb_;
+  double ub_;
+  name_id_map::const_iterator map_it_;
+};
 
+class VariationalParms : public std::vector<varparm_t>
+{
+public:
+  VariationalParms(); 
+  ~VariationalParms() {} 
+  int add(const std::string& name, const double& val, const double& lb, const double& ub);
+  using std::vector<varparm_t>::operator[];
+  const varparm_t& operator[](const std::string& pname) const 
+    { return std::vector<varparm_t>::operator[](name_id_map_.at(pname)); } 
+private:
+  unsigned num_parms_{0};
+  name_id_map name_id_map_;
+};
+
+/*
 struct parm_t
 {
   std::string name;
@@ -57,6 +97,7 @@ private:
   void append(const std::string& name, const double& value, const double& lower, 
     const double& upper);
 };
+*/
 
 } // end namespace var
 

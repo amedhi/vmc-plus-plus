@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-16 23:17:49
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-21 11:10:37
+* Last Modified time: 2017-02-21 23:02:22
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "./projector.h"
@@ -29,26 +29,34 @@ void WavefunProjector::init(const input::Parameters& parms)
 
 void WavefunProjector::update(const input::Parameters& inputs) 
 { 
-  varparms_.update(inputs); 
+  for (auto& p : varparms_) {
+    double x = inputs.set_value(p.name(), p.value());
+    p.change_value(x);
+  }
+  //varparms_.update(inputs); 
   if (gutzwiller_proj_) set_gw_ratio();
 } 
 
-void WavefunProjector::update(const std::vector<double>& vparms, const unsigned& begin,
-    const unsigned& end) 
+void WavefunProjector::update(const var::parm_vector& pvector, const unsigned& start_pos)
 { 
-  varparms_.update(vparms,begin,end); 
+  //varparms_.update(vparms,begin,end); 
+  unsigned i = 0;
+  for (auto& p : varparms_) {
+    p.change_value(pvector[start_pos+i]);
+    i++;
+  }
   if (gutzwiller_proj_) set_gw_ratio();
 }
 
 double WavefunProjector::gw_factor(void) const 
 {
-  return varparms_.values()[varparms_.at("gfactor")];
+  //return varparms_.values()[varparms_.at("gfactor")];
+  return varparms_["gfactor"].value();
 }
 
 void WavefunProjector::set_gw_ratio(void) 
 { 
-  int pos = varparms_.at("gfactor");
-  double g = varparms_.values()[pos];
+  double g = gw_factor();
   //std::cout << "### g = " << g << "\n";
   if (g<0.0) throw std::range_error("WavefunProjector::set_gw_ratio: out-of-range 'g'-value");
   gw_ratio_[0] = 1.0/g;  // nd_increament = -1

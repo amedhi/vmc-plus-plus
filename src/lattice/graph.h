@@ -4,7 +4,7 @@
 * Author: amedhi
 * Date:   2016-03-01 00:11:01
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-15 12:26:30
+* Last Modified time: 2017-02-21 22:58:35
 *----------------------------------------------------------------------------*/
 #ifndef GRAPH_H
 #define GRAPH_H
@@ -15,7 +15,7 @@
 //#include <Eigen/Dense>
 
 namespace lattice {
-namespace graph {
+//namespace graph {
 
 // Vertex properties
 struct VertexProperties {
@@ -146,7 +146,7 @@ private:
   unsigned num_edges_{0};
   vertex_iterator vi_begin_, vi_end_;
   edge_iterator ei_begin_, ei_end_;
-  boost::property_map<graph::Graph, boost::vertex_index_t>::type vertex_index_map;
+  boost::property_map<Graph, boost::vertex_index_t>::type vertex_index_map;
   //boost::property_map<graph::Graph, unsigned VertexProperties::*>::type vertex_uid_map;
   //boost::property_map<graph::Graph, Vector3d VertexProperties::*>::type vertex_cellcord_map;
   std::set<unsigned> vertex_types_set_;
@@ -155,7 +155,7 @@ private:
 };
 
 
-} // end namespace graph
+//} // end namespace graph
 } // end namespace lattice
 
 #endif

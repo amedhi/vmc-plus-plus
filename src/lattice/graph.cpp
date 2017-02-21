@@ -4,12 +4,12 @@
 * Author: amedhi
 * Date:   2016-03-01 00:11:01
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-15 12:26:28
+* Last Modified time: 2017-02-21 22:52:39
 *----------------------------------------------------------------------------*/
 #include "graph.h"
 
 namespace lattice {
-namespace graph {
+//namespace graph {
 
 //using namespace boost;
 //LatticeGraph::LatticeGraph(const Lattice& lattice) 
@@ -117,5 +117,5 @@ void LatticeGraph::construct_graph(void)
   //for (auto it=po.first; it!=po.second;++it) { std::cout << *it << "\n"; }
 }
 
-} // end namespace graph
+//} // end namespace graph
 } // end namespace lattice

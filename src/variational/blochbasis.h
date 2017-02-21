@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-01 21:13:21
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-09 11:58:23
+* Last Modified time: 2017-02-21 22:54:54
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef BLOCHBASIS_H
@@ -16,7 +16,7 @@
 
 namespace basis {
 
-using basis_state = lattice::graph::LatticeGraph::site_descriptor;
+using basis_state = lattice::LatticeGraph::site_descriptor;
 using kpoint = Vector3d;
 
 class BlochBasis : public std::vector<kpoint>
@@ -24,9 +24,9 @@ class BlochBasis : public std::vector<kpoint>
 public:
   // ctors
   BlochBasis() {}
-  BlochBasis(const lattice::graph::LatticeGraph& graph) { construct(graph); }
+  BlochBasis(const lattice::LatticeGraph& graph) { construct(graph); }
   ~BlochBasis() {}
-  void construct(const lattice::graph::LatticeGraph& graph);
+  void construct(const lattice::LatticeGraph& graph);
   const unsigned& num_kpoints(void) const { return num_kpoint_; }
   const unsigned& subspace_dimension(void) const { return subspace_dimension_; }
   kpoint kvector(const unsigned& k) const { return operator[](k); }
@@ -37,7 +37,7 @@ public:
   //const basis_state& representative_state(const unsigned& site);
   /*
   unsigned dimension(void) const { return basis_states.size(); }
-  basis_state representative_state(const basis_state& s, const lattice::graph::LatticeGraph& graph,
+  basis_state representative_state(const basis_state& s, const lattice::LatticeGraph& graph,
     Vector3d& R) const;
   basis_state site_basis(const unsigned& idx) const 
     { return basis_states[idx]; }
@@ -60,8 +60,8 @@ private:
 
   // helper functions
   void make_kpoints(const lattice::Lattice& lattice);
-  void make_subspace_basis(const lattice::graph::LatticeGraph& graph);
-  //void make_site_basis(const lattice::Lattice& lattice, const lattice::graph::LatticeGraph& graph);
+  void make_subspace_basis(const lattice::LatticeGraph& graph);
+  //void make_site_basis(const lattice::Lattice& lattice, const lattice::LatticeGraph& graph);
 };
 
 

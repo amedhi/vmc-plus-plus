@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:19:36
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-21 09:36:18
+* Last Modified time: 2017-02-21 22:56:42
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef SIMULATOR_H
@@ -28,7 +28,7 @@ public:
   int run(const std::vector<double>& varparms);
   static void print_copyright(std::ostream& os);
 private:
-  lattice::graph::LatticeGraph graph;
+  lattice::LatticeGraph graph;
   model::Hamiltonian model;
   SysConfig config;
   unsigned num_sites_;

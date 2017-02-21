@@ -2,14 +2,14 @@
 * Author: Amal Medhi
 * Date:   2017-02-01 21:13:27
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-09 11:58:26
+* Last Modified time: 2017-02-21 22:55:07
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "blochbasis.h"
 
 namespace basis {
 
-void BlochBasis::construct(const lattice::graph::LatticeGraph& graph)
+void BlochBasis::construct(const lattice::LatticeGraph& graph)
 {
   make_kpoints(graph.lattice());
   make_subspace_basis(graph);
@@ -102,7 +102,7 @@ void BlochBasis::make_kpoints(const lattice::Lattice& lattice)
   }
 }
 
-void BlochBasis::make_subspace_basis(const lattice::graph::LatticeGraph& graph)
+void BlochBasis::make_subspace_basis(const lattice::LatticeGraph& graph)
 {
   subspace_dimension_ = graph.lattice().num_basis_sites();
   subspace_basis_.resize(subspace_dimension_);
@@ -126,7 +126,7 @@ void BlochBasis::make_subspace_basis(const lattice::graph::LatticeGraph& graph)
 
 
 #ifdef ON
-int BlochBasis::construct(const lattice::Lattice& lattice, const lattice::graph::LatticeGraph& graph)
+int BlochBasis::construct(const lattice::Lattice& lattice, const lattice::LatticeGraph& graph)
 {
   // reset
   kpoints.resize(lattice.num_unitcells());
@@ -141,7 +141,7 @@ int BlochBasis::construct(const lattice::Lattice& lattice, const lattice::graph:
 }
 
 
-void BlochBasis::make_site_basis(const lattice::Lattice& lattice, const lattice::graph::LatticeGraph& graph)
+void BlochBasis::make_site_basis(const lattice::Lattice& lattice, const lattice::LatticeGraph& graph)
 {
   /*
   * The basis states are ! combination of site states connected by lattice 
@@ -152,7 +152,7 @@ void BlochBasis::make_site_basis(const lattice::Lattice& lattice, const lattice:
   */
 
   // basis states & indexing
-  lattice::graph::vertex_iterator vi, vi_end;
+  lattice::vertex_iterator vi, vi_end;
   basis_state s;
   unsigned i;
   for (i=0; i<basis_states.size(); ++i) {
@@ -168,7 +168,7 @@ void BlochBasis::make_site_basis(const lattice::Lattice& lattice, const lattice:
   null_index = basis_states.size();
 }
 
-basis_state BlochBasis::representative_state(const basis_state& s, const lattice::graph::LatticeGraph& graph,
+basis_state BlochBasis::representative_state(const basis_state& s, const lattice::LatticeGraph& graph,
     Vector3d& R) const
 {
   unsigned rs = graph.vertex_uid(s);

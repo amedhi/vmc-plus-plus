@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-21 13:00:51
+* Last Modified time: 2017-02-21 23:59:20
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "mf_model.h"
@@ -12,7 +12,7 @@
 namespace var {
 
 MF_Model::MF_Model(const input::Parameters& inputs, 
-  const lattice::graph::LatticeGraph& graph)
+  const lattice::LatticeGraph& graph)
 {
   // mean-field model
   define_model(inputs, graph);
@@ -27,7 +27,7 @@ MF_Model::MF_Model(const input::Parameters& inputs,
   //work2.resize(dim_,dim_);
 }
 
-void MF_Model::define_model(const input::Parameters& inputs, const lattice::graph::LatticeGraph& graph)
+void MF_Model::define_model(const input::Parameters& inputs, const lattice::LatticeGraph& graph)
 {
   using namespace model;
   double defval, lb, ub;
@@ -80,36 +80,37 @@ void MF_Model::define_model(const input::Parameters& inputs, const lattice::grap
   Model::finalize(graph.lattice());
 }
 
-void MF_Model::update(const input::Parameters& inputs, const lattice::graph::LatticeGraph& graph)
+void MF_Model::update(const input::Parameters& inputs, const lattice::LatticeGraph& graph)
 {
   Model::update_parameters(inputs);
-  varparms_.update(inputs);
   build_unitcell_terms(graph);
 }
 
-void MF_Model::update(const std::vector<double>& vparms, const unsigned& begin,
-    const unsigned& end, const lattice::graph::LatticeGraph& graph)
+void MF_Model::update(const parm_vector& pvector, const unsigned& start_pos, const lattice::LatticeGraph& graph)
 {
-  varparms_.update(vparms,begin,end);
-  for (const auto& elem : varparms_)
-    Model::update_parameter(elem.first, varparms_.values()[elem.second]);
-  //std::cout << "### delta_sc = " << get_parameter_value("delta_sc") << "\n";
-  build_unitcell_terms(graph);
-}
-
-/*void MF_Model::make_variational(const std::vector<std::string>& pnames)
-{
-  for (const auto& pname : pnames) {
-    vparms_.push_back({pname,get_parameter_value(pname)});
+  // for all variational parameters
+  unsigned i = 0;
+  for (const auto& p : varparms_) {
+    Model::update_parameter(p.name(), pvector[start_pos+i]);
+    ++i;
   }
-}*/
+  build_unitcell_terms(graph);
+}
+
+void MF_Model::update(const std::string& pname, const double& pvalue, 
+  const lattice::LatticeGraph& graph)
+{
+  // for one variational parameters
+  Model::update_parameter(pname, pvalue);
+  build_unitcell_terms(graph);
+}
 
 void MF_Model::make_variational(const std::string& name, const double& lb, const double& ub)
 {
   varparms_.add(name, get_parameter_value(name), lb, ub);
 }
 
-void MF_Model::build_unitcell_terms(const lattice::graph::LatticeGraph& graph)
+void MF_Model::build_unitcell_terms(const lattice::LatticeGraph& graph)
 {
   uc_siteterms_.resize(Model::num_siteterms());
   uc_bondterms_.resize(Model::num_bondterms());
@@ -161,7 +162,7 @@ void MF_Model::construct_kspace_block(const Vector3d& kvec)
   //std::cout << "ek = " << quadratic_block_(0,0) << "\n";
 }
 
-void MF_Model::update_mu(const double& mu, const lattice::graph::LatticeGraph& graph)
+void MF_Model::update_mu(const double& mu, const lattice::LatticeGraph& graph)
 {
   Model::update_parameter("mu", mu);
   unsigned i = 0;
@@ -180,10 +181,10 @@ void MF_Model::update_mu(const double& mu, const lattice::graph::LatticeGraph& g
  sites in the unitcell, the 'sl number' is same as 'uid'.
 */
 void Unitcell_Term::build_bondterm(const model::HamiltonianTerm& hamterm,
-  const lattice::graph::LatticeGraph& graph)
+  const lattice::LatticeGraph& graph)
 {
   unsigned dim = graph.lattice().num_basis_sites();
-  lattice::graph::LatticeGraph::out_edge_iterator ei, ei_end;
+  lattice::LatticeGraph::out_edge_iterator ei, ei_end;
   // get number of unique 'cell bond vectors'
   num_out_bonds_ = 0;
   for (unsigned i=0; i<dim; ++i) {
@@ -216,7 +217,7 @@ void Unitcell_Term::build_bondterm(const model::HamiltonianTerm& hamterm,
 }
 
 void Unitcell_Term::build_siteterm(const model::HamiltonianTerm& hamterm,
-  const lattice::graph::LatticeGraph& graph)
+  const lattice::LatticeGraph& graph)
 {
   unsigned dim = graph.lattice().num_basis_sites();
   num_out_bonds_ = 0;

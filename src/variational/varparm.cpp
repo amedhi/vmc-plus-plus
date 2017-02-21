@@ -2,13 +2,37 @@
 * Author: Amal Medhi
 * Date:   2017-02-20 10:47:36
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-21 10:08:28
+* Last Modified time: 2017-02-21 21:08:25
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "./varparm.h"
 
 namespace var {
 
+
+VariationalParms::VariationalParms(void)
+{
+  clear();
+  num_parms_ = 0;
+}
+
+int VariationalParms::add(const std::string& name, const double& val, 
+    const double& lb, const double& ub)
+{
+  if (val<lb || val>ub) {
+    throw std::invalid_argument("VariationalParm::add_parameter: invalid parameter bound");
+  }
+  name_id_map::const_iterator it;
+  bool status;
+  std::tie(it, status) = name_id_map_.insert({name,num_parms_});
+  if (!status) throw std::logic_error("VariationalParm::add_parameter: parameter already exists");
+  push_back({val, lb, ub});
+  back().set_name(it);
+  ++num_parms_;
+  return num_parms_;
+}
+
+/*
 unsigned VariationalParms::num_sets_ = 0;
 
 VariationalParms::VariationalParms(void)
@@ -106,6 +130,7 @@ void VariationalParms::append(const std::string& name, const double& value,
   upper_.push_back(upper);
   ++num_parms_;
 }
+*/
 
 
 } // end namespace var

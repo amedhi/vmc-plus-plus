@@ -2,15 +2,15 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-21 12:48:36
+* Last Modified time: 2017-02-21 23:54:17
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "wavefunction.h"
 
 namespace var {
 
-Wavefunction::Wavefunction(const input::Parameters& inputs, 
-  const lattice::graph::LatticeGraph& graph)
+Wavefunction::Wavefunction(const lattice::LatticeGraph& graph,
+  const input::Parameters& inputs)
   : mf_model_(inputs, graph)
   , blochbasis_(graph)
   , num_kpoints_(blochbasis_.num_kpoints())
@@ -32,7 +32,8 @@ Wavefunction::Wavefunction(const input::Parameters& inputs,
   psi_up_.resize(num_sites_,num_sites_);
 }
 
-int Wavefunction::compute(const input::Parameters& inputs, const lattice::graph::LatticeGraph& graph)
+int Wavefunction::compute(const lattice::LatticeGraph& graph,
+  const input::Parameters& inputs, const bool& psi_gradient)
 {
   set_particle_num(inputs);
   mf_model_.update(inputs,graph);
@@ -41,28 +42,54 @@ int Wavefunction::compute(const input::Parameters& inputs, const lattice::graph:
     //std::cout << "mu = " << mu << "\n";
     mf_model_.update_mu(mu, graph); 
   }
-  compute_amplitudes(graph);
+  compute_amplitudes(psi_up_,graph);
+  if (!psi_gradient) return 0;
   return 0;
 }
 
-int Wavefunction::compute(const std::vector<double>& vparms, const unsigned& begin,
-  const unsigned& end, const lattice::graph::LatticeGraph& graph)
+int Wavefunction::compute(const lattice::LatticeGraph& graph, const var::parm_vector& pvector,
+  const unsigned& start_pos, const bool& psi_gradient)
 {
-  mf_model_.update(vparms,begin,end,graph);
-  compute_amplitudes(graph);
+  mf_model_.update(pvector,start_pos,graph);
+  compute_amplitudes(psi_up_,graph);
+  if (!psi_gradient) return 0;
+
+  // Gradient of amplitudes wrt the variational parameters 
+  // by numerical differentiation (central defference formula)
+  unsigned num_parm = mf_model_.varparms().size();
+  psi_gradients_.resize(num_parm);
+  work_mat.resize(num_sites_,num_sites_);
+  double scale = 0.05;
+  unsigned i = 0;
+  for (const auto& p : mf_model_.varparms()) {
+    psi_gradients_[i].resize(num_sites_,num_sites_);
+    double h = scale * (p.ubound()-p.lbound());
+    double inv_2h = 0.5/h;
+    double x = pvector[start_pos+i];
+    mf_model_.update(p.name(), x+h, graph);
+    compute_amplitudes(psi_gradients_[i], graph);
+    mf_model_.update(p.name(), x-h, graph);
+    compute_amplitudes(work_mat, graph);
+    // model to original state
+    mf_model_.update(p.name(), x, graph);
+    // derivative
+    psi_gradients_[i] -= work_mat;
+    psi_gradients_[i] *= inv_2h;
+    ++i;
+  }
   return 0;
 }
 
-int Wavefunction::compute_amplitudes(const lattice::graph::LatticeGraph& graph)
+int Wavefunction::compute_amplitudes(Matrix& psi_mat, const lattice::LatticeGraph& graph)
 {
   switch (type_) {
     case wf_type::bcs_oneband: 
       bcs_oneband(); 
-      pair_amplitudes(graph);
+      pair_amplitudes(graph, psi_mat);
       break;
     case wf_type::bcs_multiband: 
       bcs_multiband(); 
-      pair_amplitudes(graph);
+      pair_amplitudes(graph, psi_mat);
       break;
     case wf_type::fermisea: 
       fermisea(); 
@@ -72,7 +99,7 @@ int Wavefunction::compute_amplitudes(const lattice::graph::LatticeGraph& graph)
   return 0;
 }
 
-void Wavefunction::pair_amplitudes(const lattice::graph::LatticeGraph& graph)
+void Wavefunction::pair_amplitudes(const lattice::LatticeGraph& graph, Matrix& psi_mat)
 {
   double one_by_nk = 1.0/static_cast<double>(num_kpoints_);
   for (unsigned i=0; i<num_sites_; ++i) {
@@ -86,7 +113,7 @@ void Wavefunction::pair_amplitudes(const lattice::graph::LatticeGraph& graph)
         Vector3d kvec = blochbasis_.kvector(k);
         ksum += cphi_k[k](m,n) * std::exp(ii()*kvec.dot(Ri-Rj));
       }
-      psi_up_(i,j) = ampl_part(ksum) * one_by_nk;
+      psi_mat(i,j) = ampl_part(ksum) * one_by_nk;
       //std::cout << psi_up_(i,j) << "\n"; 
       //getchar();
     }

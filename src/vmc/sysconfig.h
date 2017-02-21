@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-18 13:54:54
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-21 10:53:21
+* Last Modified time: 2017-02-21 22:57:57
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef SYSCONFIG_H
@@ -25,11 +25,11 @@ constexpr double gfactor_cutoff(void) { return 1.0E-8; }
 class SysConfig : public BasisState
 {
 public:
-  SysConfig(const input::Parameters& parms, const lattice::graph::LatticeGraph& graph, 
+  SysConfig(const input::Parameters& parms, const lattice::LatticeGraph& graph, 
     const model::Hamiltonian& model);
   ~SysConfig() {}
-  int init(const input::Parameters& inputs, const lattice::graph::LatticeGraph& graph);
-  int init(const std::vector<double>& vparms, const lattice::graph::LatticeGraph& graph);
+  int init(const input::Parameters& inputs, const lattice::LatticeGraph& graph);
+  int init(const std::vector<double>& vparms, const lattice::LatticeGraph& graph);
   const std::vector<std::string>& vparm_names(void) const; 
   const std::vector<double>& vparm_values(void) const; 
   const std::vector<double>& vparm_lbounds(void) const; 

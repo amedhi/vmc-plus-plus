@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 14:51:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-21 13:00:54
+* Last Modified time: 2017-02-21 23:55:17
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef MF_MODEL_H
@@ -34,8 +34,8 @@ class Unitcell_Term
 public:
   Unitcell_Term() {}
   ~Unitcell_Term() {}
-  void build_bondterm(const model::HamiltonianTerm& sterm, const lattice::graph::LatticeGraph& graph);
-  void build_siteterm(const model::HamiltonianTerm& sterm, const lattice::graph::LatticeGraph& graph);
+  void build_bondterm(const model::HamiltonianTerm& sterm, const lattice::LatticeGraph& graph);
+  void build_siteterm(const model::HamiltonianTerm& sterm, const lattice::LatticeGraph& graph);
   const unsigned& num_out_bonds(void) const { return num_out_bonds_; } 
   const Vector3d& bond_vector(const unsigned& i) const { return bond_vectors_[i]; }
   const ComplexMatrix& coeff_matrix(const unsigned& i=0) const { return coeff_matrices_[i]; }
@@ -51,13 +51,13 @@ private:
 class MF_Model : public model::Hamiltonian
 {
 public:
-  MF_Model(const input::Parameters& inputs, const lattice::graph::LatticeGraph& graph);
+  MF_Model(const input::Parameters& inputs, const lattice::LatticeGraph& graph);
   ~MF_Model() {}
-  const VariationalParms& var_parms(void) const { return varparms_; }
-  void update(const input::Parameters& inputs, const lattice::graph::LatticeGraph& graph);
-  void update(const std::vector<double>& vparms, const unsigned& begin,
-    const unsigned& end, const lattice::graph::LatticeGraph& graph);
-  void update_mu(const double& mu, const lattice::graph::LatticeGraph& graph);
+  const VariationalParms& varparms(void) const { return varparms_; }
+  void update(const input::Parameters& inputs, const lattice::LatticeGraph& graph);
+  void update(const std::string& pname, const double& pvalue, const lattice::LatticeGraph& graph);
+  void update(const parm_vector& pvector, const unsigned& start_pos, const lattice::LatticeGraph& graph);
+  void update_mu(const double& mu, const lattice::LatticeGraph& graph);
   //void update_parameters(const var_parm& vparms_);
   const bool& is_pairing(void) const { return pairing_type_; }
   const bool& need_noninteracting_mu(void) const { return need_noninteracting_mu_; }
@@ -80,11 +80,11 @@ private:
   ComplexMatrix work; //, work2;
 
   //void check_xml(void);
-  void define_model(const input::Parameters& inputs, const lattice::graph::LatticeGraph& graph);
+  void define_model(const input::Parameters& inputs, const lattice::LatticeGraph& graph);
   void deine_pairing(const std::vector<std::string>& pnames);
   void make_variational(const std::string& name, const double& lb, const double& ub);
   //void make_variational(const std::vector<std::string>& pnames);
-  void build_unitcell_terms(const lattice::graph::LatticeGraph& graph);
+  void build_unitcell_terms(const lattice::LatticeGraph& graph);
 };
 
 

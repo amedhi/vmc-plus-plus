@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-16 23:03:44
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-21 11:10:39
+* Last Modified time: 2017-02-21 23:02:25
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef PROJECTOR_H
@@ -27,12 +27,11 @@ public:
   ~WavefunProjector() {}
   void init(const input::Parameters& inputs); 
   void update(const input::Parameters& inputs); 
-  void update(const std::vector<double>& vparms, const unsigned& begin,
-    const unsigned& end); 
+  void update(const var::parm_vector& pvector, const unsigned& start_pos=0);
   const bool& have_gutzwiller(void) const { return gutzwiller_proj_; }
   double gw_factor(void) const; 
   const double& gw_ratio(const int& nd_incre) const { return gw_ratio_[nd_incre+1]; } 
-  const VariationalParms& var_parms(void) const { return varparms_; }
+  const VariationalParms& varparms(void) const { return varparms_; }
 private:
   using vparm_t = std::pair<std::string,double>;
   bool gutzwiller_proj_{false};

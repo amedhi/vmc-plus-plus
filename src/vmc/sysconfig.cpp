@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-18 14:01:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-21 12:56:52
+* Last Modified time: 2017-02-21 23:01:32
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "./sysconfig.h"
@@ -10,32 +10,33 @@
 
 namespace vmc {
 
-SysConfig::SysConfig(const input::Parameters& parms, 
-  const lattice::graph::LatticeGraph& graph, const model::Hamiltonian& model) 
+SysConfig::SysConfig(const input::Parameters& inputs, 
+  const lattice::LatticeGraph& graph, const model::Hamiltonian& model) 
   : BasisState(graph.num_sites(), model.double_occupancy())
-  , wf(parms, graph)
-  , projector(parms)
+  , wf(graph, inputs)
+  , projector(inputs)
   , num_sites_(graph.num_sites())
 {
   // variational parameter numbers
-  num_projector_parms_ = projector.var_parms().size();
-  num_total_parms_ = num_projector_parms_ + wf.var_parms().size();
+  num_projector_parms_ = projector.varparms().size();
+  num_total_parms_ = num_projector_parms_ + wf.varparms().size();
   //wf.va
 }
 
-int SysConfig::init(const input::Parameters& inputs, const lattice::graph::LatticeGraph& graph)
+int SysConfig::init(const input::Parameters& inputs, const lattice::LatticeGraph& graph)
 {
   if (num_sites_==0) return -1;
   projector.update(inputs);
-  wf.compute(inputs, graph);
+  wf.compute(graph, inputs);
   return init_config();
 }
 
-int SysConfig::init(const std::vector<double>& vparms, const lattice::graph::LatticeGraph& graph)
+int SysConfig::init(const var::parm_vector& pvector, const lattice::LatticeGraph& graph)
 {
   if (num_sites_==0) return -1;
-  projector.update(vparms, 0, num_projector_parms_);
-  wf.compute(vparms, num_projector_parms_, num_total_parms_, graph);
+  projector.update(pvector, 0);
+  unsigned start_pos = projector.varparms().size();
+  wf.compute(graph, pvector, start_pos);
   return init_config();
 }
 
@@ -450,36 +451,53 @@ void SysConfig::reset_accept_ratio(void)
 
 const std::vector<std::string>& SysConfig::vparm_names(void) const
 {
+  vparm_names_.clear();
+  for (auto& p : projector.varparms()) vparm_names_.push_back(p.name());
+  for (auto& p : wf.varparms()) vparm_names_.push_back(p.name());
+  /*
   // names are sorted, not in same order as the values
   vparm_names_.resize(num_total_parms_);
   for (const auto& elem : projector.var_parms()) 
     vparm_names_[elem.second] = elem.first;
   for (const auto& elem : wf.var_parms()) 
     vparm_names_[num_projector_parms_ + elem.second] = elem.first;
+  */
   return vparm_names_;
 } 
 
 const std::vector<double>& SysConfig::vparm_values(void) const 
 {
-  vparm_values_ = projector.var_parms().values();
+  vparm_values_.clear();
+  for (auto& p : projector.varparms()) vparm_values_.push_back(p.value());
+  for (auto& p : wf.varparms()) vparm_values_.push_back(p.value());
+  /*vparm_values_ = projector.var_parms().values();
   vparm_values_.insert(vparm_values_.end(),wf.var_parms().values().begin(),
     wf.var_parms().values().end());
+  */
   return vparm_values_;
 }
 
 const std::vector<double>& SysConfig::vparm_lbounds(void) const 
 {
-  vparm_lb_ = projector.var_parms().lbounds();
+  vparm_lb_.clear();
+  for (auto& p : projector.varparms()) vparm_lb_.push_back(p.lbound());
+  for (auto& p : wf.varparms()) vparm_lb_.push_back(p.lbound());
+  /*vparm_lb_ = projector.var_parms().lbounds();
   vparm_lb_.insert(vparm_lb_.end(),wf.var_parms().lbounds().begin(),
     wf.var_parms().lbounds().end());
+  */
   return vparm_lb_;
 }
 
 const std::vector<double>& SysConfig::vparm_ubounds(void) const 
 {
-  vparm_ub_ = projector.var_parms().ubounds();
+  vparm_ub_.clear();
+  for (auto& p : projector.varparms()) vparm_ub_.push_back(p.ubound());
+  for (auto& p : wf.varparms()) vparm_ub_.push_back(p.ubound());
+  /*vparm_ub_ = projector.var_parms().ubounds();
   vparm_ub_.insert(vparm_ub_.end(),wf.var_parms().ubounds().begin(),
     wf.var_parms().ubounds().end());
+  */
   return vparm_ub_;
 }
 

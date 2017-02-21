@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-09 22:48:45
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-20 10:18:20
+* Last Modified time: 2017-02-21 22:57:26
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include <algorithm>
@@ -10,7 +10,7 @@
 
 namespace var {
 
-void Wavefunction::bcs_init(const lattice::graph::LatticeGraph& graph)
+void Wavefunction::bcs_init(const lattice::LatticeGraph& graph)
 {
   // resizing
   mat_work.resize(block_dim_,block_dim_);

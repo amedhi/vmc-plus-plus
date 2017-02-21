@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 14:51:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-21 11:48:49
+* Last Modified time: 2017-02-21 23:39:04
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef WAVEFUNCTION_H
@@ -29,12 +29,13 @@ class Wavefunction
 {
 public:
   //Wavefunction() {}
-  Wavefunction(const input::Parameters& inputs, const lattice::graph::LatticeGraph& graph);
+  Wavefunction(const lattice::LatticeGraph& graph, const input::Parameters& inputs);
   ~Wavefunction() {}
-  const VariationalParms& var_parms(void) const { return mf_model_.var_parms(); }
-  int compute(const input::Parameters& inputs, const lattice::graph::LatticeGraph& graph);
-  int compute(const std::vector<double>& vparms, const unsigned& begin,
-    const unsigned& end, const lattice::graph::LatticeGraph& graph);
+  const VariationalParms& varparms(void) const { return mf_model_.varparms(); }
+  int compute(const lattice::LatticeGraph& graph, const input::Parameters& inputs,
+    const bool& psi_gradient=false);
+  int compute(const lattice::LatticeGraph& graph, const var::parm_vector& pvector,
+    const unsigned& start_pos, const bool& psi_gradient=false);
   void compute_gradient(const std::vector<double>& vparms);
   const unsigned& num_upspins(void) const { return num_upspins_; }
   const unsigned& num_dnspins(void) const { return num_dnspins_; }
@@ -62,6 +63,8 @@ private:
   // FS_state fermisea_;
   Matrix psi_up_;
   Matrix psi_dn_;
+  Matrix work_mat;
+  std::vector<Matrix> psi_gradients_;
 
   // matrices & solvers
   double bcs_large_number_;
@@ -72,13 +75,13 @@ private:
   Eigen::SelfAdjointEigenSolver<ComplexMatrix> hk;
   Eigen::SelfAdjointEigenSolver<ComplexMatrix> hminusk;
 
-  int compute_amplitudes(const lattice::graph::LatticeGraph& graph);
+  int compute_amplitudes(Matrix& psi_mat, const lattice::LatticeGraph& graph);
   void set_particle_num(const input::Parameters& inputs);
   double get_noninteracting_mu(void);
-  void pair_amplitudes(const lattice::graph::LatticeGraph& graph);
-  void fermisea_amplitudes(const lattice::graph::LatticeGraph& graph) {}
+  void pair_amplitudes(const lattice::LatticeGraph& graph, Matrix& psi_mat);
+  void fermisea_amplitudes(const lattice::LatticeGraph& graph) {}
   //void (Wavefunction::*construct_groundstate)(void);
-  void bcs_init(const lattice::graph::LatticeGraph& graph);
+  void bcs_init(const lattice::LatticeGraph& graph);
   void bcs_oneband(void);
   void bcs_multiband(void);
   void bcs_disordered(void);
