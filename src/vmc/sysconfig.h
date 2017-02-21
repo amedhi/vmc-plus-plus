@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-18 13:54:54
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-21 00:15:12
+* Last Modified time: 2017-02-21 10:53:21
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef SYSCONFIG_H
@@ -20,6 +20,7 @@
 namespace vmc {
 
 constexpr double dratio_cutoff(void) { return 1.0E-8; } 
+constexpr double gfactor_cutoff(void) { return 1.0E-8; } 
 
 class SysConfig : public BasisState
 {

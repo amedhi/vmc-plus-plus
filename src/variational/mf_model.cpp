@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-21 10:08:38
+* Last Modified time: 2017-02-21 13:00:51
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "mf_model.h"
@@ -198,7 +198,7 @@ void Unitcell_Term::build_bondterm(const model::HamiltonianTerm& hamterm,
   coeff_matrices_.resize(num_out_bonds_);
   for (auto& M : coeff_matrices_) {
     M.resize(dim, dim);
-    M = Matrix::Zero(dim,dim);
+    M.setZero();
   }
   // operator
   op_ = hamterm.qn_operator();
@@ -223,7 +223,7 @@ void Unitcell_Term::build_siteterm(const model::HamiltonianTerm& hamterm,
   bond_vectors_.resize(1);
   coeff_matrices_.resize(1);
   coeff_matrices_[0].resize(dim, dim);
-  coeff_matrices_[0] = Matrix::Zero(dim,dim);
+  coeff_matrices_[0].setZero();
   // operator
   op_ = hamterm.qn_operator();
   // build the matrix 

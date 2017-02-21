@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 14:51:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-21 10:09:17
+* Last Modified time: 2017-02-21 11:48:49
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef WAVEFUNCTION_H
@@ -65,12 +65,12 @@ private:
 
   // matrices & solvers
   double bcs_large_number_;
-  Matrix mat_work;
-  Matrix mat_delta_k;
-  Matrix mat_dphi_k;
-  std::vector<Matrix> cphi_k;
-  Eigen::SelfAdjointEigenSolver<Matrix> hk;
-  Eigen::SelfAdjointEigenSolver<Matrix> hminusk;
+  ComplexMatrix mat_work;
+  ComplexMatrix mat_delta_k;
+  ComplexMatrix mat_dphi_k;
+  std::vector<ComplexMatrix> cphi_k;
+  Eigen::SelfAdjointEigenSolver<ComplexMatrix> hk;
+  Eigen::SelfAdjointEigenSolver<ComplexMatrix> hminusk;
 
   int compute_amplitudes(const lattice::graph::LatticeGraph& graph);
   void set_particle_num(const input::Parameters& inputs);

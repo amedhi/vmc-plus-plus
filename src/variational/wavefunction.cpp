@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-21 00:10:16
+* Last Modified time: 2017-02-21 12:48:36
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "wavefunction.h"
@@ -86,7 +86,7 @@ void Wavefunction::pair_amplitudes(const lattice::graph::LatticeGraph& graph)
         Vector3d kvec = blochbasis_.kvector(k);
         ksum += cphi_k[k](m,n) * std::exp(ii()*kvec.dot(Ri-Rj));
       }
-      psi_up_(i,j) = ksum * one_by_nk;
+      psi_up_(i,j) = ampl_part(ksum) * one_by_nk;
       //std::cout << psi_up_(i,j) << "\n"; 
       //getchar();
     }

@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-18 14:01:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-21 10:04:32
+* Last Modified time: 2017-02-21 12:56:52
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "./sysconfig.h"
@@ -46,6 +46,15 @@ int SysConfig::init_config(void)
   if (num_upspins_==0 && num_dnspins_==0) return -1;
   if (num_upspins_ != num_dnspins_) 
     throw std::range_error("*SysConfig::init_config: unequal UP & DN spin case not implemented");
+  // small 'gfactor' caution
+  bool tmp_restriction = false;
+  bool original_state = BasisState::double_occupancy();
+  if (projector.have_gutzwiller()) {
+    if (projector.gw_factor()<gfactor_cutoff()) {
+      BasisState::allow_double_occupancy(false);
+      tmp_restriction = true;
+    }
+  }
   BasisState::init_spins(num_upspins_, num_dnspins_);
   psi_mat.resize(num_upspins_, num_dnspins_);
   psi_inv.resize(num_dnspins_, num_upspins_);
@@ -64,6 +73,7 @@ int SysConfig::init_config(void)
       throw std::underflow_error("*SysConfig::init: Ill conditioned wave function matrix.");
     }
   }
+  if (tmp_restriction) allow_double_occupancy(original_state);
   //std::cout << psi_mat;
   //std::cout << bstate;
   // amplitude matrix invers
@@ -95,7 +105,7 @@ amplitude_t SysConfig::apply(const model::op::quantum_op& qn_op, const unsigned&
 {
   switch (qn_op.id()) {
     case model::op_id::niup_nidn:
-      return amplitude_t(apply_niup_nidn(site_i)); break;
+      return ampl_part(apply_niup_nidn(site_i)); break;
     default: 
       throw std::range_error("SysConfig::apply: undefined site operator");
   }
@@ -110,7 +120,7 @@ int SysConfig::apply_niup_nidn(const unsigned& i) const
 amplitude_t SysConfig::apply_upspin_hop(const unsigned& i, const unsigned& j,
   const int& bc_phase) const
 {
-  if (i == j) return amplitude_t(1.0);
+  if (i == j) return ampl_part(1.0);
   int upspin, to_site;
   int delta_nd;
   //check_upspin_hop(i,j)
@@ -137,7 +147,8 @@ amplitude_t SysConfig::apply_upspin_hop(const unsigned& i, const unsigned& j,
   // det_ratio for the term
   wf.get_amplitudes(psi_row, to_site, dnspin_sites());
   amplitude_t det_ratio = psi_row.cwiseProduct(psi_inv.col(upspin)).sum();
-  return amplitude_t(bc_phase)*std::conj(det_ratio)*projector.gw_ratio(delta_nd);
+  det_ratio = ampl_part(std::conj(det_ratio));
+  return amplitude_t(bc_phase) * det_ratio * projector.gw_ratio(delta_nd);
 }
 
 amplitude_t SysConfig::apply_dnspin_hop(const unsigned& i, const unsigned& j,
@@ -169,7 +180,8 @@ amplitude_t SysConfig::apply_dnspin_hop(const unsigned& i, const unsigned& j,
   // det_ratio for the term
   wf.get_amplitudes(psi_col, upspin_sites(), to_site);
   amplitude_t det_ratio = psi_col.cwiseProduct(psi_inv.row(dnspin)).sum();
-  return amplitude_t(bc_phase)*std::conj(det_ratio)*projector.gw_ratio(delta_nd);
+  det_ratio = ampl_part(std::conj(det_ratio));
+  return amplitude_t(bc_phase) * det_ratio * projector.gw_ratio(delta_nd);
 }
 
 amplitude_t SysConfig::apply_sisj_plus(const unsigned& i, const unsigned& j) const
@@ -235,8 +247,8 @@ amplitude_t SysConfig::apply_sisj_plus(const unsigned& i, const unsigned& j) con
   inv_row(upspin) = ratio_inv * psi_inv(dnspin,upspin);
   // ratio for the dnspin hop
   amplitude_t det_ratio2 = psi_col.cwiseProduct(inv_row).sum();
-
-  return -0.5*std::conj(det_ratio1 * det_ratio2) + amplitude_t(ninj_term);
+  amplitude_t det_ratio = ampl_part(std::conj(det_ratio1*det_ratio2));
+  return -0.5 * det_ratio + amplitude_t(ninj_term);
 }
 
 int SysConfig::update_state(void)

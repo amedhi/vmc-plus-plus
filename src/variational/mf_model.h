@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 14:51:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-21 10:08:41
+* Last Modified time: 2017-02-21 13:00:54
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef MF_MODEL_H
@@ -38,13 +38,13 @@ public:
   void build_siteterm(const model::HamiltonianTerm& sterm, const lattice::graph::LatticeGraph& graph);
   const unsigned& num_out_bonds(void) const { return num_out_bonds_; } 
   const Vector3d& bond_vector(const unsigned& i) const { return bond_vectors_[i]; }
-  const Matrix& coeff_matrix(const unsigned& i=0) const { return coeff_matrices_[i]; }
+  const ComplexMatrix& coeff_matrix(const unsigned& i=0) const { return coeff_matrices_[i]; }
   //const double& coupling(const unsigned& site_type) const; 
   const model::op::quantum_op& qn_operator(void) const { return op_; }
 private:
   model::op::quantum_op op_;
   unsigned num_out_bonds_;
-  std::vector<Matrix> coeff_matrices_;
+  std::vector<ComplexMatrix> coeff_matrices_;
   std::vector<Vector3d> bond_vectors_;
 };
 
@@ -62,8 +62,8 @@ public:
   const bool& is_pairing(void) const { return pairing_type_; }
   const bool& need_noninteracting_mu(void) const { return need_noninteracting_mu_; }
   void construct_kspace_block(const Vector3d& kvec);
-  const Matrix& quadratic_spinup_block(void) const { return quadratic_block_up_; }
-  const Matrix& pairing_part(void) const { return pairing_block_; }
+  const ComplexMatrix& quadratic_spinup_block(void) const { return quadratic_block_up_; }
+  const ComplexMatrix& pairing_part(void) const { return pairing_block_; }
 private:
   using Model = model::Hamiltonian;
   mf_order order_;
@@ -74,10 +74,10 @@ private:
   std::vector<Unitcell_Term> uc_bondterms_;
   // matrices in kspace representation
   unsigned dim_;
-  Matrix quadratic_block_up_;
-  Matrix quadratic_block_dn_;
-  Matrix pairing_block_;
-  Matrix work; //, work2;
+  ComplexMatrix quadratic_block_up_;
+  ComplexMatrix quadratic_block_dn_;
+  ComplexMatrix pairing_block_;
+  ComplexMatrix work; //, work2;
 
   //void check_xml(void);
   void define_model(const input::Parameters& inputs, const lattice::graph::LatticeGraph& graph);

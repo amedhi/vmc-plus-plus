@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-16 23:03:44
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-21 10:08:45
+* Last Modified time: 2017-02-21 11:10:39
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef PROJECTOR_H
@@ -30,6 +30,7 @@ public:
   void update(const std::vector<double>& vparms, const unsigned& begin,
     const unsigned& end); 
   const bool& have_gutzwiller(void) const { return gutzwiller_proj_; }
+  double gw_factor(void) const; 
   const double& gw_ratio(const int& nd_incre) const { return gw_ratio_[nd_incre+1]; } 
   const VariationalParms& var_parms(void) const { return varparms_; }
 private:

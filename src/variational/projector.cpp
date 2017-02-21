@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-16 23:17:49
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-21 10:08:14
+* Last Modified time: 2017-02-21 11:10:37
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "./projector.h"
@@ -16,7 +16,8 @@ void WavefunProjector::init(const input::Parameters& parms)
   double g = 1.0;
   if (gutzwiller_proj_) {
     g = parms.set_value("gfactor", 1.0);
-    varparms_.add("g", g, 1.0E-6, 1.0);
+    if (g<0.0) throw std::range_error("WavefunProjector::init: out-of-range 'g'-value.");
+    varparms_.add("gfactor", g, 1.0E-6, 1.0);
   }
   //pfactors_.insert({"g", g});
   // gw ratio
@@ -39,11 +40,17 @@ void WavefunProjector::update(const std::vector<double>& vparms, const unsigned&
   if (gutzwiller_proj_) set_gw_ratio();
 }
 
+double WavefunProjector::gw_factor(void) const 
+{
+  return varparms_.values()[varparms_.at("gfactor")];
+}
+
 void WavefunProjector::set_gw_ratio(void) 
 { 
-  int pos = varparms_.at("g");
+  int pos = varparms_.at("gfactor");
   double g = varparms_.values()[pos];
   //std::cout << "### g = " << g << "\n";
+  if (g<0.0) throw std::range_error("WavefunProjector::set_gw_ratio: out-of-range 'g'-value");
   gw_ratio_[0] = 1.0/g;  // nd_increament = -1
   gw_ratio_[1] = 1.0;    // nd_increament = 0
   gw_ratio_[2] = g;      // nd_increament = 1
