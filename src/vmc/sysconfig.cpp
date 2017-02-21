@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-18 14:01:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-20 06:07:39
+* Last Modified time: 2017-02-21 10:04:32
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "./sysconfig.h"
@@ -17,17 +17,35 @@ SysConfig::SysConfig(const input::Parameters& parms,
   , projector(parms)
   , num_sites_(graph.num_sites())
 {
+  // variational parameter numbers
+  num_projector_parms_ = projector.var_parms().size();
+  num_total_parms_ = num_projector_parms_ + wf.var_parms().size();
+  //wf.va
 }
 
-int SysConfig::init(const input::Parameters& parms,const lattice::graph::LatticeGraph& graph)
+int SysConfig::init(const input::Parameters& inputs, const lattice::graph::LatticeGraph& graph)
 {
   if (num_sites_==0) return -1;
-  wf.compute(parms, graph);
+  projector.update(inputs);
+  wf.compute(inputs, graph);
+  return init_config();
+}
+
+int SysConfig::init(const std::vector<double>& vparms, const lattice::graph::LatticeGraph& graph)
+{
+  if (num_sites_==0) return -1;
+  projector.update(vparms, 0, num_projector_parms_);
+  wf.compute(vparms, num_projector_parms_, num_total_parms_, graph);
+  return init_config();
+}
+
+int SysConfig::init_config(void)
+{
   num_upspins_ = wf.num_upspins();
   num_dnspins_ = wf.num_dnspins();
   if (num_upspins_==0 && num_dnspins_==0) return -1;
   if (num_upspins_ != num_dnspins_) 
-    throw std::range_error("*SysConfig::init: unequal UP & DN spin case not implemented");
+    throw std::range_error("*SysConfig::init_config: unequal UP & DN spin case not implemented");
   BasisState::init_spins(num_upspins_, num_dnspins_);
   psi_mat.resize(num_upspins_, num_dnspins_);
   psi_inv.resize(num_dnspins_, num_upspins_);
@@ -416,6 +434,41 @@ void SysConfig::reset_accept_ratio(void)
 {
   last_proposed_moves_ = 0;
   last_accepted_moves_ = 0;
+}
+
+const std::vector<std::string>& SysConfig::vparm_names(void) const
+{
+  // names are sorted, not in same order as the values
+  vparm_names_.resize(num_total_parms_);
+  for (const auto& elem : projector.var_parms()) 
+    vparm_names_[elem.second] = elem.first;
+  for (const auto& elem : wf.var_parms()) 
+    vparm_names_[num_projector_parms_ + elem.second] = elem.first;
+  return vparm_names_;
+} 
+
+const std::vector<double>& SysConfig::vparm_values(void) const 
+{
+  vparm_values_ = projector.var_parms().values();
+  vparm_values_.insert(vparm_values_.end(),wf.var_parms().values().begin(),
+    wf.var_parms().values().end());
+  return vparm_values_;
+}
+
+const std::vector<double>& SysConfig::vparm_lbounds(void) const 
+{
+  vparm_lb_ = projector.var_parms().lbounds();
+  vparm_lb_.insert(vparm_lb_.end(),wf.var_parms().lbounds().begin(),
+    wf.var_parms().lbounds().end());
+  return vparm_lb_;
+}
+
+const std::vector<double>& SysConfig::vparm_ubounds(void) const 
+{
+  vparm_ub_ = projector.var_parms().ubounds();
+  vparm_ub_.insert(vparm_ub_.end(),wf.var_parms().ubounds().begin(),
+    wf.var_parms().ubounds().end());
+  return vparm_ub_;
 }
 
 

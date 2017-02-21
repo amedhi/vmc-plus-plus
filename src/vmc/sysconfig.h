@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-18 13:54:54
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-20 05:38:09
+* Last Modified time: 2017-02-21 00:15:12
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef SYSCONFIG_H
@@ -27,7 +27,12 @@ public:
   SysConfig(const input::Parameters& parms, const lattice::graph::LatticeGraph& graph, 
     const model::Hamiltonian& model);
   ~SysConfig() {}
-  int init(const input::Parameters& parms,const lattice::graph::LatticeGraph& graph);
+  int init(const input::Parameters& inputs, const lattice::graph::LatticeGraph& graph);
+  int init(const std::vector<double>& vparms, const lattice::graph::LatticeGraph& graph);
+  const std::vector<std::string>& vparm_names(void) const; 
+  const std::vector<double>& vparm_values(void) const; 
+  const std::vector<double>& vparm_lbounds(void) const; 
+  const std::vector<double>& vparm_ubounds(void) const; 
   int update_state(void);
   double accept_ratio(void);
   void reset_accept_ratio(void);
@@ -37,6 +42,7 @@ public:
   int apply_niup_nidn(const unsigned& i) const;
   const int& num_updates(void) const { return num_updates_; }
   const var::Wavefunction& wavefunc(void) const { return wf; }
+  //var::VariationalParms& var_parms(void) { return wf.var_parms(); }
 private:
   var::Wavefunction wf;
   var::WavefunProjector projector;
@@ -48,6 +54,14 @@ private:
   unsigned num_sites_;
   unsigned num_upspins_;
   unsigned num_dnspins_;
+
+  // variational parameters
+  mutable std::vector<std::string> vparm_names_;
+  mutable std::vector<double> vparm_values_;
+  mutable std::vector<double> vparm_lb_;
+  mutable std::vector<double> vparm_ub_;
+  unsigned num_projector_parms_{0};
+  unsigned num_total_parms_{0};
 
   // mc parameters
   enum move_t {uphop, dnhop, exch, end};
@@ -63,6 +77,7 @@ private:
   long last_accepted_moves_;
 
   // helper methods
+  int init_config(void);
   int set_run_parameters(void);
   int do_upspin_hop(void);
   int do_dnspin_hop(void);

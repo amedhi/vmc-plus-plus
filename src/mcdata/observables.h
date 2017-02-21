@@ -30,8 +30,8 @@ public:
   ~ObservableBase() { fs_.close(); }
   virtual void init(const input::Parameters& parms); 
   virtual void reset(void) {}
-  virtual int print_heading(const std::map<std::string, double> xparms) { return -1; }
-  virtual int print_result(const std::map<std::string, double> xparms) { return -1; }
+  virtual int print_heading(const std::vector<std::string>& xpnames) { return -1; }
+  virtual int print_result(const std::vector<double>& xpvals) { return -1; }
   inline const bool& is_on(void) const { return onoff_; }
   bool& state(void) { return onoff_; }
   void open_file(const std::string& fname) { if (onoff_) fs_.open(fname); }
@@ -54,8 +54,8 @@ public:
   ~ScalarObservable() {}
   void init(const input::Parameters& parms) override; 
   inline void operator<<(const double& data) { data_ << data; }
-  int print_heading(const std::map<std::string, double> xparms) override;
-  int print_result(const std::map<std::string, double> xparms) override;
+  int print_heading(const std::vector<std::string>& xpnames) override;
+  int print_result(const std::vector<double>& xpvals) override;
   void reset(void) override { if (is_on()) data_.clear(); }
   operator int(void) const { return is_on(); }
 private:
@@ -72,8 +72,8 @@ public:
     { size_=size; elem_names_=elem_names; }
   void init(const input::Parameters& parms) override; 
   inline void operator<<(const VectorData& data) { data_ << data; }
-  int print_heading(const std::map<std::string, double> xparms) override;
-  int print_result(const std::map<std::string, double> xparms) override;
+  int print_heading(const std::vector<std::string>& xpnames) override;
+  int print_result(const std::vector<double>& xpvals) override;
   void reset(void) override { if (is_on()) data_.clear(); }
   operator int(void) const { return is_on(); }
   const unsigned& size(void) const { return size_; }
@@ -101,17 +101,18 @@ public:
   //void set_magn_op(const std::string& op, const std::string& site="i"); 
   //void set_strain_op(const std::string& op, const std::string& site="i"); 
   //const bool& need_energy(void) { return energy_.on(); }
-  void as_function_of(const std::map<std::string, double> xparms);
-  void as_function_of(const std::string& xparm_name);
-  void print(const std::map<std::string, double> xparms); 
-  void print(const double& xparm_val);
+  void as_function_of(const std::vector<std::string>& xpnames);
+  //void as_function_of(const std::map<std::string, double>& xparms);
+  void as_function_of(const std::string& xpname);
+  void print(const std::vector<double> xpvals); 
+  void print(const double& xpval);
 private:
   //ScalarObservable magn_;
   //ScalarObservable magn_sq_;
   VectorObservable energy_;
   //VectorObservable energy_sq_;
   unsigned num_xparms_{0};
-  std::map<std::string, double> single_xparm_;
+  //std::map<std::string, double> single_xparm_;
 };
 
 

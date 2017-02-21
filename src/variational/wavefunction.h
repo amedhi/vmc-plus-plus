@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 14:51:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-20 06:37:29
+* Last Modified time: 2017-02-21 10:09:17
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef WAVEFUNCTION_H
@@ -31,10 +31,11 @@ public:
   //Wavefunction() {}
   Wavefunction(const input::Parameters& inputs, const lattice::graph::LatticeGraph& graph);
   ~Wavefunction() {}
-  const std::vector<vparm_t>& variational_parms(void) { return mf_model_.variational_parms(); }
+  const VariationalParms& var_parms(void) const { return mf_model_.var_parms(); }
   int compute(const input::Parameters& inputs, const lattice::graph::LatticeGraph& graph);
-  void update_amplitudes(const std::vector<double>& variatioanl_parm);
-  void compute_grade(const std::vector<double>& variatioanl_parm);
+  int compute(const std::vector<double>& vparms, const unsigned& begin,
+    const unsigned& end, const lattice::graph::LatticeGraph& graph);
+  void compute_gradient(const std::vector<double>& vparms);
   const unsigned& num_upspins(void) const { return num_upspins_; }
   const unsigned& num_dnspins(void) const { return num_dnspins_; }
   const double& hole_doping(void) const { return hole_doping_; }

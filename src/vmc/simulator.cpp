@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:20:56
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-20 05:39:01
+* Last Modified time: 2017-02-21 09:37:57
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "simulator.h"
@@ -26,14 +26,29 @@ Simulator::Simulator(const input::Parameters& parms)
 
   // observables
   observables_.init(parms, model, print_copyright);
-  observables_.as_function_of("x");
+  //observables_.as_function_of("x");
+  observables_.as_function_of(config.vparm_names());
   config_energy_.resize(model.num_terms());
 }
 
-int Simulator::run(const input::Parameters& parms)
+int Simulator::run(const input::Parameters& inputs) 
 {
-  int stat = config.init(parms, graph);
+  int stat = config.init(inputs, graph);
   if (stat != 0) return -1;
+  run_simulation();
+  return 0;
+}
+
+int Simulator::run(const std::vector<double>& varparms) 
+{
+  int stat = config.init(varparms, graph);
+  if (stat != 0) return -1;
+  run_simulation();
+  return 0;
+}
+
+int Simulator::run_simulation(void)
+{
   // run simulation
   int num_measurement = 0;
   int count = min_interval_;
@@ -54,10 +69,18 @@ int Simulator::run(const input::Parameters& parms)
     count++;
   }
   // output
-  observables_.print(config.wavefunc().hole_doping());
+  //observables_.print(config.wavefunc().hole_doping());
+  observables_.print(config.vparm_values());
   std::cout << "total steps = " << config.num_updates() << "\n";
   return 0;
 }
+
+int Simulator::get_variational_parms(std::vector<double>& varparms)
+{
+  varparms = config.vparm_values();
+  return varparms.size();
+}
+
 
 
 void Simulator::print_copyright(std::ostream& os)

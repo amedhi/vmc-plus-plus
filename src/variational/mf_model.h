@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 14:51:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-20 06:35:23
+* Last Modified time: 2017-02-21 10:08:41
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef MF_MODEL_H
@@ -17,6 +17,7 @@
 #include "../model/quantum_op.h"
 #include "../model/model.h"
 #include "../lattice/graph.h"
+#include "./varparm.h"
 #include "blochbasis.h"
 #include "matrix.h"
 
@@ -52,8 +53,10 @@ class MF_Model : public model::Hamiltonian
 public:
   MF_Model(const input::Parameters& inputs, const lattice::graph::LatticeGraph& graph);
   ~MF_Model() {}
-  const std::vector<vparm_t>& variational_parms(void) { return vparms_; }
+  const VariationalParms& var_parms(void) const { return varparms_; }
   void update(const input::Parameters& inputs, const lattice::graph::LatticeGraph& graph);
+  void update(const std::vector<double>& vparms, const unsigned& begin,
+    const unsigned& end, const lattice::graph::LatticeGraph& graph);
   void update_mu(const double& mu, const lattice::graph::LatticeGraph& graph);
   //void update_parameters(const var_parm& vparms_);
   const bool& is_pairing(void) const { return pairing_type_; }
@@ -66,7 +69,7 @@ private:
   mf_order order_;
   bool pairing_type_;
   bool need_noninteracting_mu_;
-  std::vector<vparm_t> vparms_;
+  VariationalParms varparms_;
   std::vector<Unitcell_Term> uc_siteterms_;
   std::vector<Unitcell_Term> uc_bondterms_;
   // matrices in kspace representation
@@ -79,7 +82,8 @@ private:
   //void check_xml(void);
   void define_model(const input::Parameters& inputs, const lattice::graph::LatticeGraph& graph);
   void deine_pairing(const std::vector<std::string>& pnames);
-  void make_variational(const std::vector<std::string>& pnames);
+  void make_variational(const std::string& name, const double& lb, const double& ub);
+  //void make_variational(const std::vector<std::string>& pnames);
   void build_unitcell_terms(const lattice::graph::LatticeGraph& graph);
 };
 

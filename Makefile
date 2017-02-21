@@ -22,6 +22,7 @@ SRCS+= lattice/graph.cpp
 SRCS+= model/hamiltonian_term.cpp
 SRCS+= model/model.cpp
 SRCS+= model/modellibrary.cpp
+SRCS+= variational/varparm.cpp
 SRCS+= variational/blochbasis.cpp
 SRCS+= variational/mf_model.cpp
 SRCS+= variational/bcsfunction.cpp
@@ -49,6 +50,7 @@ HDRS=scheduler/optionparser.h scheduler/cmdargs.h \
 	 montecarlo/simulator.h \
          model/modelparams.h  model/quantum_op.h \
 	 model/hamiltonian_term.h model/model.h \
+	 variational/varparm.h \
 	 variational/blochbasis.h \
 	 variational/mf_model.h variational/wavefunction.h \
 	 variational/projector.h \

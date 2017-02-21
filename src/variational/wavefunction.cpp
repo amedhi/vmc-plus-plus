@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-20 06:02:24
+* Last Modified time: 2017-02-21 00:10:16
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "wavefunction.h"
@@ -20,6 +20,7 @@ Wavefunction::Wavefunction(const input::Parameters& inputs,
   , num_upspins_(0)
   , num_dnspins_(0)
 {
+  set_particle_num(inputs);
   if (mf_model_.is_pairing()) {
     bcs_init(graph);
     if (block_dim_==1) type_ = wf_type::bcs_oneband;
@@ -40,6 +41,14 @@ int Wavefunction::compute(const input::Parameters& inputs, const lattice::graph:
     //std::cout << "mu = " << mu << "\n";
     mf_model_.update_mu(mu, graph); 
   }
+  compute_amplitudes(graph);
+  return 0;
+}
+
+int Wavefunction::compute(const std::vector<double>& vparms, const unsigned& begin,
+  const unsigned& end, const lattice::graph::LatticeGraph& graph)
+{
+  mf_model_.update(vparms,begin,end,graph);
   compute_amplitudes(graph);
   return 0;
 }

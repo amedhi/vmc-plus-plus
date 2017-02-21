@@ -55,39 +55,38 @@ void Observables::init(const input::Parameters& parms, const model::Hamiltonian&
   }*/
 }
 
-void Observables::as_function_of(const std::map<std::string, double> xparms)
+void Observables::as_function_of(const std::vector<std::string>& xpnames)
 {
-  num_xparms_ = xparms.size();
+  num_xparms_ = xpnames.size();
   for (auto& obs : *this) {
     if (obs.get().is_on() && obs.get().is_open() && obs.get().replace_mode()) {
-      obs.get().print_heading(xparms);
+      obs.get().print_heading(xpnames);
     }
   }
 } 
 
-void Observables::as_function_of(const std::string& xparm_name)
+void Observables::as_function_of(const std::string& xpname)
 {
-  single_xparm_.clear(); 
-  single_xparm_[xparm_name] = 0.0;
-  as_function_of(single_xparm_);
+  std::vector<std::string> xpnames({xpname});
+  as_function_of(xpnames);
 }
 
-void Observables::print(const std::map<std::string, double> xparms) 
+void Observables::print(const std::vector<double> xpvals) 
 {
-  if (xparms.size() != num_xparms_) 
+  if (xpvals.size() != num_xparms_) 
     throw std::range_error("* Observables::print: 'x-parameters' size mismatch");
-  for (auto& obs : *this) obs.get().print_result(xparms); 
+  for (auto& obs : *this) obs.get().print_result(xpvals); 
 }
 
 void Observables::print(const double& xparm_val) 
 {
   if (num_xparms_ != 1) 
     throw std::range_error("* Observables::print: no 'x-parameter' was set initially");
-  single_xparm_.begin()->second = xparm_val;
-  for (auto& obs : *this) obs.get().print_result(single_xparm_); 
+  std::vector<double> xpvals({xparm_val});
+  for (auto& obs : *this) obs.get().print_result(xpvals); 
 }
 
-int ScalarObservable::print_heading(const std::map<std::string, double> xparms) 
+int ScalarObservable::print_heading(const std::vector<std::string>& xpnames) 
 {
   if (!is_on()) return 1;
   if (!fs_) throw std::runtime_error("* ScalarObservable::print_heading: file not open");
@@ -96,8 +95,8 @@ int ScalarObservable::print_heading(const std::map<std::string, double> xparms)
   fs_ << std::left;
   fs_ << "# ";
   //fs_ << std::setw(14)<<xvar_name;
-  for (const auto& p : xparms) 
-    fs_ << std::setw(14)<<p.first.substr(0,14);
+  for (const auto& p : xpnames) 
+    fs_ << std::setw(14)<<p.substr(0,14);
   std::string short_name = name();
   if (short_name.size() >= 16) short_name.erase(14);
   fs_ << std::setw(14)<<short_name<<std::setw(11)<<"err";
@@ -107,20 +106,20 @@ int ScalarObservable::print_heading(const std::map<std::string, double> xparms)
   return 0;
 }
 
-int ScalarObservable::print_result(const std::map<std::string, double> xparms) 
+int ScalarObservable::print_result(const std::vector<double>& xpvals) 
 {
   if (!is_on()) return 1;
   if (!fs_) throw std::runtime_error("* ScalarObservable::print: file not open");
   fs_ << std::right;
   fs_ << std::scientific << std::uppercase << std::setprecision(6);
-  for (const auto& p : xparms) 
-    fs_ << std::setw(13) << p.second;
+  for (const auto& p : xpvals) 
+    fs_ << std::setw(14) << p;
   fs_ << data_.result_str() << data_.conv_str();
   fs_ << std::endl;
   return 0;
 } 
 
-int VectorObservable::print_heading(const std::map<std::string, double> xparms) 
+int VectorObservable::print_heading(const std::vector<std::string>& xpnames) 
 {
   if (!is_on()) return 1;
   if (!fs_) throw std::runtime_error("* VectorObservable::print_heading: file not open");
@@ -129,7 +128,9 @@ int VectorObservable::print_heading(const std::map<std::string, double> xparms)
   fs_ << "# ";
   fs_ << std::left;
   //fs_ << std::setw(14)<<xvar_name;
-  for (const auto& p : xparms) fs_ << std::setw(14)<<p.first.substr(0,14);
+  for (const auto& p : xpnames) fs_ << std::setw(14)<<p.substr(0,14);
+  // total value
+  fs_ << std::setw(14)<<"Total"<<std::setw(11)<<"err";
   for (const auto& name : elem_names_) 
     fs_ << std::setw(14)<<name<<std::setw(11)<<"err";
   fs_ << std::setw(9)<<"samples";
@@ -138,14 +139,16 @@ int VectorObservable::print_heading(const std::map<std::string, double> xparms)
   return 0;
 }
 
-int VectorObservable::print_result(const std::map<std::string, double> xparms) 
+int VectorObservable::print_result(const std::vector<double>& xpvals) 
 {
   if (!is_on()) return 1;
   if (!fs_) throw std::runtime_error("* VectorObservable::print: file not open");
   fs_ << std::right;
   fs_ << std::scientific << std::uppercase << std::setprecision(6);
-  for (const auto& p : xparms) 
-    fs_ << std::setw(13) << p.second;
+  for (const auto& p : xpvals) 
+    fs_ << std::setw(14) << p;
+  // total value
+  fs_ << data_.result_str(-1); 
   for (unsigned i=0; i<size_; ++i) 
     fs_ << data_.result_str(i); 
   fs_ << data_.conv_str(0).substr(0,10); 

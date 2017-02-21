@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-20 06:35:37
+* Last Modified time: 2017-02-21 10:08:38
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "mf_model.h"
@@ -14,7 +14,6 @@ namespace var {
 MF_Model::MF_Model(const input::Parameters& inputs, 
   const lattice::graph::LatticeGraph& graph)
 {
-  vparms_.clear();
   // mean-field model
   define_model(inputs, graph);
   // 'unitcell representation' of the hamiltonian
@@ -31,7 +30,7 @@ MF_Model::MF_Model(const input::Parameters& inputs,
 void MF_Model::define_model(const input::Parameters& inputs, const lattice::graph::LatticeGraph& graph)
 {
   using namespace model;
-  double defval;
+  double defval, lb, ub;
   std::string name;
   model::CouplingConstant cc;
   // mean-field order & model
@@ -44,7 +43,8 @@ void MF_Model::define_model(const input::Parameters& inputs, const lattice::grap
   add_parameter(name="mu", defval=0.0, inputs, info);
   if (info == 0) need_noninteracting_mu_ = false;
   else need_noninteracting_mu_ = true;
-  if (inputs.set_value("mu_variational", false, info)) make_variational({"mu"});
+  if (inputs.set_value("mu_variational", false, info)) 
+    make_variational("mu", -5.0, +5.0);
 
   // assuming spin up-down symmetry, down-spin operators are not specified 
   if (order_name == "NONE") {
@@ -63,7 +63,8 @@ void MF_Model::define_model(const input::Parameters& inputs, const lattice::grap
     add_siteterm(name="mu_term", cc="-mu", op::ni_up());
     cc = CouplingConstant({0, "delta_sc"}, {1, "-delta_sc"});
     add_bondterm(name="pairing", cc, op::pair_create());
-    make_variational({"delta_sc"});
+    // variational parameters
+    make_variational("delta_sc", lb=0.0, ub=1.0);
   }
   else if (order_name == "SWAVE_SC") {
     order_ = mf_order::ssc;
@@ -82,14 +83,30 @@ void MF_Model::define_model(const input::Parameters& inputs, const lattice::grap
 void MF_Model::update(const input::Parameters& inputs, const lattice::graph::LatticeGraph& graph)
 {
   Model::update_parameters(inputs);
+  varparms_.update(inputs);
   build_unitcell_terms(graph);
 }
 
-void MF_Model::make_variational(const std::vector<std::string>& pnames)
+void MF_Model::update(const std::vector<double>& vparms, const unsigned& begin,
+    const unsigned& end, const lattice::graph::LatticeGraph& graph)
+{
+  varparms_.update(vparms,begin,end);
+  for (const auto& elem : varparms_)
+    Model::update_parameter(elem.first, varparms_.values()[elem.second]);
+  //std::cout << "### delta_sc = " << get_parameter_value("delta_sc") << "\n";
+  build_unitcell_terms(graph);
+}
+
+/*void MF_Model::make_variational(const std::vector<std::string>& pnames)
 {
   for (const auto& pname : pnames) {
     vparms_.push_back({pname,get_parameter_value(pname)});
   }
+}*/
+
+void MF_Model::make_variational(const std::string& name, const double& lb, const double& ub)
+{
+  varparms_.add(name, get_parameter_value(name), lb, ub);
 }
 
 void MF_Model::build_unitcell_terms(const lattice::graph::LatticeGraph& graph)

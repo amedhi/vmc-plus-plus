@@ -21,21 +21,22 @@ bc2 = "antiperiodic"
 #---------------------------------------------
 # Model:
 #---------------------------------------------
-model = "t-J"
-#model = "HUBBARD"
+#model = "t-J"
+model = "HUBBARD"
 t = 1.0
 J = 0.35
-#U = 8.0
+U = 8.0
 
 #---------------------------------------------
 # Variational wavefunction
 #---------------------------------------------
 mf_order = "DWAVE_SC"
-gutzwiller_proj = "NO"
+gutzwiller_proj = "YES"
 hole_doping = 0.20
-g = 1.0
-delta_sc = 0.5
+gfactor = 0.2  #, 0.5, 0.7
+delta_sc = 0.1 #, 0.1, 1.0
 mu = 0.0
+mu_variational = "YES"
 
 
 #---------------------------------------------

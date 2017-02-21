@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:50
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-19 09:39:47
+* Last Modified time: 2017-02-20 13:03:21
 *----------------------------------------------------------------------------*/
 #include "model.h"
 
@@ -161,7 +161,7 @@ double Hamiltonian::get_parameter_value(const std::string& pname) const
 {
   auto it = parms_.find(pname);
   if (it != parms_.end()) return it->second;
-  else return 0.0;
+  else throw std::logic_error("Hamiltonian::get_parameter_value: parameter does not exist");
 }
 
 void Hamiltonian::get_term_names(std::vector<std::string>& term_names) const
