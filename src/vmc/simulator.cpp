@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:20:56
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-21 22:56:57
+* Last Modified time: 2017-02-23 00:04:36
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "simulator.h"
@@ -23,6 +23,7 @@ Simulator::Simulator(const input::Parameters& parms)
   num_warmup_steps_ = parms.set_value("warmup_steps", 0);
   min_interval_ = parms.set_value("min_interval", 0);
   max_interval_ = parms.set_value("max_interval", 0);
+  check_interval_ = std::max(1,num_measure_steps_/10);
 
   // observables
   observables_.init(parms, model, print_copyright);
@@ -31,18 +32,20 @@ Simulator::Simulator(const input::Parameters& parms)
   config_energy_.resize(model.num_terms());
 }
 
-int Simulator::run(const input::Parameters& inputs) 
+int Simulator::run(const input::Parameters& inputs, const bool& silent) 
 {
   int stat = config.init(inputs, graph);
   if (stat != 0) return -1;
+  print_progress_ = !silent;
   run_simulation();
   return 0;
 }
 
-int Simulator::run(const std::vector<double>& varparms) 
+int Simulator::run(const std::vector<double>& varparms, const bool& silent) 
 {
   int stat = config.init(varparms, graph);
   if (stat != 0) return -1;
+  print_progress_ = !silent;
   run_simulation();
   return 0;
 }
@@ -54,6 +57,7 @@ int Simulator::run_simulation(void)
   int count = min_interval_;
   // warmup run
   for (int n=0; n<num_warmup_steps_; ++n) config.update_state();
+  if (print_progress_) std::cout << " warmup done\n";
   // measuring run
   observables_.reset();
   while (num_measurement < num_measure_steps_) {
@@ -64,14 +68,18 @@ int Simulator::run_simulation(void)
         config.reset_accept_ratio();
         do_measurements();
         ++num_measurement;
+        if (print_progress_) print_progress(num_measurement);
       }
     }
     count++;
   }
+  if (print_progress_) {
+    std::cout << " simulation done\n";
+    config.print_stats();
+  }
   // output
   //observables_.print(config.wavefunc().hole_doping());
   observables_.print(config.vparm_values());
-  std::cout << "total steps = " << config.num_updates() << "\n";
   return 0;
 }
 
@@ -81,6 +89,11 @@ int Simulator::get_variational_parms(std::vector<double>& varparms)
   return varparms.size();
 }
 
+void Simulator::print_progress(const int& num_measurement) const
+{
+  if (num_measurement%check_interval_==0)
+  std::cout<<" measurement = "<< double(100.0*num_measurement)/num_measure_steps_<<" %\n";
+}
 
 
 void Simulator::print_copyright(std::ostream& os)

@@ -10,11 +10,12 @@ namespace mc {
 
 Observables::Observables() 
   : energy_("Energy")
-  //, energy_sq_("Energy^2")
+  , energy_grad_("EnergyGradient")
   //, magn_("Magnetization")
   //, magn_sq_("Magnetization^2")
 {
   push_back(energy_);
+  //push_back(energy_grad_);
   //push_back(energy_sq_);
   //push_back(magn_);
   //push_back(magn_sq_);

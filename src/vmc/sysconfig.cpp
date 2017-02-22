@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-18 14:01:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-21 23:01:32
+* Last Modified time: 2017-02-23 00:07:24
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "./sysconfig.h"
@@ -83,173 +83,6 @@ int SysConfig::init_config(void)
   set_run_parameters();
 
   return 0;
-}
-
-amplitude_t SysConfig::apply(const model::op::quantum_op& qn_op, const unsigned& site_i, 
-    const unsigned& site_j, const int& bc_phase) const
-{
-  amplitude_t term(0); 
-  switch (qn_op.id()) {
-    case model::op_id::cdagc_sigma:
-      term = apply_upspin_hop(site_i,site_j,bc_phase);
-      term+= apply_dnspin_hop(site_i,site_j,bc_phase);
-      break;
-    case model::op_id::sisj_plus:
-      term = apply_sisj_plus(site_i,site_j); break;
-    default: 
-      throw std::range_error("SysConfig::apply: undefined bond operator.");
-  }
-  return term;
-}
-
-amplitude_t SysConfig::apply(const model::op::quantum_op& qn_op, const unsigned& site_i) const
-{
-  switch (qn_op.id()) {
-    case model::op_id::niup_nidn:
-      return ampl_part(apply_niup_nidn(site_i)); break;
-    default: 
-      throw std::range_error("SysConfig::apply: undefined site operator");
-  }
-}
-
-int SysConfig::apply_niup_nidn(const unsigned& i) const
-{
-  if (operator[](i).count()==2) return 1;
-  else return 0;
-}
-
-amplitude_t SysConfig::apply_upspin_hop(const unsigned& i, const unsigned& j,
-  const int& bc_phase) const
-{
-  if (i == j) return ampl_part(1.0);
-  int upspin, to_site;
-  int delta_nd;
-  //check_upspin_hop(i,j)
-  const SiteState* state_i = &operator[](i);
-  const SiteState* state_j = &operator[](j);
-  if (state_i->have_upspin() && state_j->have_uphole()) {
-    upspin = state_i->upspin_id();
-    to_site = j;
-    delta_nd = state_j->count(); // must be 0 or one
-    if (state_i->count()==2) delta_nd--;
-  }
-  else if (state_j->have_upspin() && state_i->have_uphole()) {
-    upspin = state_j->upspin_id();
-    to_site = i;
-    delta_nd = state_i->count(); // must be 0 or one
-    if (state_j->count()==2) delta_nd--;
-  }
-  else {
-    return amplitude_t(0.0);
-  }
-  // site occupancy constraint
-  if (operator[](to_site).count()==site_capacity()) return amplitude_t(0.0);
-
-  // det_ratio for the term
-  wf.get_amplitudes(psi_row, to_site, dnspin_sites());
-  amplitude_t det_ratio = psi_row.cwiseProduct(psi_inv.col(upspin)).sum();
-  det_ratio = ampl_part(std::conj(det_ratio));
-  return amplitude_t(bc_phase) * det_ratio * projector.gw_ratio(delta_nd);
-}
-
-amplitude_t SysConfig::apply_dnspin_hop(const unsigned& i, const unsigned& j,
-  const int& bc_phase) const
-{
-  if (i == j) return amplitude_t(1.0);
-  int dnspin, to_site;
-  int delta_nd;
-  const SiteState* state_i = &operator[](i);
-  const SiteState* state_j = &operator[](j);
-  if (state_i->have_dnspin() && state_j->have_dnhole()) {
-    dnspin = state_i->dnspin_id();
-    to_site = j;
-    delta_nd = state_j->count(); // must be 0 or one
-    if (state_i->count()==2) delta_nd--;
-  }
-  else if (state_j->have_dnspin() && state_i->have_dnhole()) {
-    dnspin = state_j->dnspin_id();
-    to_site = i;
-    delta_nd = state_i->count(); // must be 0 or one
-    if (state_j->count()==2) delta_nd--;
-  }
-  else {
-    return amplitude_t(0.0);
-  }
-  // site occupancy constraint
-  if (operator[](to_site).count()==site_capacity()) return amplitude_t(0.0);
-
-  // det_ratio for the term
-  wf.get_amplitudes(psi_col, upspin_sites(), to_site);
-  amplitude_t det_ratio = psi_col.cwiseProduct(psi_inv.row(dnspin)).sum();
-  det_ratio = ampl_part(std::conj(det_ratio));
-  return amplitude_t(bc_phase) * det_ratio * projector.gw_ratio(delta_nd);
-}
-
-amplitude_t SysConfig::apply_sisj_plus(const unsigned& i, const unsigned& j) const
-{
-/* It evaluates the following operator:
- !   O = (S_i.S_j - (n_i n_j)/4)
- ! The operator can be cast in the form,
- !   O = O_{ud} + O_{du}
- ! where,
- !   O_{ud} = 1/2*(- c^{\dag}_{j\up}c_{i\up} c^{\dag}_{i\dn}c_{j\dn}
- !                 - n_{i\up} n_{j_dn})
- ! O_{du} is obtained from O_{ud} by interchanging spin indices. */
-
-  const SiteState* state_i = &operator[](i);
-  const SiteState* state_j = &operator[](j);
-  // ni_nj term
-  double ninj_term;
-  if (state_i->have_upspin() && state_j->have_dnspin()) 
-    ninj_term = -0.5;
-  else if (state_i->have_dnspin() && state_j->have_upspin()) 
-    ninj_term = -0.5;
-  else ninj_term = 0.0;
-
-  // spin exchange term
-  // if any of the two sites doubly occupied, no exchange possible
-  if (state_i->count()==2 || state_j->count()==2) return amplitude_t(ninj_term);
-
-  int upspin, up_tosite;
-  int dnspin, dn_tosite;
-  if (state_i->have_upspin() && state_j->have_dnspin()) {
-    upspin = state_i->upspin_id();
-    up_tosite = j;
-    dnspin = state_j->dnspin_id();
-    dn_tosite = i;
-  }
-  else if (state_i->have_dnspin() && state_j->have_upspin()) {
-    upspin = state_j->upspin_id();
-    up_tosite = i;
-    dnspin = state_i->dnspin_id();
-    dn_tosite = j;
-  }
-  else return amplitude_t(ninj_term);
-
-  // det_ratio for the term
-  wf.get_amplitudes(psi_row, up_tosite, dnspin_sites());
-  amplitude_t det_ratio1 = psi_row.cwiseProduct(psi_inv.col(upspin)).sum();
-
-  // now for dnspin hop 
-  wf.get_amplitudes(psi_col, upspin_sites(), dn_tosite);
-  // since the upspin should have moved
-  wf.get_amplitudes(psi_col(upspin), up_tosite, dn_tosite);
-  // updated 'dnspin'-th row of psi_inv
-  amplitude_t ratio_inv = amplitude_t(1.0)/det_ratio1;
-  // elements other than 'upspin'-th
-  for (int i=0; i<upspin; ++i) {
-    amplitude_t beta = ratio_inv*psi_row.cwiseProduct(psi_inv.col(i)).sum();
-    inv_row(i) = psi_inv(dnspin,i) - beta * psi_inv(dnspin,upspin);
-  }
-  for (int i=upspin+1; i<num_upspins_; ++i) {
-    amplitude_t beta = ratio_inv*psi_row.cwiseProduct(psi_inv.col(i)).sum();
-    inv_row(i) = psi_inv(dnspin,i) - beta * psi_inv(dnspin,upspin);
-  }
-  inv_row(upspin) = ratio_inv * psi_inv(dnspin,upspin);
-  // ratio for the dnspin hop
-  amplitude_t det_ratio2 = psi_col.cwiseProduct(inv_row).sum();
-  amplitude_t det_ratio = ampl_part(std::conj(det_ratio1*det_ratio2));
-  return -0.5 * det_ratio + amplitude_t(ninj_term);
 }
 
 int SysConfig::update_state(void)
@@ -439,8 +272,11 @@ int SysConfig::set_run_parameters(void)
 
 double SysConfig::accept_ratio(void)
 {
+  // acceptance ratio wrt particle number
   return static_cast<double>(last_accepted_moves_)/
-         static_cast<double>(last_proposed_moves_); 
+         static_cast<double>(num_upspins_+num_dnspins_); 
+  //return static_cast<double>(last_accepted_moves_)/
+  //       static_cast<double>(last_proposed_moves_); 
 }
 
 void SysConfig::reset_accept_ratio(void)
@@ -465,10 +301,12 @@ const std::vector<std::string>& SysConfig::vparm_names(void) const
   return vparm_names_;
 } 
 
-const std::vector<double>& SysConfig::vparm_values(void) const 
+const std::vector<double>& SysConfig::vparm_values(void) 
 {
   vparm_values_.clear();
   for (auto& p : projector.varparms()) vparm_values_.push_back(p.value());
+  // wave vparms are not automatically updated after initialization
+  wf.refresh_varparms();
   for (auto& p : wf.varparms()) vparm_values_.push_back(p.value());
   /*vparm_values_ = projector.var_parms().values();
   vparm_values_.insert(vparm_values_.end(),wf.var_parms().values().begin(),
@@ -501,6 +339,192 @@ const std::vector<double>& SysConfig::vparm_ubounds(void) const
   return vparm_ub_;
 }
 
+amplitude_t SysConfig::apply(const model::op::quantum_op& qn_op, const unsigned& site_i, 
+    const unsigned& site_j, const int& bc_phase) const
+{
+  amplitude_t term(0); 
+  switch (qn_op.id()) {
+    case model::op_id::cdagc_sigma:
+      term = apply_upspin_hop(site_i,site_j,bc_phase);
+      term+= apply_dnspin_hop(site_i,site_j,bc_phase);
+      break;
+    case model::op_id::sisj_plus:
+      term = apply_sisj_plus(site_i,site_j); break;
+    default: 
+      throw std::range_error("SysConfig::apply: undefined bond operator.");
+  }
+  return term;
+}
+
+amplitude_t SysConfig::apply(const model::op::quantum_op& qn_op, const unsigned& site_i) const
+{
+  switch (qn_op.id()) {
+    case model::op_id::niup_nidn:
+      return ampl_part(apply_niup_nidn(site_i)); break;
+    default: 
+      throw std::range_error("SysConfig::apply: undefined site operator");
+  }
+}
+
+int SysConfig::apply_niup_nidn(const unsigned& i) const
+{
+  if (operator[](i).count()==2) return 1;
+  else return 0;
+}
+
+amplitude_t SysConfig::apply_upspin_hop(const unsigned& i, const unsigned& j,
+  const int& bc_phase) const
+{
+  if (i == j) return ampl_part(1.0);
+  int upspin, to_site;
+  int delta_nd;
+  //check_upspin_hop(i,j)
+  const SiteState* state_i = &operator[](i);
+  const SiteState* state_j = &operator[](j);
+  if (state_i->have_upspin() && state_j->have_uphole()) {
+    upspin = state_i->upspin_id();
+    to_site = j;
+    delta_nd = state_j->count(); // must be 0 or one
+    if (state_i->count()==2) delta_nd--;
+  }
+  else if (state_j->have_upspin() && state_i->have_uphole()) {
+    upspin = state_j->upspin_id();
+    to_site = i;
+    delta_nd = state_i->count(); // must be 0 or one
+    if (state_j->count()==2) delta_nd--;
+  }
+  else {
+    return amplitude_t(0.0);
+  }
+  // site occupancy constraint
+  if (operator[](to_site).count()==site_capacity()) return amplitude_t(0.0);
+
+  // det_ratio for the term
+  wf.get_amplitudes(psi_row, to_site, dnspin_sites());
+  amplitude_t det_ratio = psi_row.cwiseProduct(psi_inv.col(upspin)).sum();
+  det_ratio = ampl_part(std::conj(det_ratio));
+  return amplitude_t(bc_phase) * det_ratio * projector.gw_ratio(delta_nd);
+}
+
+amplitude_t SysConfig::apply_dnspin_hop(const unsigned& i, const unsigned& j,
+  const int& bc_phase) const
+{
+  if (i == j) return amplitude_t(1.0);
+  int dnspin, to_site;
+  int delta_nd;
+  const SiteState* state_i = &operator[](i);
+  const SiteState* state_j = &operator[](j);
+  if (state_i->have_dnspin() && state_j->have_dnhole()) {
+    dnspin = state_i->dnspin_id();
+    to_site = j;
+    delta_nd = state_j->count(); // must be 0 or one
+    if (state_i->count()==2) delta_nd--;
+  }
+  else if (state_j->have_dnspin() && state_i->have_dnhole()) {
+    dnspin = state_j->dnspin_id();
+    to_site = i;
+    delta_nd = state_i->count(); // must be 0 or one
+    if (state_j->count()==2) delta_nd--;
+  }
+  else {
+    return amplitude_t(0.0);
+  }
+  // site occupancy constraint
+  if (operator[](to_site).count()==site_capacity()) return amplitude_t(0.0);
+
+  // det_ratio for the term
+  wf.get_amplitudes(psi_col, upspin_sites(), to_site);
+  amplitude_t det_ratio = psi_col.cwiseProduct(psi_inv.row(dnspin)).sum();
+  det_ratio = ampl_part(std::conj(det_ratio));
+  return amplitude_t(bc_phase) * det_ratio * projector.gw_ratio(delta_nd);
+}
+
+amplitude_t SysConfig::apply_sisj_plus(const unsigned& i, const unsigned& j) const
+{
+/* It evaluates the following operator:
+ !   O = (S_i.S_j - (n_i n_j)/4)
+ ! The operator can be cast in the form,
+ !   O = O_{ud} + O_{du}
+ ! where,
+ !   O_{ud} = 1/2*(- c^{\dag}_{j\up}c_{i\up} c^{\dag}_{i\dn}c_{j\dn}
+ !                 - n_{i\up} n_{j_dn})
+ ! O_{du} is obtained from O_{ud} by interchanging spin indices. */
+
+  const SiteState* state_i = &operator[](i);
+  const SiteState* state_j = &operator[](j);
+  // ni_nj term
+  double ninj_term;
+  if (state_i->have_upspin() && state_j->have_dnspin()) 
+    ninj_term = -0.5;
+  else if (state_i->have_dnspin() && state_j->have_upspin()) 
+    ninj_term = -0.5;
+  else ninj_term = 0.0;
+
+  // spin exchange term
+  // if any of the two sites doubly occupied, no exchange possible
+  if (state_i->count()==2 || state_j->count()==2) return amplitude_t(ninj_term);
+
+  int upspin, up_tosite;
+  int dnspin, dn_tosite;
+  if (state_i->have_upspin() && state_j->have_dnspin()) {
+    upspin = state_i->upspin_id();
+    up_tosite = j;
+    dnspin = state_j->dnspin_id();
+    dn_tosite = i;
+  }
+  else if (state_i->have_dnspin() && state_j->have_upspin()) {
+    upspin = state_j->upspin_id();
+    up_tosite = i;
+    dnspin = state_i->dnspin_id();
+    dn_tosite = j;
+  }
+  else return amplitude_t(ninj_term);
+
+  // det_ratio for the term
+  wf.get_amplitudes(psi_row, up_tosite, dnspin_sites());
+  amplitude_t det_ratio1 = psi_row.cwiseProduct(psi_inv.col(upspin)).sum();
+
+  // now for dnspin hop 
+  wf.get_amplitudes(psi_col, upspin_sites(), dn_tosite);
+  // since the upspin should have moved
+  wf.get_amplitudes(psi_col(upspin), up_tosite, dn_tosite);
+  // updated 'dnspin'-th row of psi_inv
+  amplitude_t ratio_inv = amplitude_t(1.0)/det_ratio1;
+  // elements other than 'upspin'-th
+  for (int i=0; i<upspin; ++i) {
+    amplitude_t beta = ratio_inv*psi_row.cwiseProduct(psi_inv.col(i)).sum();
+    inv_row(i) = psi_inv(dnspin,i) - beta * psi_inv(dnspin,upspin);
+  }
+  for (int i=upspin+1; i<num_upspins_; ++i) {
+    amplitude_t beta = ratio_inv*psi_row.cwiseProduct(psi_inv.col(i)).sum();
+    inv_row(i) = psi_inv(dnspin,i) - beta * psi_inv(dnspin,upspin);
+  }
+  inv_row(upspin) = ratio_inv * psi_inv(dnspin,upspin);
+  // ratio for the dnspin hop
+  amplitude_t det_ratio2 = psi_col.cwiseProduct(inv_row).sum();
+  amplitude_t det_ratio = ampl_part(std::conj(det_ratio1*det_ratio2));
+  return -0.5 * det_ratio + amplitude_t(ninj_term);
+}
+
+void SysConfig::print_stats(std::ostream& os) const
+{
+  long proposed_hops = num_proposed_moves_[move_t::uphop]
+                         + num_proposed_moves_[move_t::dnhop];
+  long proposed_exch = num_proposed_moves_[move_t::exch];
+  long accepted_hops = num_accepted_moves_[move_t::uphop] 
+                     + num_accepted_moves_[move_t::dnhop];
+  long accepted_exch = num_accepted_moves_[move_t::exch];
+  double accept_ratio = 100.0*double(accepted_hops+accepted_exch)/(proposed_hops+proposed_exch);
+  double hop_ratio = double(100.0*accepted_hops)/(proposed_hops);
+  double exch_ratio = double(100.0*accepted_exch)/(proposed_exch);
+  os << "--------------------------------------\n";
+  os << " total mcsteps = " << num_updates_ <<"\n";
+  os << " total accepted moves = " << (accepted_hops+accepted_exch)<<"\n";
+  os << " acceptance ratio = " << accept_ratio << " %\n";
+  os << " hopping = " << hop_ratio << " %\n";
+  os << " exchange = " << exch_ratio << " %\n";
+  os << "--------------------------------------\n";
+}
 
 
 } // end namespace vmc

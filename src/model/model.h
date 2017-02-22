@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:46
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-21 22:51:14
+* Last Modified time: 2017-02-22 22:17:33
 *----------------------------------------------------------------------------*/
 #ifndef MODEL_H
 #define MODEL_H
@@ -49,9 +49,9 @@ public:
     { parms_[pname] = inputs.set_value(pname, defval, info); return parms_.size(); }
   unsigned add_parameter(const std::string& pname, const double& val) 
     { parms_[pname] = val; return parms_.size(); }
-  void update_parameters(const input::Parameters& inputs);
-  void update_parameter(const std::string& pname, const double& val); 
-  void change_parameter_value(const std::string& pname, const double& pval);
+  void update_parameters(const input::Parameters& inputs, const bool& update_terms=true);
+  void update_parameter(const std::string& pname, const double& val, const bool& update_terms=true); 
+  //void change_parameter_value(const std::string& pname, const double& pval);
   double get_parameter_value(const std::string& pname) const;
   unsigned add_constant(const std::string& cname, const double& val) 
     { constants_.insert({cname, val}); return constants_.size(); }
@@ -63,6 +63,8 @@ public:
   //const SiteBasis& site_basis(const unsigned& site_type) const { return basis_.at(site_type); }
   //unsigned sitebasis_dimension(const unsigned& site_type) const
   //{ return basis_.dimension(site_type); }
+  const ModelParams& parameters(void) const { return parms_; }
+  const ModelParams& constants(void) const { return constants_; }
   const bool& double_occupancy(void) const { return double_occupancy_; }
   const bool& has_siteterm(void) const { return has_siteterm_; }
   const bool& has_bondterm(void) const { return has_bondterm_; }

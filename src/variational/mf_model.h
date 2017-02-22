@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 14:51:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-21 23:55:17
+* Last Modified time: 2017-02-23 00:07:41
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef MF_MODEL_H
@@ -28,6 +28,7 @@ constexpr std::complex<double> ii(void) { return std::complex<double>{0.0,static
 namespace var {
 using vparm_t = std::pair<std::string,double>;
 
+/*
 //class SiteTerm : public std::unordered_map<unsigned, SiteOperatorTerm>
 class Unitcell_Term
 {
@@ -46,6 +47,29 @@ private:
   unsigned num_out_bonds_;
   std::vector<ComplexMatrix> coeff_matrices_;
   std::vector<Vector3d> bond_vectors_;
+};*/
+
+class UnitcellTerm
+{
+public:
+  UnitcellTerm() {}
+  ~UnitcellTerm() {}
+  void build_bondterm(const model::HamiltonianTerm& sterm, const lattice::LatticeGraph& graph);
+  void build_siteterm(const model::HamiltonianTerm& sterm, const lattice::LatticeGraph& graph);
+  void eval_coupling_constant(const model::ModelParams& cvals, const model::ModelParams& pvals);
+  const unsigned& num_out_bonds(void) const { return num_out_bonds_; } 
+  const Vector3d& bond_vector(const unsigned& i) const { return bond_vectors_[i]; }
+  const ComplexMatrix& coeff_matrix(const unsigned& i=0) const { return coeff_matrices_[i]; }
+  //const double& coupling(const unsigned& site_type) const; 
+  const model::op::quantum_op& qn_operator(void) const { return op_; }
+private:
+  using strMatrix = std::vector<std::vector<std::string> >;
+  model::op::quantum_op op_;
+  unsigned num_out_bonds_;
+  unsigned dim_;
+  std::vector<ComplexMatrix> coeff_matrices_;
+  std::vector<strMatrix> expr_matrices_;
+  std::vector<Vector3d> bond_vectors_;
 };
 
 class MF_Model : public model::Hamiltonian
@@ -53,6 +77,7 @@ class MF_Model : public model::Hamiltonian
 public:
   MF_Model(const input::Parameters& inputs, const lattice::LatticeGraph& graph);
   ~MF_Model() {}
+  void refresh_varparms(void);
   const VariationalParms& varparms(void) const { return varparms_; }
   void update(const input::Parameters& inputs, const lattice::LatticeGraph& graph);
   void update(const std::string& pname, const double& pvalue, const lattice::LatticeGraph& graph);
@@ -70,8 +95,10 @@ private:
   bool pairing_type_;
   bool need_noninteracting_mu_;
   VariationalParms varparms_;
-  std::vector<Unitcell_Term> uc_siteterms_;
-  std::vector<Unitcell_Term> uc_bondterms_;
+  //std::vector<Unitcell_Term> uc_siteterms_;
+  //std::vector<Unitcell_Term> uc_bondterms_;
+  std::vector<UnitcellTerm> usite_terms_;
+  std::vector<UnitcellTerm> ubond_terms_;
   // matrices in kspace representation
   unsigned dim_;
   ComplexMatrix quadratic_block_up_;
@@ -85,6 +112,8 @@ private:
   void make_variational(const std::string& name, const double& lb, const double& ub);
   //void make_variational(const std::vector<std::string>& pnames);
   void build_unitcell_terms(const lattice::LatticeGraph& graph);
+  void update_unitcell_terms(void);
+  //void build_ucterms(const lattice::LatticeGraph& graph);
 };
 
 

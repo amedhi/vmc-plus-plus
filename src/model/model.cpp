@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:50
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-21 22:51:28
+* Last Modified time: 2017-02-22 22:17:35
 *----------------------------------------------------------------------------*/
 #include "model.h"
 
@@ -126,24 +126,26 @@ int Hamiltonian::finalize(const lattice::Lattice& L)
   return 0;
 }
 
-void Hamiltonian::change_parameter_value(const std::string& pname, const double& pval) 
+/*void Hamiltonian::change_parameter_value(const std::string& pname, const double& pval) 
 {
   auto it = parms_.find(pname);
   if (it != parms_.end()) it->second = pval;
-}
+}*/
 
-void Hamiltonian::update_parameter(const std::string& pname, const double& val)
+void Hamiltonian::update_parameter(const std::string& pname, const double& val, 
+  const bool& update_terms)
 {
   // update one parameter
   parms_.at(pname) = val; 
-  update_coupling_constants();
+  if (update_terms) update_coupling_constants();
 }
 
-void Hamiltonian::update_parameters(const input::Parameters& inputs)
+void Hamiltonian::update_parameters(const input::Parameters& inputs,
+  const bool& update_terms)
 {
   // update the parameter values
   for (auto& p : parms_) p.second = inputs.set_value(p.first, p.second);
-  update_coupling_constants();
+  if (update_terms) update_coupling_constants();
 }
 
 void Hamiltonian::update_coupling_constants(void)

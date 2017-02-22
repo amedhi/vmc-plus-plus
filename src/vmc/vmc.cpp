@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:50
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-21 10:48:03
+* Last Modified time: 2017-02-22 19:34:40
 *----------------------------------------------------------------------------*/
 #include <iomanip>
 #include "vmc.h"
@@ -20,8 +20,8 @@ int VMC::start(input::Parameters& parms)
   std::cout << " Simulator::run\n";
   simulator.run(parms);
   return 0;
-
-  /*simulator.get_variational_parms(varparms_);
+  /*
+  simulator.get_variational_parms(varparms_);
   std::cout << "var parms = " << varparms_.size();
   int j = 0;
   for (int i=0; i<10; ++i) {

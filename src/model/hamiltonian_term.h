@@ -72,6 +72,8 @@ public:
     { return is_defined_[operand_type]; }
   const double& coupling(const unsigned& operand_type) const
     { return cc_values_[operand_type]; }
+  const std::string& coupling_expr(const unsigned& operand_type) const
+    { return cc_.at(operand_type); }
   const std::string& name(void) const { return name_; }
 private:
   std::string name_;

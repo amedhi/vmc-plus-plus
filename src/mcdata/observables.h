@@ -29,6 +29,7 @@ public:
   ObservableBase(const std::string& name) : name_{name} {}
   ~ObservableBase() { fs_.close(); }
   virtual void init(const input::Parameters& parms); 
+  //virtual void switch_on(const bool& file_print=true); 
   virtual void reset(void) {}
   virtual int print_heading(const std::vector<std::string>& xpnames) { return -1; }
   virtual int print_result(const std::vector<double>& xpvals) { return -1; }
@@ -93,6 +94,7 @@ public:
   //inline ScalarObservable& magn(void) { return magn_; }
   //inline ScalarObservable& magn_sq(void) { return magn_sq_; }
   inline VectorObservable& energy(void) { return energy_; }
+  inline VectorObservable& energy_grad(void) { return energy_grad_; }
   //inline VectorObservable& energy_sq(void) { return energy_sq_; }
   void reset(void) { for (auto& obs : *this) obs.get().reset(); }
   //inline SiteObsOperator& magn_op(void) { return magn_op_; } 
@@ -110,6 +112,7 @@ private:
   //ScalarObservable magn_;
   //ScalarObservable magn_sq_;
   VectorObservable energy_;
+  VectorObservable energy_grad_;
   //VectorObservable energy_sq_;
   unsigned num_xparms_{0};
   //std::map<std::string, double> single_xparm_;

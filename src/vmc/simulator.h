@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:19:36
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-21 22:56:42
+* Last Modified time: 2017-02-22 23:46:35
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef SIMULATOR_H
@@ -22,10 +22,9 @@ class Simulator
 public:
   Simulator(const input::Parameters& parms); 
   ~Simulator() {}
-  int init_config(void);
+  int run(const input::Parameters& parms, const bool& silent=false);
+  int run(const std::vector<double>& varparms, const bool& silent=false);
   int get_variational_parms(std::vector<double>& varparms);
-  int run(const input::Parameters& parms);
-  int run(const std::vector<double>& varparms);
   static void print_copyright(std::ostream& os);
 private:
   lattice::LatticeGraph graph;
@@ -43,9 +42,12 @@ private:
   int num_warmup_steps_{0};
   int min_interval_{0};
   int max_interval_{0};
+  int check_interval_{0};
+  bool print_progress_{true};
 
   int run_simulation(void);
   int do_measurements(void);
+  void print_progress(const int& num_measurement) const;
   mc::VectorData config_energy(void) const;
 };
 
