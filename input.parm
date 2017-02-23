@@ -6,6 +6,7 @@
 # Job Specification 
 #---------------------------------------------
 job = "VMC Simulation" 
+optimizing_run = "YES" 
 mode = "NEW" # ("NEW"/"APPEND")
 print_level = -2 #-2
 
@@ -49,7 +50,7 @@ Magnetization = "No"
 # Monte Carlo parameters
 #---------------------------------------------
 rng_seed = 1  # (=0 No seed, >0 time_seed)
-measure_steps = 10000
+measure_steps = 1000
 warmup_steps = 1000
 min_interval = 2
 max_interval = 10

@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-23 00:07:38
+* Last Modified time: 2017-02-24 00:10:15
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "mf_model.h"
@@ -84,6 +84,9 @@ void MF_Model::define_model(const input::Parameters& inputs, const lattice::Latt
 void MF_Model::update(const input::Parameters& inputs, const lattice::LatticeGraph& graph)
 {
   Model::update_parameters(inputs);
+  // update variational parameters
+  for (auto& p : varparms_) 
+    p.change_value(Model::get_parameter_value(p.name()));
   //build_unitcell_terms(graph);
   update_unitcell_terms();
 }

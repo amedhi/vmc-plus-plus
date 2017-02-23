@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 14:51:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-22 22:43:33
+* Last Modified time: 2017-02-23 21:32:54
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef WAVEFUNCTION_H
@@ -33,11 +33,9 @@ public:
   ~Wavefunction() {}
   void refresh_varparms(void) { mf_model_.refresh_varparms(); }
   const VariationalParms& varparms(void) const { return mf_model_.varparms(); }
-  int compute(const lattice::LatticeGraph& graph, const input::Parameters& inputs,
-    const bool& psi_gradient=false);
+  int compute(const input::Parameters& inputs, const lattice::LatticeGraph& graph);
   int compute(const lattice::LatticeGraph& graph, const var::parm_vector& pvector,
     const unsigned& start_pos, const bool& psi_gradient=false);
-  void compute_gradient(const std::vector<double>& vparms);
   const unsigned& num_upspins(void) const { return num_upspins_; }
   const unsigned& num_dnspins(void) const { return num_dnspins_; }
   const double& hole_doping(void) const { return hole_doping_; }

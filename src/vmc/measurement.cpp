@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-17 23:30:00
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-20 04:54:39
+* Last Modified time: 2017-02-24 00:29:39
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include <iostream>
@@ -12,6 +12,16 @@ namespace vmc {
 
 int Simulator::do_measurements(void)
 {
+  if (optimizing_mode_) {
+    double energy = config_energy().sum();
+    observables_.total_energy() << energy;
+    if (observables_.energy_grad()) {
+      //config.grad_log_psi()
+    }
+    return 0;
+  }
+
+  // normal run
   if (observables_.energy()) {
     observables_.energy() << config_energy();
   }

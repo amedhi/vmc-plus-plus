@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-22 19:34:33
+* Last Modified time: 2017-02-23 21:32:32
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "wavefunction.h"
@@ -32,8 +32,7 @@ Wavefunction::Wavefunction(const lattice::LatticeGraph& graph,
   psi_up_.resize(num_sites_,num_sites_);
 }
 
-int Wavefunction::compute(const lattice::LatticeGraph& graph,
-  const input::Parameters& inputs, const bool& psi_gradient)
+int Wavefunction::compute(const input::Parameters& inputs, const lattice::LatticeGraph& graph)
 {
   set_particle_num(inputs);
   mf_model_.update(inputs,graph);
@@ -43,7 +42,6 @@ int Wavefunction::compute(const lattice::LatticeGraph& graph,
     mf_model_.update_mu(mu, graph); 
   }
   compute_amplitudes(psi_up_,graph);
-  if (!psi_gradient) return 0;
   return 0;
 }
 

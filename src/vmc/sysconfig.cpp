@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-18 14:01:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-23 00:07:24
+* Last Modified time: 2017-02-23 21:34:05
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "./sysconfig.h"
@@ -17,26 +17,23 @@ SysConfig::SysConfig(const input::Parameters& inputs,
   , projector(inputs)
   , num_sites_(graph.num_sites())
 {
-  // variational parameter numbers
-  num_projector_parms_ = projector.varparms().size();
-  num_total_parms_ = num_projector_parms_ + wf.varparms().size();
-  //wf.va
 }
 
 int SysConfig::init(const input::Parameters& inputs, const lattice::LatticeGraph& graph)
 {
   if (num_sites_==0) return -1;
   projector.update(inputs);
-  wf.compute(graph, inputs);
+  wf.compute(inputs, graph);
   return init_config();
 }
 
-int SysConfig::init(const var::parm_vector& pvector, const lattice::LatticeGraph& graph)
+int SysConfig::init(const var::parm_vector& pvector, const lattice::LatticeGraph& graph,
+  const bool& need_psi_grad)
 {
   if (num_sites_==0) return -1;
   projector.update(pvector, 0);
   unsigned start_pos = projector.varparms().size();
-  wf.compute(graph, pvector, start_pos);
+  wf.compute(graph, pvector, start_pos, need_psi_grad);
   return init_config();
 }
 
@@ -283,6 +280,11 @@ void SysConfig::reset_accept_ratio(void)
 {
   last_proposed_moves_ = 0;
   last_accepted_moves_ = 0;
+}
+
+unsigned SysConfig::num_varparms(void) const 
+{
+  return projector.varparms().size()+wf.varparms().size();
 }
 
 const std::vector<std::string>& SysConfig::vparm_names(void) const

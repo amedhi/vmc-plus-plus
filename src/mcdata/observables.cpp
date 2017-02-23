@@ -8,54 +8,83 @@
 
 namespace mc {
 
-Observables::Observables() 
+Observables::Observables(const input::Parameters& inputs) 
   : energy_("Energy")
+  , total_energy_("TotalEnergy")
   , energy_grad_("EnergyGradient")
   //, magn_("Magnetization")
   //, magn_sq_("Magnetization^2")
 {
   push_back(energy_);
-  //push_back(energy_grad_);
+  push_back(total_energy_);
+  push_back(energy_grad_);
   //push_back(energy_sq_);
   //push_back(magn_);
   //push_back(magn_sq_);
+  std::string mode = inputs.set_value("mode", "NEW");
+  boost::to_upper(mode);
+  if (mode=="APPEND") replace_mode_ = false;
+  else replace_mode_ = true;
+  for (auto& obs : *this) obs.get().check_on(inputs, replace_mode_);
 }
 
-void Observables::init(const input::Parameters& parms, const model::Hamiltonian& model,
-  void (&print_copyright)(std::ostream& os))
-{
-  // energy_terms details 
-  std::vector<std::string> elem_names;
-  model.get_term_names(elem_names);
-  energy_.set_elements(elem_names.size(), elem_names);
-  // energy_terms_sq details 
-  //for (auto& name : elem_names) name += "2";
-  //energy_terms_sq_.set_elements(elem_names.size(), elem_names);
+void Observables::switch_off(void) {
+  for (auto& obs : *this) obs.get().switch_off();
+}
 
-  // actual init of observables
+void Observables::init(const input::Parameters& inputs) {
+  bool replace_mode;
+  std::string mode = inputs.set_value("mode", "NEW");
+  boost::to_upper(mode);
+  if (mode=="APPEND") replace_mode = false;
+  else replace_mode = true;
+  for (auto& obs : *this) obs.get().check_on(inputs, replace_mode);
+}
+
+void Observables::print_heading(const std::vector<std::string>& xpnames, 
+   void (&print_copyright)(std::ostream& os), const model::Hamiltonian& model)
+{
+  num_xparms_ = xpnames.size();
   for (auto& obs : *this) {
-    obs.get().init(parms);
-    if (obs.get().is_on() && obs.get().is_open() && obs.get().replace_mode()) {
+    if (obs.get().is_on() && obs.get().replace_mode()) {
+      obs.get().open_file();
       print_copyright(obs.get().fs_stream());
       model.print_info(obs.get().fs_stream());
-      //obs.get().print_heading("T");
+      obs.get().print_heading(xpnames);
     }
   }
-
-  // basis for building operator matrices
-  // basis_ = model.basis();
-  // build observable operators
-  /*if (magn_ || magn_sq_) {
-    magn_op_.init(model.basis(), "S(i)");
-  }
-  if (potts_magn_ || potts_magn_sq_) {
-    potts_magn_op_.init(model.basis(), "S(i)");
-  }
-  if (strain_ || strain_sq_) {
-    strain_op_.init(model.basis(), "sigma(i)");
-  }*/
 }
 
+void Observables::print_heading(const std::string& xpname, 
+   void (&print_copyright)(std::ostream& os), const model::Hamiltonian& model)
+{
+  num_xparms_ = 1;
+  std::vector<std::string> xpnames({xpname});
+  for (auto& obs : *this) {
+    if (obs.get().is_on() && obs.get().replace_mode()) {
+      obs.get().open_file();
+      print_copyright(obs.get().fs_stream());
+      model.print_info(obs.get().fs_stream());
+      obs.get().print_heading(xpnames);
+    }
+  }
+}
+
+void Observables::print_heading(void (&print_copyright)(std::ostream& os), const model::Hamiltonian& model)
+{
+  num_xparms_ = 0;
+  std::vector<std::string> xpnames;
+  for (auto& obs : *this) {
+    if (obs.get().is_on() && obs.get().replace_mode()) {
+      obs.get().open_file();
+      print_copyright(obs.get().fs_stream());
+      model.print_info(obs.get().fs_stream());
+      obs.get().print_heading(xpnames);
+    }
+  }
+}
+
+/*
 void Observables::as_function_of(const std::vector<std::string>& xpnames)
 {
   num_xparms_ = xpnames.size();
@@ -65,32 +94,41 @@ void Observables::as_function_of(const std::vector<std::string>& xpnames)
     }
   }
 } 
-
 void Observables::as_function_of(const std::string& xpname)
 {
   std::vector<std::string> xpnames({xpname});
   as_function_of(xpnames);
 }
+*/
 
 void Observables::print(const std::vector<double> xpvals) 
 {
   if (xpvals.size() != num_xparms_) 
-    throw std::range_error("* Observables::print: 'x-parameters' size mismatch");
+    throw std::invalid_argument("Observables::print: 'x-parameters' size mismatch");
   for (auto& obs : *this) obs.get().print_result(xpvals); 
 }
 
 void Observables::print(const double& xparm_val) 
 {
   if (num_xparms_ != 1) 
-    throw std::range_error("* Observables::print: no 'x-parameter' was set initially");
+    throw std::invalid_argument("Observables::print: no 'x-parameter' was set initially");
   std::vector<double> xpvals({xparm_val});
+  for (auto& obs : *this) obs.get().print_result(xpvals); 
+}
+
+void Observables::print(void) 
+{
+  if (num_xparms_ != 0) 
+    throw std::invalid_argument("Observables::print: 'x-parameter' value not given");
+  std::vector<double> xpvals;
   for (auto& obs : *this) obs.get().print_result(xpvals); 
 }
 
 int ScalarObservable::print_heading(const std::vector<std::string>& xpnames) 
 {
   if (!is_on()) return 1;
-  if (!fs_) throw std::runtime_error("* ScalarObservable::print_heading: file not open");
+  open_file();
+  if (!fs_.is_open()) throw std::runtime_error("* ScalarObservable::print_heading: file not open");
   fs_ << "# Results: " << name() << "\n";
   fs_ << "#" << std::string(72, '-') << "\n";
   fs_ << std::left;
@@ -110,7 +148,8 @@ int ScalarObservable::print_heading(const std::vector<std::string>& xpnames)
 int ScalarObservable::print_result(const std::vector<double>& xpvals) 
 {
   if (!is_on()) return 1;
-  if (!fs_) throw std::runtime_error("* ScalarObservable::print: file not open");
+  open_file();
+  if (!fs_.is_open()) throw std::runtime_error("ScalarObservable::print: file not open");
   fs_ << std::right;
   fs_ << std::scientific << std::uppercase << std::setprecision(6);
   for (const auto& p : xpvals) 
@@ -123,7 +162,8 @@ int ScalarObservable::print_result(const std::vector<double>& xpvals)
 int VectorObservable::print_heading(const std::vector<std::string>& xpnames) 
 {
   if (!is_on()) return 1;
-  if (!fs_) throw std::runtime_error("* VectorObservable::print_heading: file not open");
+  open_file();
+  if (!fs_.is_open()) throw std::runtime_error("VectorObservable::print_heading: file not open");
   fs_ << "# Results: " << name() << "\n";
   fs_ << "#" << std::string(72, '-') << "\n";
   fs_ << "# ";
@@ -143,7 +183,8 @@ int VectorObservable::print_heading(const std::vector<std::string>& xpnames)
 int VectorObservable::print_result(const std::vector<double>& xpvals) 
 {
   if (!is_on()) return 1;
-  if (!fs_) throw std::runtime_error("* VectorObservable::print: file not open");
+  open_file();
+  if (!fs_.is_open()) throw std::runtime_error("* VectorObservable::print: file not open");
   fs_ << std::right;
   fs_ << std::scientific << std::uppercase << std::setprecision(6);
   for (const auto& p : xpvals) 
@@ -157,39 +198,69 @@ int VectorObservable::print_result(const std::vector<double>& xpvals)
   return 0;
 } 
 
-void ObservableBase::init(const input::Parameters& parms)
+void ObservableBase::check_on(const input::Parameters& inputs, const bool& replace_mode)
 {
   int no_warn;
-  onoff_ = parms.set_value(name(), false, no_warn);
-  if (onoff_) {
+  is_on_ = inputs.set_value(name(), false, no_warn);
+  replace_mode_ = replace_mode;
+}
+
+void ScalarObservable::check_on(const input::Parameters& inputs, const bool& replace_mode)
+{
+  ObservableBase::check_on(inputs,replace_mode);
+  if (is_on()) data_.init(name());
+}
+
+void VectorObservable::check_on(const input::Parameters& inputs, const bool& replace_mode)
+{
+  ObservableBase::check_on(inputs,replace_mode);
+}
+
+void ScalarObservable::switch_on(void) 
+{
+  ObservableBase::switch_on();
+  data_.init(name());
+}
+
+void VectorObservable::switch_on(void)
+{
+  ObservableBase::switch_on(); 
+  size_ = 0;
+}
+/*void VectorObservable::switch_on(const unsigned& size)
+{
+  size_=size;   
+  if (size_==0) 
+    throw std::logic_error("VectorObservable::switch_on: can't switch on zero size observable");
+  ObservableBase::switch_on(); 
+  elem_names_=std::vector<std::string>(size_); 
+  data_.init(name(),size_);
+}*/
+
+void ObservableBase::open_file(void) 
+{
+  if (fs_.is_open()) return;
+  if (is_on_) {
     std::string fname = name_;
     boost::to_lower(fname);
     auto pos = fname.find('^');
     if (pos != std::string::npos) fname.erase(pos,1);
     fname = "res_"+fname+".txt";
-    std::string mode = parms.set_value("mode", "NEW");
-    boost::to_upper(mode);
-    if (mode=="APPEND") replace_mode_ = false;
-    else replace_mode_ = true;
     // open file
     if (replace_mode_) fs_.open(fname);
     else fs_.open(fname, std::ios::app);
   }
 } 
 
-void ScalarObservable::init(const input::Parameters& parms)
-{
-  ObservableBase::init(parms);
-  if (is_on()) data_.init(name());
-} 
 
-void VectorObservable::init(const input::Parameters& parms)
+void VectorObservable::set_elements(const std::vector<std::string>& elem_names)
 {
+  elem_names_=elem_names; 
+  size_=elem_names_.size();   
   if (size_==0) 
-    throw std::logic_error("* VectorObservable::init: can't initialize zero size observable");
-  ObservableBase::init(parms);
-  if (is_on()) data_.init(name(),size_);
-} 
+    throw std::logic_error("VectorObservable::set_elements: can't initialize zero size observable");
+  data_.init(name(),size_);
+}
 
 
 } // end namespace mc

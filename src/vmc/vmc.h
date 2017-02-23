@@ -24,7 +24,8 @@ public:
   static void print_copyright(std::ostream& os);
 private:
   Simulator simulator;
-  std::vector<double> varparms_;
+  bool optimizing_run{false};
+  std::vector<double> varparms;
 };
 
 
