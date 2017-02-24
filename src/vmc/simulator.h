@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:19:36
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-24 00:06:08
+* Last Modified time: 2017-02-24 23:36:41
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef SIMULATOR_H
@@ -16,8 +16,6 @@
 #include "./sysconfig.h"
 
 namespace vmc {
-
-enum class obs {energy, energy_grad};
 
 class Simulator 
 {
@@ -43,9 +41,9 @@ private:
   bool optimizing_mode_{false};
 
   // observables
-  mc::Observables observables_;
-  mutable mc::VectorData config_energy_;
-  mutable mc::VectorData energy_grad_;
+  obs::ObservableSet observables;
+  mutable obs::data_t config_energy_;
+  mutable obs::data_t energy_grad_;
 
   // mc parameters
   enum move_t {uphop, dnhop, exch, end};
@@ -59,7 +57,7 @@ private:
   int run_simulation(void);
   int do_measurements(void);
   void print_progress(const int& num_measurement) const;
-  mc::VectorData config_energy(void) const;
+  obs::data_t config_energy(void) const;
 };
 
 } // end namespace vmc

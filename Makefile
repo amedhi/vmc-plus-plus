@@ -28,6 +28,7 @@ SRCS+= variational/mf_model.cpp
 SRCS+= variational/bcsfunction.cpp
 SRCS+= variational/wavefunction.cpp
 SRCS+= variational/projector.cpp
+SRCS+= mcdata/mcdata.cpp
 SRCS+= mcdata/observables.cpp
 #SRCS+= montecarlo/measurement.cpp
 SRCS+= vmc/random.cpp

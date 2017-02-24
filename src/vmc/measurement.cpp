@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-17 23:30:00
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-24 00:29:39
+* Last Modified time: 2017-02-24 23:32:21
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include <iostream>
@@ -14,21 +14,26 @@ int Simulator::do_measurements(void)
 {
   if (optimizing_mode_) {
     double energy = config_energy().sum();
-    observables_.total_energy() << energy;
-    if (observables_.energy_grad()) {
+    observables.total_energy() << energy;
+    if (observables.energy_grad()) {
       //config.grad_log_psi()
     }
     return 0;
   }
 
   // normal run
-  if (observables_.energy()) {
-    observables_.energy() << config_energy();
+  if (observables.energy()) {
+    observables.energy() << config_energy();
   }
+  /*if (observables_.total_energy()) {
+    double e = config_energy().sum();
+    observables_.total_energy() << e;
+    observables.total_energy() << e;
+  }*/
   return 0;
 }
 
-mc::VectorData Simulator::config_energy(void) const
+obs::data_t Simulator::config_energy(void) const
 {
   using op_id = model::op_id;
   //for (auto& elem : config_energy_) elem = 0.0;

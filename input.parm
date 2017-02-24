@@ -6,7 +6,7 @@
 # Job Specification 
 #---------------------------------------------
 job = "VMC Simulation" 
-optimizing_run = "YES" 
+optimizing_run = "NO" 
 mode = "NEW" # ("NEW"/"APPEND")
 print_level = -2 #-2
 
@@ -34,7 +34,7 @@ U = 8.0
 mf_order = "DWAVE_SC"
 gutzwiller_proj = "YES"
 hole_doping = 0.16
-gfactor = 0.3037000
+gfactor = 0.3037000 #0.1, 0.1, 1.0  # 0.3037000
 delta_sc = 0.080
 mu = -0.4263000
 mu_variational = "YES"

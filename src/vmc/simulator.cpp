@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:20:56
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-24 00:26:14
+* Last Modified time: 2017-02-24 23:40:43
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "simulator.h"
@@ -14,7 +14,6 @@ Simulator::Simulator(const input::Parameters& inputs)
   : graph(inputs) 
   , model(inputs, graph.lattice()) 
   , config(inputs, graph, model)
-  , observables_(inputs)
 {
   // seed random generator
   config.rng().seed(inputs.set_value("rng_seed", 1));
@@ -27,20 +26,23 @@ Simulator::Simulator(const input::Parameters& inputs)
   check_interval_ = std::max(1,num_measure_steps_/10);
 
   // observables
+  observables.init(inputs);
+
   int nowarn;
   optimizing_mode_ = inputs.set_value("optimizing_run",false,nowarn);
   if (optimizing_mode_) {
-    observables_.switch_off();
-    observables_.energy().switch_on();
+    observables.switch_off();
+    observables.energy().switch_on();
   }
   // sizes of vector observables
-  if (observables_.energy()) {
+  if (observables.energy()) {
     std::vector<std::string> elem_names;
     model.get_term_names(elem_names);
     config_energy_.resize(elem_names.size());
-    observables_.energy().set_elements(elem_names);
+    observables.energy().set_elements(elem_names);
   }
-  observables_.print_heading(config.vparm_names(), copyright_msg, model);
+  // open file & print heading
+  observables.print_heading(config.vparm_names(), copyright_msg, model);
 }
 
 int Simulator::init(const input::Parameters& inputs)
@@ -60,12 +62,12 @@ int Simulator::optimizing_run(const std::vector<double>& varparms,
   const bool& need_energy_grad, const bool& silent)
 {
   optimizing_mode_ = true;
-  observables_.total_energy().switch_on();
+  observables.total_energy().switch_on();
   if (need_energy_grad) {
-    observables_.energy_grad().switch_on();
-    observables_.energy_grad().set_elements(config.vparm_names());
+    observables.energy_grad().switch_on();
+    observables.energy_grad().set_elements(config.vparm_names());
   }
-  else observables_.energy_grad().switch_off();
+  else observables.energy_grad().switch_off();
   int stat = config.init(varparms, graph, need_energy_grad);
   if (stat != 0) return -1;
   print_progress_ = !silent;
@@ -82,7 +84,7 @@ int Simulator::run_simulation(void)
   for (int n=0; n<num_warmup_steps_; ++n) config.update_state();
   if (print_progress_) std::cout << " warmup done\n";
   // measuring run
-  observables_.reset();
+  observables.reset();
   while (num_measurement < num_measure_steps_) {
     config.update_state();
     if (count >= min_interval_) {
@@ -105,8 +107,9 @@ int Simulator::run_simulation(void)
 
 void Simulator::print_results(void) 
 {
-  //observables_.print(config.wavefunc().hole_doping());
-  observables_.print(config.vparm_values());
+  //observables.print(config.wavefunc().hole_doping());
+  observables.print(config.vparm_values());
+  //std::cout << observables.energy().with_statistic() << "\n";
 }
 
 int Simulator::get_variational_parms(std::vector<double>& varparms)
