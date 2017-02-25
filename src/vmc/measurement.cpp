@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-17 23:30:00
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-24 23:32:21
+* Last Modified time: 2017-02-25 13:29:21
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include <iostream>
@@ -16,14 +16,41 @@ int Simulator::do_measurements(void)
     double energy = config_energy().sum();
     observables.total_energy() << energy;
     if (observables.energy_grad()) {
-      //config.grad_log_psi()
+      config.get_grad_logpsi(grad_logpsi_);
+      unsigned n = 0;
+      for (unsigned i=0; i<num_varparms_; ++i) {
+        energy_grad2_[n] = energy * grad_logpsi_[i];
+        energy_grad2_[n+1] = grad_logpsi_[i];
+        n += 2;
+      }
+      observables.energy_grad() << energy_grad2_;
     }
     return 0;
   }
 
   // normal run
-  if (observables.energy()) {
-    observables.energy() << config_energy();
+  if (need_energy_) {
+    config_energy_ = config_energy();
+    //std::cout << "--------here--------\n";
+    if (observables.energy()) observables.energy() << config_energy_;
+
+    if (observables.energy_grad()) {
+      double energy = config_energy_.sum();
+      observables.total_energy() << energy;
+      config.get_grad_logpsi(grad_logpsi_);
+      unsigned n = 0;
+      for (unsigned i=0; i<num_varparms_; ++i) {
+        energy_grad2_[n] = energy * grad_logpsi_[i];
+        energy_grad2_[n+1] = grad_logpsi_[i];
+        n += 2;
+      }
+      observables.energy_grad() << energy_grad2_;
+    } 
+
+    else if (observables.total_energy()) {
+      double energy = config_energy_.sum();
+      observables.total_energy() << energy;
+    }
   }
   /*if (observables_.total_energy()) {
     double e = config_energy().sum();
@@ -33,7 +60,21 @@ int Simulator::do_measurements(void)
   return 0;
 }
 
-obs::data_t Simulator::config_energy(void) const
+int Simulator::finalize_energy_grad(void)
+{
+  double mean_energy = observables.total_energy().mean();
+  energy_grad2_ = observables.energy_grad().mean_data(); 
+  unsigned n = 0;
+  for (unsigned i=0; i<(num_varparms_-1); i+=2) {
+    energy_grad_(n) = 2.0*(energy_grad2_[i]*mean_energy - energy_grad2_[i+1]);
+    n++;
+  }
+  observables.energy_grad().set_elements(num_varparms_);
+  observables.energy_grad() << energy_grad_;
+  return 0;
+}
+
+obs::vector Simulator::config_energy(void) const
 {
   using op_id = model::op_id;
   //for (auto& elem : config_energy_) elem = 0.0;

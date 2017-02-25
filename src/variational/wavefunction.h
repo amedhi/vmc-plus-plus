@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 14:51:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-24 08:35:59
+* Last Modified time: 2017-02-25 13:27:05
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef WAVEFUNCTION_H
@@ -36,6 +36,7 @@ public:
   int compute(const input::Parameters& inputs, const lattice::LatticeGraph& graph);
   int compute(const lattice::LatticeGraph& graph, const var::parm_vector& pvector,
     const unsigned& start_pos, const bool& psi_gradient=false);
+  //int compute_gradients(const lattice::LatticeGraph& graph);
   const unsigned& num_upspins(void) const { return num_upspins_; }
   const unsigned& num_dnspins(void) const { return num_dnspins_; }
   const double& hole_doping(void) const { return hole_doping_; }
@@ -46,6 +47,8 @@ public:
   void get_amplitudes(RowVector& psi_vec, const std::vector<int>& row,
     const int& icol) const;
   void get_amplitudes(amplitude_t& elem, const int& irow, const int& jcol) const;
+  void get_gradients(Matrix& psi_grad, const int& n, 
+    const std::vector<int>& row, const std::vector<int>& col) const;
 private:
   wf_type type_;
   MF_Model mf_model_;
@@ -64,6 +67,7 @@ private:
   Matrix psi_dn_;
   Matrix work_mat;
   std::vector<Matrix> psi_gradients_;
+  bool have_gradients_{false};
 
   // matrices & solvers
   double bcs_large_number_;

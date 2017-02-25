@@ -126,6 +126,15 @@ void Observable::set_elements(const std::vector<std::string>& elem_names)
   elem_names_ = elem_names;
 }
 
+void Observable::set_elements(const unsigned& size)
+{
+  mcdata::resize(size);
+  avg_mcdata_.resize(size);
+  elem_names_.resize(size); 
+  for (unsigned i=0; i<size; ++i) 
+    elem_names_[i] = "var" + std::to_string(i);
+}
+
 void Observable::save_result(void)
 {
   avg_mcdata_ << mcdata::mean_data();

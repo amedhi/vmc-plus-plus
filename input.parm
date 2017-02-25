@@ -37,13 +37,14 @@ hole_doping = 0.16
 gfactor = 0.3037000 #0.1, 0.1, 1.0  # 0.3037000
 delta_sc = 0.080
 mu = -0.4263000
-mu_variational = "YES"
+mu_variational = "NO"
 
 
 #---------------------------------------------
 # List of observable to calculate:
 #---------------------------------------------
-Energy = "Yes"
+#Energy = "Yes"
+EnergyGradient = "Yes"
 Magnetization = "No"
 
 #---------------------------------------------

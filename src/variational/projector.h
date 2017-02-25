@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-16 23:03:44
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-21 23:02:25
+* Last Modified time: 2017-02-25 11:45:47
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef PROJECTOR_H
@@ -18,6 +18,8 @@
 //#include "../variational/matrix.h"
 
 namespace var {
+
+enum class pp {gutzwiller, end};
 
 class WavefunProjector 
 {

@@ -20,7 +20,8 @@
 
 namespace obs {
 
-using data_t = mcdata::data_t;
+using vector = mcdata::data_t;
+using scalar = mcdata::scalardata_t;
 
 class Observable : public mcdata
 {
@@ -32,6 +33,7 @@ public:
   void init(const std::string& name, const unsigned& size=1) override; 
   void resize(const unsigned& size) override;
   void set_elements(const std::vector<std::string>& elem_names);
+  void set_elements(const unsigned& size);
   void reset(void) { mcdata::clear(); }
   void check_on(const input::Parameters& inputs, const bool& replace_mode); 
   void switch_on(void) { is_on_=true; }

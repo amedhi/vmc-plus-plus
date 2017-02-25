@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-18 14:01:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-23 21:34:05
+* Last Modified time: 2017-02-25 12:11:44
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "./sysconfig.h"
@@ -263,6 +263,7 @@ int SysConfig::set_run_parameters(void)
   psi_row.resize(num_dnspins_);
   psi_col.resize(num_upspins_);
   inv_row.resize(num_upspins_);
+  psi_grad.resize(num_upspins_,num_dnspins_);
   
   return 0;
 }
@@ -507,6 +508,27 @@ amplitude_t SysConfig::apply_sisj_plus(const unsigned& i, const unsigned& j) con
   amplitude_t det_ratio = ampl_part(std::conj(det_ratio1*det_ratio2));
   return -0.5 * det_ratio + amplitude_t(ninj_term);
 }
+
+void SysConfig::get_grad_logpsi(RealVector& grad_logpsi)
+{
+  // grad_logpsi wrt projector parameters
+  unsigned p = projector.varparms().size();
+  for (unsigned n=0; n<p; ++n) {
+    if (projector.varparms()[n].name()=="gfactor") {
+      double g = projector.varparms()[n].value();
+      grad_logpsi(n) = static_cast<double>(dblocc_count())/g;
+    }
+    else {
+      throw std::range_error("SysConfig::get_grad_logpsi: this projector parameter not implemented\n");
+    }
+  }
+  // grad_logpsi wrt wf parameters
+  for (unsigned n=0; n<wf.varparms().size(); ++n) {
+    wf.get_gradients(psi_grad,n,upspin_sites(),dnspin_sites());
+    grad_logpsi(p+n) = std::real(psi_grad.cwiseProduct(psi_inv.transpose()).sum());
+  }
+}
+
 
 void SysConfig::print_stats(std::ostream& os) const
 {

@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-18 13:54:54
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-24 08:36:07
+* Last Modified time: 2017-02-25 12:07:54
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef SYSCONFIG_H
@@ -43,6 +43,7 @@ public:
     const unsigned& site_j, const int& bc_phase) const;
   amplitude_t apply(const model::op::quantum_op& qn_op, const unsigned& site_i) const;
   int apply_niup_nidn(const unsigned& i) const;
+  void get_grad_logpsi(RealVector& grad_logpsi);
   const int& num_updates(void) const { return num_updates_; }
   const var::Wavefunction& wavefunc(void) const { return wf; }
   void print_stats(std::ostream& os=std::cout) const;
@@ -55,6 +56,7 @@ private:
   mutable ColVector psi_row;
   mutable RowVector psi_col;
   mutable RowVector inv_row;
+  mutable Matrix psi_grad;
   unsigned num_sites_;
   unsigned num_upspins_;
   unsigned num_dnspins_;

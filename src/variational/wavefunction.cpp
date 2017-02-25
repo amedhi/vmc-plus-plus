@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-24 08:36:02
+* Last Modified time: 2017-02-25 13:26:59
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "wavefunction.h"
@@ -42,6 +42,7 @@ int Wavefunction::compute(const input::Parameters& inputs, const lattice::Lattic
     mf_model_.update_mu(mu, graph); 
   }
   compute_amplitudes(psi_up_,graph);
+  have_gradients_ = false;
   return 0;
 }
 
@@ -50,6 +51,7 @@ int Wavefunction::compute(const lattice::LatticeGraph& graph, const var::parm_ve
 {
   mf_model_.update(pvector,start_pos,graph);
   compute_amplitudes(psi_up_,graph);
+  have_gradients_ = false;
   if (!psi_gradient) return 0;
 
   // Gradient of amplitudes wrt the variational parameters 
@@ -75,8 +77,40 @@ int Wavefunction::compute(const lattice::LatticeGraph& graph, const var::parm_ve
     psi_gradients_[i] *= inv_2h;
     ++i;
   }
+  have_gradients_ = true;
   return 0;
 }
+
+/*
+int Wavefunction::compute_gradients(const lattice::LatticeGraph& graph)
+{
+  // Gradient of amplitudes wrt the variational parameters 
+  // by numerical differentiation (central defference formula)
+  unsigned num_parm = mf_model_.varparms().size();
+  psi_gradients_.resize(num_parm);
+  work_mat.resize(num_sites_,num_sites_);
+  double scale = 0.05;
+  unsigned i = 0;
+  for (const auto& p : mf_model_.varparms()) {
+    psi_gradients_[i].resize(num_sites_,num_sites_);
+    double h = scale * (p.ubound()-p.lbound());
+    double inv_2h = 0.5/h;
+    double x = pvector[start_pos+i];
+    mf_model_.update(p.name(), x+h, graph);
+    compute_amplitudes(psi_gradients_[i], graph);
+    mf_model_.update(p.name(), x-h, graph);
+    compute_amplitudes(work_mat, graph);
+    // model to original state
+    mf_model_.update(p.name(), x, graph);
+    // derivative
+    psi_gradients_[i] -= work_mat;
+    psi_gradients_[i] *= inv_2h;
+    ++i;
+  }
+  have_gradients_ = true;
+  return 0;
+}
+*/
 
 int Wavefunction::compute_amplitudes(Matrix& psi_mat, const lattice::LatticeGraph& graph)
 {
@@ -169,6 +203,19 @@ void Wavefunction::get_amplitudes(amplitude_t& elem, const int& irow,
 {
   elem = psi_up_(irow,jcol);
 }
+
+void Wavefunction::get_gradients(Matrix& psi_grad, const int& n, 
+  const std::vector<int>& row, const std::vector<int>& col) const
+{
+  if (!have_gradients_) 
+    throw std::logic_error("Wavefunction::get_gradients: gradients were not computed");
+  for (int i=0; i<row.size(); ++i)
+    for (int j=0; j<col.size(); ++j)
+      psi_grad(i,j) = psi_gradients_[n](row[i],col[j]);
+}
+
+
+
 
 } // end namespace var
 

@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-24 08:44:27
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-24 23:32:48
+* Last Modified time: 2017-02-25 09:30:18
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef NEW_MCDATA_H
@@ -55,6 +55,7 @@ class mcdata : private std::vector<DataBin>
 {
 public:
   using data_t = DataBin::data_t;
+  using scalardata_t = Eigen::Array<double,1,1>;
   mcdata() {}
   mcdata(const std::string& name, const unsigned& size=1) { init(name,size); }
   ~mcdata() {}
