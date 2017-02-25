@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-17 23:30:00
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-25 13:29:21
+* Last Modified time: 2017-02-26 00:57:06
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include <iostream>
@@ -38,6 +38,7 @@ int Simulator::do_measurements(void)
       double energy = config_energy_.sum();
       observables.total_energy() << energy;
       config.get_grad_logpsi(grad_logpsi_);
+  //-------------------------------------------------
       unsigned n = 0;
       for (unsigned i=0; i<num_varparms_; ++i) {
         energy_grad2_[n] = energy * grad_logpsi_[i];
@@ -65,11 +66,16 @@ int Simulator::finalize_energy_grad(void)
   double mean_energy = observables.total_energy().mean();
   energy_grad2_ = observables.energy_grad().mean_data(); 
   unsigned n = 0;
-  for (unsigned i=0; i<(num_varparms_-1); i+=2) {
-    energy_grad_(n) = 2.0*(energy_grad2_[i]*mean_energy - energy_grad2_[i+1]);
-    n++;
+  for (unsigned i=0; i<num_varparms_; ++i) {
+    energy_grad_(i) = 2.0*(energy_grad2_[n] - mean_energy * energy_grad2_[n+1]);
+    n += 2;
   }
   observables.energy_grad().set_elements(num_varparms_);
+  //-------------------------------------------------
+  //std::cout << mean_energy << "\n";
+  //std::cout << energy_grad2_ << "\n";
+  //for (int i=0; i<energy_grad_.size(); ++i) std::cout << energy_grad_[i] << "\n";
+  //-------------------------------------------------
   observables.energy_grad() << energy_grad_;
   return 0;
 }

@@ -34,7 +34,7 @@ U = 8.0
 mf_order = "DWAVE_SC"
 gutzwiller_proj = "YES"
 hole_doping = 0.16
-gfactor = 0.3037000 #0.1, 0.1, 1.0  # 0.3037000
+gfactor = 0.3037000 # 0.1, 0.1, 1.0  # 0.3037000
 delta_sc = 0.080
 mu = -0.4263000
 mu_variational = "NO"
@@ -51,9 +51,9 @@ Magnetization = "No"
 # Monte Carlo parameters
 #---------------------------------------------
 rng_seed = 1  # (=0 No seed, >0 time_seed)
-measure_steps = 1000
-warmup_steps = 1000
-min_interval = 2
+measure_steps = 50000
+warmup_steps = 5000
+min_interval = 3
 max_interval = 10
 
 

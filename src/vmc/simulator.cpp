@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:20:56
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-25 13:28:57
+* Last Modified time: 2017-02-25 13:41:51
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "simulator.h"
@@ -27,6 +27,7 @@ Simulator::Simulator(const input::Parameters& inputs)
 
   // no of variational parameters
   num_varparms_ = config.num_varparms();
+  //std::cout << "num_varparms = " << num_varparms_ << "\n"; getchar();
 
   // observables
   observables.init(inputs);
