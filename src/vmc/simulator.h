@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:19:36
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-25 12:55:18
+* Last Modified time: 2017-02-28 20:23:43
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef SIMULATOR_H
@@ -22,7 +22,7 @@ class Simulator
 public:
   Simulator(const input::Parameters& inputs); 
   ~Simulator() {}
-  int init(const input::Parameters& inputs);
+  int start(const input::Parameters& inputs);
   int run(const bool& silent=false);
   int optimizing_run(const std::vector<double>& varparms, 
     const bool& need_energy_grad=false, const bool& silent=false);
@@ -43,6 +43,7 @@ private:
   // observables
   obs::ObservableSet observables;
   bool need_energy_{false};
+  bool need_gradient_{false};
   mutable obs::vector config_energy_;
   mutable obs::vector energy_grad2_;
   mutable obs::vector energy_grad_;

@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-16 22:12:57
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-25 13:11:29
+* Last Modified time: 2017-02-26 19:59:08
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 //#define EIGEN_USE_MKL_ALL
@@ -11,7 +11,7 @@
 #ifndef MATRIX_H
 #define MATRIX_H
 
-//#define REAL_WAVEFUNCTION
+#define REAL_WAVEFUNCTION
 
 using Vector3i = Eigen::Vector3i;
 using Vector3d = Eigen::Vector3d;

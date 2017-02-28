@@ -32,6 +32,7 @@ public:
   ~Observable() {}
   void init(const std::string& name, const unsigned& size=1) override; 
   void resize(const unsigned& size) override;
+  void set_option(const bool& file_out=true, const bool& print_total=false);
   void set_elements(const std::vector<std::string>& elem_names);
   void set_elements(const unsigned& size);
   void reset(void) { mcdata::clear(); }
@@ -57,6 +58,8 @@ private:
   std::ofstream fs_;
   bool is_on_{false};
   bool replace_mode_{true};
+  bool need_file_out_{true};
+  bool print_total_{false};
   std::string name_{""};
 };
 
@@ -77,6 +80,7 @@ public:
   inline Observable& energy(void) { return energy_; }
   inline Observable& total_energy(void) { return total_energy_; }
   inline Observable& energy_grad(void) { return energy_grad_; }
+  inline Observable& energy_grad2(void) { return energy_grad2_; }
   void print(const std::vector<double> xpvals); 
   void print(const double& xpval);
   void print(void);
@@ -85,6 +89,7 @@ private:
   Observable energy_;
   Observable total_energy_;
   Observable energy_grad_;
+  Observable energy_grad2_;
   unsigned num_xparms_{0};
   
   void file_init(const std::vector<std::string>& xpnames, void (&print_copyright)(std::ostream& os), 

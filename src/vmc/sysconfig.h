@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-18 13:54:54
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-25 12:07:54
+* Last Modified time: 2017-02-28 21:49:52
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef SYSCONFIG_H
@@ -28,8 +28,9 @@ public:
   SysConfig(const input::Parameters& parms, const lattice::LatticeGraph& graph, 
     const model::Hamiltonian& model);
   ~SysConfig() {}
-  int init(const input::Parameters& inputs, const lattice::LatticeGraph& graph);
-  int init(const std::vector<double>& vparms, const lattice::LatticeGraph& graph,
+  int build(const input::Parameters& inputs, const lattice::LatticeGraph& graph,
+    const bool& with_gradient=false);
+  int update(const std::vector<double>& vparms, const lattice::LatticeGraph& graph,
     const bool& need_psi_grad=false);
   unsigned num_varparms(void) const; 
   const std::vector<std::string>& vparm_names(void) const; 

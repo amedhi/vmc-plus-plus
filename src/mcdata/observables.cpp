@@ -12,10 +12,15 @@ ObservableSet::ObservableSet()
   : energy_("Energy")
   , total_energy_("TotalEnergy")
   , energy_grad_("EnergyGradient")
+  , energy_grad2_("EnergyGradient2")
 {
   push_back(energy_);
   push_back(total_energy_);
   push_back(energy_grad_);
+  push_back(energy_grad2_);
+
+  // for energy, need file out & have total
+  energy_.set_option(true,true);
 }
 
 void ObservableSet::init(const input::Parameters& inputs) 
@@ -135,6 +140,12 @@ void Observable::set_elements(const unsigned& size)
     elem_names_[i] = "var" + std::to_string(i);
 }
 
+void Observable::set_option(const bool& file_out, const bool& print_total)
+{
+  need_file_out_ = file_out;
+  print_total_ = print_total;
+}
+
 void Observable::save_result(void)
 {
   avg_mcdata_ << mcdata::mean_data();
@@ -152,6 +163,7 @@ void Observable::check_on(const input::Parameters& inputs, const bool& replace_m
 
 void Observable::open_file(void) 
 {
+  if (!need_file_out_) return;
   if (fs_.is_open()) return;
   if (is_on_) {
     std::string fname = name_;
@@ -167,6 +179,7 @@ void Observable::open_file(void)
 
 int Observable::print_heading(const std::vector<std::string>& xpnames) 
 {
+  if (!need_file_out_) return 0;
   if (!is_on()) return 1;
   open_file();
   if (!fs_.is_open()) throw std::runtime_error("Observable::print_heading: file not open");
@@ -177,7 +190,7 @@ int Observable::print_heading(const std::vector<std::string>& xpnames)
   //fs_ << std::setw(14)<<xvar_name;
   for (const auto& p : xpnames) fs_ << std::setw(14)<<p.substr(0,14);
   // total value
-  if (mcdata::size()>1)
+  if (mcdata::size()>1 && print_total_)
     fs_ << std::setw(14)<<"Total"<<std::setw(11)<<"err";
   for (const auto& name : elem_names_) 
     fs_ << std::setw(14)<<name<<std::setw(11)<<"err";
@@ -190,6 +203,7 @@ int Observable::print_heading(const std::vector<std::string>& xpnames)
 
 int Observable::print_result(const std::vector<double>& xpvals) 
 {
+  if (!need_file_out_) return 0;
   if (!is_on()) return 1;
   open_file();
   if (!fs_.is_open()) throw std::runtime_error("Observable::print_result: file not open");
@@ -198,7 +212,8 @@ int Observable::print_result(const std::vector<double>& xpvals)
   for (const auto& p : xpvals) 
     fs_ << std::setw(14) << p;
   // total value
-  if (mcdata::size()>1)
+  //if (mcdata::size()>1)
+  if (mcdata::size()>1 && print_total_)
     fs_ << mcdata::result_str(-1); 
   for (unsigned i=0; i<mcdata::size(); ++i) 
     fs_ << mcdata::result_str(i); 

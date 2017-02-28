@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:50
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-25 11:34:33
+* Last Modified time: 2017-02-27 21:55:18
 *----------------------------------------------------------------------------*/
 #include <iomanip>
 #include "vmc.h"
@@ -18,7 +18,7 @@ VMC::VMC(const input::Parameters& inputs) : simulator(inputs)
 int VMC::start(input::Parameters& inputs) 
 {
   // starting
-  simulator.init(inputs);
+  simulator.start(inputs);
 
   // normal run
   if (!simulator.optimizing_mode()) {

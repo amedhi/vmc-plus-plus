@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 14:51:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-25 13:27:05
+* Last Modified time: 2017-02-28 21:51:48
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef WAVEFUNCTION_H
@@ -33,7 +33,8 @@ public:
   ~Wavefunction() {}
   void refresh_varparms(void) { mf_model_.refresh_varparms(); }
   const VariationalParms& varparms(void) const { return mf_model_.varparms(); }
-  int compute(const input::Parameters& inputs, const lattice::LatticeGraph& graph);
+  int compute(const lattice::LatticeGraph& graph, const input::Parameters& inputs, 
+    const bool& psi_gradient=false);
   int compute(const lattice::LatticeGraph& graph, const var::parm_vector& pvector,
     const unsigned& start_pos, const bool& psi_gradient=false);
   //int compute_gradients(const lattice::LatticeGraph& graph);
@@ -79,6 +80,8 @@ private:
   Eigen::SelfAdjointEigenSolver<ComplexMatrix> hminusk;
 
   int compute_amplitudes(Matrix& psi_mat, const lattice::LatticeGraph& graph);
+  int compute_gradients(const lattice::LatticeGraph& graph, 
+    const var::parm_vector& pvector, const unsigned& start_pos=0);
   void set_particle_num(const input::Parameters& inputs);
   double get_noninteracting_mu(void);
   void pair_amplitudes(const lattice::LatticeGraph& graph, Matrix& psi_mat);

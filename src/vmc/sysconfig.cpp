@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-18 14:01:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-25 13:36:33
+* Last Modified time: 2017-02-28 21:51:29
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "./sysconfig.h"
@@ -19,15 +19,16 @@ SysConfig::SysConfig(const input::Parameters& inputs,
 {
 }
 
-int SysConfig::init(const input::Parameters& inputs, const lattice::LatticeGraph& graph)
+int SysConfig::build(const input::Parameters& inputs, const lattice::LatticeGraph& graph,
+    const bool& with_gradient)
 {
   if (num_sites_==0) return -1;
   projector.update(inputs);
-  wf.compute(inputs, graph);
+  wf.compute(graph, inputs, with_gradient);
   return init_config();
 }
 
-int SysConfig::init(const var::parm_vector& pvector, const lattice::LatticeGraph& graph,
+int SysConfig::update(const var::parm_vector& pvector, const lattice::LatticeGraph& graph,
   const bool& need_psi_grad)
 {
   if (num_sites_==0) return -1;

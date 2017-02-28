@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-24 00:10:15
+* Last Modified time: 2017-02-26 19:37:38
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "mf_model.h"
@@ -354,19 +354,24 @@ void UnitcellTerm::build_siteterm(const model::HamiltonianTerm& hamterm,
   bond_vectors_[0] = Vector3d(0,0,0);
 }
 
-void UnitcellTerm::eval_coupling_constant(const model::ModelParams& cvals, const model::ModelParams& pvals)
+void UnitcellTerm::eval_coupling_constant(const model::ModelParams& pvals, const model::ModelParams& cvals)
 {
   expr::Expression expr;
   expr::Expression::variables vars;
+  for (const auto& p : pvals) {
+    vars[p.first] = p.second;
+    //std::cout << p.first << " = " << p.second << "\n"; getchar();
+  }
   for (const auto& c : cvals) vars[c.first] = c.second;
-  for (const auto& p : pvals) vars[p.first] = p.second;
   try { 
     for (unsigned n=0; n<num_out_bonds_; ++n) {
       for (unsigned i=0; i<dim_; ++i) {
         for (unsigned j=0; j<dim_; ++j) {
           std::string cc_expr(expr_matrices_[n][i][j]);
-          if (cc_expr.size()>0) 
+          if (cc_expr.size()>0) {
             coeff_matrices_[n](i,j) = expr.evaluate(cc_expr, vars); 
+            //std::cout << "cc = " << coeff_matrices_[n](i,j) << "\n"; getchar();
+          }
           else
             coeff_matrices_[n](i,j) = 0.0;
         }
