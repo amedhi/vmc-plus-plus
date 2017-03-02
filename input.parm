@@ -34,8 +34,8 @@ U = 8.0
 mf_order = "DWAVE_SC"
 gutzwiller_proj = "YES"
 hole_doping = 0.16
-gfactor = 0.3037000  #0.1, 0.1, 1.0  # 0.3037000
-delta_sc = 0.01, 0.01, 0.30 #0.080
+gfactor = 0.1, 0.1, 1.0  # 0.3037000
+delta_sc = 0.080 #0.01, 0.05, 0.30 #0.080
 mu = -0.4263000
 mu_variational = "NO"
 
@@ -44,7 +44,7 @@ mu_variational = "NO"
 # List of observable to calculate:
 #---------------------------------------------
 Energy = "Yes"
-EnergyGradient = "YES"
+EnergyGradient = "NO"
 Magnetization = "No"
 
 #---------------------------------------------
@@ -53,8 +53,8 @@ Magnetization = "No"
 rng_seed = 1  # (=0 No seed, >0 time_seed)
 measure_steps = 10000
 warmup_steps = 1000
-min_interval = 5
-max_interval = 10
+min_interval = 2
+max_interval = 20
 
 
 

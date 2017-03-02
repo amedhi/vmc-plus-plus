@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:19:36
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-28 20:23:43
+* Last Modified time: 2017-03-02 23:55:26
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef SIMULATOR_H
@@ -22,11 +22,13 @@ class Simulator
 public:
   Simulator(const input::Parameters& inputs); 
   ~Simulator() {}
-  int start(const input::Parameters& inputs);
-  int run(const bool& silent=false);
-  int optimizing_run(const std::vector<double>& varparms, 
-    const bool& need_energy_grad=false, const bool& silent=false);
-  int get_variational_parms(std::vector<double>& varparms);
+  int start(const input::Parameters& inputs, const bool& silent=false);
+  int run();
+  int optimizing_run(const var::parm_vector& varparms, 
+    const bool& need_energy_grad=false);
+  double operator()(const var::parm_vector& x, Eigen::VectorXd& grad);
+  void get_vparm_values(var::parm_vector& varparms) 
+    { varparms = config.vparm_values(); }
   const bool& optimizing_mode(void) const { return optimizing_mode_; }
   //void energy_gradient_off(void) { need_energy_grad_=false; }
   void print_results(void); 
@@ -44,7 +46,7 @@ private:
   obs::ObservableSet observables;
   bool need_energy_{false};
   bool need_gradient_{false};
-  mutable obs::vector config_energy_;
+  mutable obs::vector term_energy_;
   mutable obs::vector energy_grad2_;
   mutable obs::vector energy_grad_;
   mutable RealVector grad_logpsi_;
@@ -57,8 +59,9 @@ private:
   int min_interval_{0};
   int max_interval_{0};
   int check_interval_{0};
-  bool print_progress_{true};
+  bool silent_{false};
 
+  void init_observables(const input::Parameters& inputs);
   int run_simulation(void);
   int do_measurements(void);
   int finalize_energy_grad(void);

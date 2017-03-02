@@ -24,8 +24,9 @@ public:
   static void print_copyright(std::ostream& os);
 private:
   Simulator simulator;
-  bool optimizing_run{false};
-  std::vector<double> varparms;
+  var::parm_vector varparms;
+  var::parm_vector vp_lbound;
+  var::parm_vector vp_ubound;
 };
 
 

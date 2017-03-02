@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-17 23:30:00
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-27 22:06:04
+* Last Modified time: 2017-03-03 00:08:54
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include <iostream>
@@ -15,6 +15,7 @@ int Simulator::do_measurements(void)
   if (optimizing_mode_) {
     double energy = config_energy().sum();
     observables.total_energy() << energy;
+
     if (observables.energy_grad()) {
       config.get_grad_logpsi(grad_logpsi_);
       unsigned n = 0;
@@ -23,19 +24,19 @@ int Simulator::do_measurements(void)
         energy_grad2_[n+1] = grad_logpsi_[i];
         n += 2;
       }
-      observables.energy_grad() << energy_grad2_;
+      observables.energy_grad2() << energy_grad2_;
     }
     return 0;
   }
 
   // normal run
   if (need_energy_) {
-    config_energy_ = config_energy();
+    term_energy_ = config_energy();
     //std::cout << "--------here--------\n";
-    if (observables.energy()) observables.energy() << config_energy_;
+    if (observables.energy()) observables.energy() << term_energy_;
 
     if (observables.energy_grad()) {
-      double energy = config_energy_.sum();
+      double energy = term_energy_.sum();
       observables.total_energy() << energy;
       config.get_grad_logpsi(grad_logpsi_);
   //-------------------------------------------------
@@ -49,7 +50,7 @@ int Simulator::do_measurements(void)
     } 
 
     else if (observables.total_energy()) {
-      double energy = config_energy_.sum();
+      double energy = term_energy_.sum();
       observables.total_energy() << energy;
     }
   }
@@ -82,8 +83,8 @@ int Simulator::finalize_energy_grad(void)
 obs::vector Simulator::config_energy(void) const
 {
   using op_id = model::op_id;
-  //for (auto& elem : config_energy_) elem = 0.0;
-  config_energy_.setZero();
+  //for (auto& elem : term_energy_) elem = 0.0;
+  term_energy_.setZero();
   // bond energies
   if (model.has_bondterm()) {
     Matrix matrix_elem(model.num_bondterms(),graph.num_bond_types());
@@ -103,7 +104,7 @@ obs::vector Simulator::config_energy(void) const
     unsigned i = 0;
     for (auto it=model.bondterms_begin(); it!=model.bondterms_end(); ++it) {
       for (unsigned btype=0; btype<graph.num_bond_types(); ++btype) {
-        config_energy_(i) += std::real(it->coupling(btype)*matrix_elem(i,btype));
+        term_energy_(i) += std::real(it->coupling(btype)*matrix_elem(i,btype));
       }
       i++;
     }
@@ -150,19 +151,19 @@ obs::vector Simulator::config_energy(void) const
       // special treatment for hubbard
       if (it->qn_operator().id()==op_id::niup_nidn) {
         for (unsigned stype=0; stype<graph.num_site_types(); ++stype) {
-          config_energy_(n+i) += std::real(it->coupling(stype)*hubbard_nd(stype));
+          term_energy_(n+i) += std::real(it->coupling(stype)*hubbard_nd(stype));
         }
       }
       else {
         for (unsigned stype=0; stype<graph.num_site_types(); ++stype) {
-          config_energy_(n+i) += std::real(it->coupling(stype)*matrix_elem(i,stype));
+          term_energy_(n+i) += std::real(it->coupling(stype)*matrix_elem(i,stype));
         }
       }
       i++;
     }
   }
   // energy per site
-  return config_energy_/num_sites_;
+  return term_energy_/num_sites_;
 }
 
 

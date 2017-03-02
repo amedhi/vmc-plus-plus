@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 14:51:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-28 21:51:48
+* Last Modified time: 2017-03-02 23:14:08
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef WAVEFUNCTION_H
@@ -31,7 +31,6 @@ public:
   //Wavefunction() {}
   Wavefunction(const lattice::LatticeGraph& graph, const input::Parameters& inputs);
   ~Wavefunction() {}
-  void refresh_varparms(void) { mf_model_.refresh_varparms(); }
   const VariationalParms& varparms(void) const { return mf_model_.varparms(); }
   int compute(const lattice::LatticeGraph& graph, const input::Parameters& inputs, 
     const bool& psi_gradient=false);
@@ -41,6 +40,11 @@ public:
   const unsigned& num_upspins(void) const { return num_upspins_; }
   const unsigned& num_dnspins(void) const { return num_dnspins_; }
   const double& hole_doping(void) const { return hole_doping_; }
+  void get_vparm_names(std::vector<std::string>& names, unsigned start_pos) const; 
+  void get_vparm_values(var::parm_vector& values, unsigned start_pos);
+  void get_vparm_vector(std::vector<double>& vparm_values, unsigned start_pos);
+  void get_vparm_lbound(var::parm_vector& lbounds, unsigned start_pos) const; 
+  void get_vparm_ubound(var::parm_vector& ubounds, unsigned start_pos) const; 
   void get_amplitudes(Matrix& psi, const std::vector<int>& row,  
     const std::vector<int>& col) const;
   void get_amplitudes(ColVector& psi_vec, const int& irow,  

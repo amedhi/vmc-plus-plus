@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-16 23:17:49
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-21 23:02:22
+* Last Modified time: 2017-03-02 23:13:00
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "./projector.h"
@@ -47,6 +47,51 @@ void WavefunProjector::update(const var::parm_vector& pvector, const unsigned& s
   }
   if (gutzwiller_proj_) set_gw_ratio();
 }
+
+void WavefunProjector::get_vparm_names(std::vector<std::string>& vparm_names, 
+  unsigned start_pos) const
+{
+  unsigned i = 0;
+  for (auto& p : varparms_) {
+    vparm_names[start_pos+i] = p.name(); ++i;
+  }
+}
+
+void WavefunProjector::get_vparm_values(var::parm_vector& vparm_values, 
+  unsigned start_pos) const
+{
+  unsigned i = 0;
+  for (auto& p : varparms_) {
+    vparm_values[start_pos+i] = p.value(); ++i;
+  }
+}
+
+void WavefunProjector::get_vparm_vector(std::vector<double>& vparm_values, unsigned start_pos) const
+{
+  unsigned i = 0;
+  for (auto& p : varparms_) {
+    vparm_values[start_pos+i] = p.value(); ++i;
+  }
+}
+
+void WavefunProjector::get_vparm_lbound(var::parm_vector& vparm_lb, 
+  unsigned start_pos) const
+{
+  unsigned i = 0;
+  for (auto& p : varparms_) {
+    vparm_lb[start_pos+i] = p.lbound(); ++i;
+  }
+}
+
+void WavefunProjector::get_vparm_ubound(var::parm_vector& vparm_ub, 
+  unsigned start_pos) const
+{
+  unsigned i = 0;
+  for (auto& p : varparms_) {
+    vparm_ub[start_pos+i] = p.ubound(); ++i;
+  }
+}
+
 
 double WavefunProjector::gw_factor(void) const 
 {

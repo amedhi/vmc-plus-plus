@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-18 14:01:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-28 21:51:29
+* Last Modified time: 2017-03-02 23:12:45
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "./sysconfig.h"
@@ -14,26 +14,60 @@ SysConfig::SysConfig(const input::Parameters& inputs,
   const lattice::LatticeGraph& graph, const model::Hamiltonian& model) 
   : BasisState(graph.num_sites(), model.double_occupancy())
   , wf(graph, inputs)
-  , projector(inputs)
+  , pj(inputs)
   , num_sites_(graph.num_sites())
 {
+  // variational parameters
+  num_pj_parms_ = pj.varparms().size();
+  num_wf_parms_ = wf.varparms().size();
+  num_varparms_ = (num_pj_parms_ + num_wf_parms_);
+  vparm_names_.resize(num_varparms_);
+  vparm_lbound_.resize(num_varparms_);
+  vparm_ubound_.resize(num_varparms_);
+  // names
+  pj.get_vparm_names(vparm_names_,0);
+  wf.get_vparm_names(vparm_names_,num_pj_parms_);
+  // values are not static and may change
+  // bounds
+  pj.get_vparm_lbound(vparm_lbound_,0);
+  wf.get_vparm_lbound(vparm_lbound_,num_pj_parms_);
+  pj.get_vparm_ubound(vparm_ubound_,0);
+  wf.get_vparm_ubound(vparm_ubound_,num_pj_parms_);
+}
+
+const var::parm_vector& SysConfig::vparm_values(void) 
+{
+  // values as 'var::parm_vector'
+  vparm_values_.resize(num_varparms_);
+  pj.get_vparm_values(vparm_values_,0);
+  wf.get_vparm_values(vparm_values_,num_pj_parms_);
+  return vparm_values_;
+}
+
+const std::vector<double>& SysConfig::vparm_vector(void) 
+{
+  // values as 'std::double'
+  vparm_vector_.resize(num_varparms_);
+  pj.get_vparm_vector(vparm_vector_,0);
+  wf.get_vparm_vector(vparm_vector_,num_pj_parms_);
+  return vparm_vector_;
 }
 
 int SysConfig::build(const input::Parameters& inputs, const lattice::LatticeGraph& graph,
     const bool& with_gradient)
 {
   if (num_sites_==0) return -1;
-  projector.update(inputs);
+  pj.update(inputs);
   wf.compute(graph, inputs, with_gradient);
   return init_config();
 }
 
-int SysConfig::update(const var::parm_vector& pvector, const lattice::LatticeGraph& graph,
+int SysConfig::build(const var::parm_vector& pvector, const lattice::LatticeGraph& graph,
   const bool& need_psi_grad)
 {
   if (num_sites_==0) return -1;
-  projector.update(pvector, 0);
-  unsigned start_pos = projector.varparms().size();
+  pj.update(pvector, 0);
+  unsigned start_pos = pj.varparms().size();
   wf.compute(graph, pvector, start_pos, need_psi_grad);
   return init_config();
 }
@@ -48,8 +82,8 @@ int SysConfig::init_config(void)
   // small 'gfactor' caution
   bool tmp_restriction = false;
   bool original_state = BasisState::double_occupancy();
-  if (projector.have_gutzwiller()) {
-    if (projector.gw_factor()<gfactor_cutoff()) {
+  if (pj.have_gutzwiller()) {
+    if (pj.gw_factor()<gfactor_cutoff()) {
       BasisState::allow_double_occupancy(false);
       tmp_restriction = true;
     }
@@ -79,7 +113,41 @@ int SysConfig::init_config(void)
   psi_inv = psi_mat.inverse();
   // run parameters
   set_run_parameters();
+  return 0;
+}
 
+int SysConfig::set_run_parameters(void)
+{
+  num_updates_ = 0;
+  refresh_cycle_ = 100;
+  // number of moves per mcstep
+  int n_up = static_cast<int>(num_upspins_);
+  int n_dn = static_cast<int>(num_dnspins_);
+  if (double_occupancy()) {
+    num_uphop_moves_ = num_upspins_;
+    num_dnhop_moves_ = num_dnspins_;
+    num_exchange_moves_ = std::min(n_up, n_dn);
+    //num_exchange_moves_ = 2*std::min(n_up, n_dn);
+  }
+  else {
+    int num_holes = num_sites_-(num_upspins_+num_dnspins_);
+    num_uphop_moves_ = std::min(n_up, num_holes);
+    num_dnhop_moves_ = std::min(n_dn, num_holes);
+    num_exchange_moves_ = std::min(n_up, n_dn);
+    //num_exchange_moves_ = 4*std::min(n_up, n_dn);
+  }
+  for (int i=0; i<move_t::end; ++i) {
+    num_proposed_moves_[i] = 0;
+    num_accepted_moves_[i] = 0;
+  }
+  last_proposed_moves_ = 1;
+  last_accepted_moves_ = 1;
+
+  // work arrays 
+  psi_row.resize(num_dnspins_);
+  psi_col.resize(num_upspins_);
+  inv_row.resize(num_upspins_);
+  psi_grad.resize(num_upspins_,num_dnspins_);
   return 0;
 }
 
@@ -107,7 +175,7 @@ int SysConfig::do_upspin_hop(void)
   wf.get_amplitudes(psi_row, to_site, dnspin_sites());
   amplitude_t det_ratio = psi_row.cwiseProduct(psi_inv.col(upspin)).sum();
   if (std::abs(det_ratio) < dratio_cutoff()) return 0; // for safety
-  double proj_ratio = projector.gw_ratio(dblocc_increament());
+  double proj_ratio = pj.gw_ratio(dblocc_increament());
   amplitude_t weight_ratio = det_ratio * proj_ratio;
   double transition_proby = std::norm(weight_ratio);
   //std::cout << "W = " << transition_proby << "\n";
@@ -134,7 +202,7 @@ int SysConfig::do_dnspin_hop(void)
   wf.get_amplitudes(psi_col, upspin_sites(), to_site);
   amplitude_t det_ratio = psi_col.cwiseProduct(psi_inv.row(dnspin)).sum();
   if (std::abs(det_ratio) < dratio_cutoff()) return 0; // for safety
-  double proj_ratio = projector.gw_ratio(dblocc_increament());
+  double proj_ratio = pj.gw_ratio(dblocc_increament());
   amplitude_t weight_ratio = det_ratio * proj_ratio;
   double transition_proby = std::norm(weight_ratio);
   if (rng().random_real()<transition_proby) {
@@ -183,7 +251,7 @@ int SysConfig::do_spin_exchange(void)
   amplitude_t det_ratio2 = psi_col.cwiseProduct(inv_row).sum();
   if (std::abs(det_ratio2) < dratio_cutoff()) return 0; // for safety
 
-  // weight ratio (gw projector does not play here)
+  // weight ratio (gw pj does not play here)
   amplitude_t weight_ratio = det_ratio1 * det_ratio2;
   double transition_proby = std::norm(weight_ratio);
   //std::cout << "W = " << transition_proby << "\n";
@@ -233,115 +301,6 @@ int SysConfig::inv_update_dnspin(const int& dnspin, const RowVector& psi_col,
   return 0;
 }
 
-int SysConfig::set_run_parameters(void)
-{
-  num_updates_ = 0;
-  refresh_cycle_ = 100;
-  // number of moves per mcstep
-  int n_up = static_cast<int>(num_upspins_);
-  int n_dn = static_cast<int>(num_dnspins_);
-  if (double_occupancy()) {
-    num_uphop_moves_ = num_upspins_;
-    num_dnhop_moves_ = num_dnspins_;
-    num_exchange_moves_ = std::min(n_up, n_dn);
-    //num_exchange_moves_ = 2*std::min(n_up, n_dn);
-  }
-  else {
-    int num_holes = num_sites_-(num_upspins_+num_dnspins_);
-    num_uphop_moves_ = std::min(n_up, num_holes);
-    num_dnhop_moves_ = std::min(n_dn, num_holes);
-    num_exchange_moves_ = std::min(n_up, n_dn);
-    //num_exchange_moves_ = 4*std::min(n_up, n_dn);
-  }
-  for (int i=0; i<move_t::end; ++i) {
-    num_proposed_moves_[i] = 0;
-    num_accepted_moves_[i] = 0;
-  }
-  last_proposed_moves_ = 1;
-  last_accepted_moves_ = 1;
-
-  // work arrays 
-  psi_row.resize(num_dnspins_);
-  psi_col.resize(num_upspins_);
-  inv_row.resize(num_upspins_);
-  psi_grad.resize(num_upspins_,num_dnspins_);
-  
-  return 0;
-}
-
-double SysConfig::accept_ratio(void)
-{
-  // acceptance ratio wrt particle number
-  return static_cast<double>(last_accepted_moves_)/
-         static_cast<double>(num_upspins_+num_dnspins_); 
-  //return static_cast<double>(last_accepted_moves_)/
-  //       static_cast<double>(last_proposed_moves_); 
-}
-
-void SysConfig::reset_accept_ratio(void)
-{
-  last_proposed_moves_ = 0;
-  last_accepted_moves_ = 0;
-}
-
-unsigned SysConfig::num_varparms(void) const 
-{
-  return projector.varparms().size()+wf.varparms().size();
-}
-
-const std::vector<std::string>& SysConfig::vparm_names(void) const
-{
-  vparm_names_.clear();
-  for (auto& p : projector.varparms()) vparm_names_.push_back(p.name());
-  for (auto& p : wf.varparms()) vparm_names_.push_back(p.name());
-  /*
-  // names are sorted, not in same order as the values
-  vparm_names_.resize(num_total_parms_);
-  for (const auto& elem : projector.var_parms()) 
-    vparm_names_[elem.second] = elem.first;
-  for (const auto& elem : wf.var_parms()) 
-    vparm_names_[num_projector_parms_ + elem.second] = elem.first;
-  */
-  return vparm_names_;
-} 
-
-const std::vector<double>& SysConfig::vparm_values(void) 
-{
-  vparm_values_.clear();
-  for (auto& p : projector.varparms()) vparm_values_.push_back(p.value());
-  // wave vparms are not automatically updated after initialization
-  wf.refresh_varparms();
-  for (auto& p : wf.varparms()) vparm_values_.push_back(p.value());
-  /*vparm_values_ = projector.var_parms().values();
-  vparm_values_.insert(vparm_values_.end(),wf.var_parms().values().begin(),
-    wf.var_parms().values().end());
-  */
-  return vparm_values_;
-}
-
-const std::vector<double>& SysConfig::vparm_lbounds(void) const 
-{
-  vparm_lb_.clear();
-  for (auto& p : projector.varparms()) vparm_lb_.push_back(p.lbound());
-  for (auto& p : wf.varparms()) vparm_lb_.push_back(p.lbound());
-  /*vparm_lb_ = projector.var_parms().lbounds();
-  vparm_lb_.insert(vparm_lb_.end(),wf.var_parms().lbounds().begin(),
-    wf.var_parms().lbounds().end());
-  */
-  return vparm_lb_;
-}
-
-const std::vector<double>& SysConfig::vparm_ubounds(void) const 
-{
-  vparm_ub_.clear();
-  for (auto& p : projector.varparms()) vparm_ub_.push_back(p.ubound());
-  for (auto& p : wf.varparms()) vparm_ub_.push_back(p.ubound());
-  /*vparm_ub_ = projector.var_parms().ubounds();
-  vparm_ub_.insert(vparm_ub_.end(),wf.var_parms().ubounds().begin(),
-    wf.var_parms().ubounds().end());
-  */
-  return vparm_ub_;
-}
 
 amplitude_t SysConfig::apply(const model::op::quantum_op& qn_op, const unsigned& site_i, 
     const unsigned& site_j, const int& bc_phase) const
@@ -407,7 +366,7 @@ amplitude_t SysConfig::apply_upspin_hop(const unsigned& i, const unsigned& j,
   wf.get_amplitudes(psi_row, to_site, dnspin_sites());
   amplitude_t det_ratio = psi_row.cwiseProduct(psi_inv.col(upspin)).sum();
   det_ratio = ampl_part(std::conj(det_ratio));
-  return amplitude_t(bc_phase) * det_ratio * projector.gw_ratio(delta_nd);
+  return amplitude_t(bc_phase) * det_ratio * pj.gw_ratio(delta_nd);
 }
 
 amplitude_t SysConfig::apply_dnspin_hop(const unsigned& i, const unsigned& j,
@@ -440,7 +399,7 @@ amplitude_t SysConfig::apply_dnspin_hop(const unsigned& i, const unsigned& j,
   wf.get_amplitudes(psi_col, upspin_sites(), to_site);
   amplitude_t det_ratio = psi_col.cwiseProduct(psi_inv.row(dnspin)).sum();
   det_ratio = ampl_part(std::conj(det_ratio));
-  return amplitude_t(bc_phase) * det_ratio * projector.gw_ratio(delta_nd);
+  return amplitude_t(bc_phase) * det_ratio * pj.gw_ratio(delta_nd);
 }
 
 amplitude_t SysConfig::apply_sisj_plus(const unsigned& i, const unsigned& j) const
@@ -512,15 +471,15 @@ amplitude_t SysConfig::apply_sisj_plus(const unsigned& i, const unsigned& j) con
 
 void SysConfig::get_grad_logpsi(RealVector& grad_logpsi)
 {
-  // grad_logpsi wrt projector parameters
-  unsigned p = projector.varparms().size();
+  // grad_logpsi wrt pj parameters
+  unsigned p = pj.varparms().size();
   for (unsigned n=0; n<p; ++n) {
-    if (projector.varparms()[n].name()=="gfactor") {
-      double g = projector.varparms()[n].value();
+    if (pj.varparms()[n].name()=="gfactor") {
+      double g = pj.varparms()[n].value();
       grad_logpsi(n) = static_cast<double>(dblocc_count())/g;
     }
     else {
-      throw std::range_error("SysConfig::get_grad_logpsi: this projector parameter not implemented\n");
+      throw std::range_error("SysConfig::get_grad_logpsi: this pj parameter not implemented\n");
     }
   }
   // grad_logpsi wrt wf parameters
@@ -530,6 +489,20 @@ void SysConfig::get_grad_logpsi(RealVector& grad_logpsi)
   }
 }
 
+double SysConfig::accept_ratio(void)
+{
+  // acceptance ratio wrt particle number
+  return static_cast<double>(last_accepted_moves_)/
+         static_cast<double>(num_upspins_+num_dnspins_); 
+  //return static_cast<double>(last_accepted_moves_)/
+  //       static_cast<double>(last_proposed_moves_); 
+}
+
+void SysConfig::reset_accept_ratio(void)
+{
+  last_proposed_moves_ = 0;
+  last_accepted_moves_ = 0;
+}
 
 void SysConfig::print_stats(std::ostream& os) const
 {

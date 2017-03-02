@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-20 10:18:07
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-25 11:41:32
+* Last Modified time: 2017-03-02 22:01:16
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef VARPARM_H
@@ -12,10 +12,12 @@
 #include <vector>
 #include <map>
 #include <stdexcept>
+#include <Eigen/Core>
 #include "../scheduler/task.h"
 
 namespace var {
 using parm_vector = std::vector<double>;
+//using parm_vector = Eigen::VectorXd;
 using name_id_map = std::map<std::string,unsigned>; 
 class varparm_t
 {

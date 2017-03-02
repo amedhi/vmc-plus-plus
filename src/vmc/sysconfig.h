@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-18 13:54:54
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-28 21:49:52
+* Last Modified time: 2017-03-02 23:10:06
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef SYSCONFIG_H
@@ -30,13 +30,14 @@ public:
   ~SysConfig() {}
   int build(const input::Parameters& inputs, const lattice::LatticeGraph& graph,
     const bool& with_gradient=false);
-  int update(const std::vector<double>& vparms, const lattice::LatticeGraph& graph,
+  int build(const var::parm_vector& vparms, const lattice::LatticeGraph& graph,
     const bool& need_psi_grad=false);
-  unsigned num_varparms(void) const; 
-  const std::vector<std::string>& vparm_names(void) const; 
-  const std::vector<double>& vparm_values(void); 
-  const std::vector<double>& vparm_lbounds(void) const; 
-  const std::vector<double>& vparm_ubounds(void) const; 
+  const unsigned& num_varparms(void) const { return num_varparms_; } 
+  const var::parm_vector& vparm_values(void);
+  const std::vector<double>& vparm_vector(void); 
+  const std::vector<std::string>& vparm_names(void) const { return vparm_names_; }
+  const var::parm_vector& vparm_lbound(void) const { return vparm_lbound_; } 
+  const var::parm_vector& vparm_ubound(void) const { return vparm_ubound_; } 
   int update_state(void);
   double accept_ratio(void);
   void reset_accept_ratio(void);
@@ -51,7 +52,7 @@ public:
   //var::VariationalParms& var_parms(void) { return wf.var_parms(); }
 private:
   var::Wavefunction wf;
-  var::WavefunProjector projector;
+  var::WavefunProjector pj;
   Matrix psi_mat;
   Matrix psi_inv;
   mutable ColVector psi_row;
@@ -63,10 +64,14 @@ private:
   unsigned num_dnspins_;
 
   // variational parameters
-  mutable std::vector<std::string> vparm_names_;
-  mutable std::vector<double> vparm_values_;
-  mutable std::vector<double> vparm_lb_;
-  mutable std::vector<double> vparm_ub_;
+  unsigned num_pj_parms_{0};
+  unsigned num_wf_parms_{0};
+  unsigned num_varparms_{0};
+  mutable var::parm_vector vparm_values_;
+  mutable std::vector<double> vparm_vector_;
+  std::vector<std::string> vparm_names_;
+  var::parm_vector vparm_lbound_;
+  var::parm_vector vparm_ubound_;
 
   // mc parameters
   enum move_t {uphop, dnhop, exch, end};

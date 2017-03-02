@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-16 23:03:44
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-25 11:45:47
+* Last Modified time: 2017-03-02 23:12:57
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef PROJECTOR_H
@@ -34,6 +34,11 @@ public:
   double gw_factor(void) const; 
   const double& gw_ratio(const int& nd_incre) const { return gw_ratio_[nd_incre+1]; } 
   const VariationalParms& varparms(void) const { return varparms_; }
+  void get_vparm_names(std::vector<std::string>& names, unsigned start_pos=0) const; 
+  void get_vparm_values(var::parm_vector& values, unsigned start_pos=0) const; 
+  void get_vparm_vector(std::vector<double>& vparm_values, unsigned start_pos=0) const;
+  void get_vparm_lbound(var::parm_vector& lbounds, unsigned start_pos=0) const; 
+  void get_vparm_ubound(var::parm_vector& ubounds, unsigned start_pos=0) const; 
 private:
   using vparm_t = std::pair<std::string,double>;
   bool gutzwiller_proj_{false};

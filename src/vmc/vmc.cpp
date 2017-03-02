@@ -4,10 +4,12 @@
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:50
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-27 21:55:18
+* Last Modified time: 2017-03-02 23:57:29
 *----------------------------------------------------------------------------*/
 #include <iomanip>
+#include <nlopt.hpp>
 #include "vmc.h"
+#include "../optimizer/LBFGS.h"
 
 namespace vmc {
 
@@ -30,9 +32,21 @@ int VMC::start(input::Parameters& inputs)
 
   // optimizing run
   std::cout << " starting vmc optimization\n";
-  simulator.get_variational_parms(varparms);
+  simulator.get_vparm_values(varparms);
+
+  nlopt::opt opt(nlopt::LD_MMA, varparms.size());
+
+
+  /*using namespace LBFGSpp;
+  LBFGSParam<double> lbfgs_param;
+  LBFGSSolver<double> solver(lbfgs_param);
   //simulator.run(varparms, true);
-  return 0;
+  double emin;
+  int niter = solver.minimize(simulator, varparms, emin);
+  std::cout << niter << " iterations" << std::endl;
+  std::cout << "x = \n" << varparms.transpose() << std::endl;
+  std::cout << "f(x) = " << emin << std::endl;
+  */
   /*
   std::cout << "var parms = " << varparms_.size();
   simulator.optimizing(varparms_,energy,energy_grad);
@@ -44,6 +58,7 @@ int VMC::start(input::Parameters& inputs)
   }
   return 0;
   */
+  return 0;
 }
 
 void VMC::print_copyright(std::ostream& os)

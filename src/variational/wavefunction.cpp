@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-28 21:52:13
+* Last Modified time: 2017-03-02 23:14:11
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "wavefunction.h"
@@ -45,8 +45,15 @@ int Wavefunction::compute(const lattice::LatticeGraph& graph,
   compute_amplitudes(psi_up_,graph);
   // psi gradients
   if (psi_gradient) {
-    var::parm_vector pvector;
-    for (auto& p : mf_model_.varparms()) pvector.push_back(p.value());
+    unsigned num_parms = mf_model_.varparms().size();
+    var::parm_vector pvector(num_parms);
+    //for (auto& p : mf_model_.varparms()) pvector.push_back(p.value());
+    unsigned i = 0;
+    for (auto& p : mf_model_.varparms()) {
+     pvector[i] = p.value();
+     ++i;
+    }
+
     compute_gradients(graph, pvector);
     have_gradients_ = true;
   }
@@ -203,6 +210,53 @@ void Wavefunction::get_gradients(Matrix& psi_grad, const int& n,
       psi_grad(i,j) = psi_gradients_[n](row[i],col[j]);
 }
 
+
+void Wavefunction::get_vparm_names(std::vector<std::string>& vparm_names, 
+  unsigned start_pos) const
+{
+  unsigned i = 0;
+  for (auto& p : mf_model_.varparms()) {
+    vparm_names[start_pos+i] = p.name(); ++i;
+  }
+}
+
+void Wavefunction::get_vparm_values(var::parm_vector& vparm_values, 
+  unsigned start_pos)
+{
+  mf_model_.refresh_varparms(); 
+  unsigned i = 0;
+  for (auto& p : mf_model_.varparms()) {
+    vparm_values[start_pos+i] = p.value(); ++i;
+  }
+}
+
+void Wavefunction::get_vparm_vector(std::vector<double>& vparm_values, 
+  unsigned start_pos)
+{
+  mf_model_.refresh_varparms(); 
+  unsigned i = 0;
+  for (auto& p : mf_model_.varparms()) {
+    vparm_values[start_pos+i] = p.value(); ++i;
+  }
+}
+
+void Wavefunction::get_vparm_lbound(var::parm_vector& vparm_lb, 
+  unsigned start_pos) const
+{
+  unsigned i = 0;
+  for (auto& p : mf_model_.varparms()) {
+    vparm_lb[start_pos+i] = p.lbound(); ++i;
+  }
+}
+
+void Wavefunction::get_vparm_ubound(var::parm_vector& vparm_ub, 
+  unsigned start_pos) const
+{
+  unsigned i = 0;
+  for (auto& p : mf_model_.varparms()) {
+    vparm_ub[start_pos+i] = p.ubound(); ++i;
+  }
+}
 
 
 
