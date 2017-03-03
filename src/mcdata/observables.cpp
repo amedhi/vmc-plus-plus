@@ -13,11 +13,13 @@ ObservableSet::ObservableSet()
   , total_energy_("TotalEnergy")
   , energy_grad_("EnergyGradient")
   , energy_grad2_("EnergyGradient2")
+  , sr_matrix_("SRmatrix")
 {
   push_back(energy_);
   push_back(total_energy_);
   push_back(energy_grad_);
   push_back(energy_grad2_);
+  push_back(sr_matrix_);
 
   // for energy, need file out & have total
   energy_.set_option(true,true);

@@ -81,6 +81,7 @@ public:
   inline Observable& total_energy(void) { return total_energy_; }
   inline Observable& energy_grad(void) { return energy_grad_; }
   inline Observable& energy_grad2(void) { return energy_grad2_; }
+  inline Observable& sr_matrix(void) { return sr_matrix_; }
   void print(const std::vector<double> xpvals); 
   void print(const double& xpval);
   void print(void);
@@ -90,6 +91,7 @@ private:
   Observable total_energy_;
   Observable energy_grad_;
   Observable energy_grad2_;
+  Observable sr_matrix_;
   unsigned num_xparms_{0};
   
   void file_init(const std::vector<std::string>& xpnames, void (&print_copyright)(std::ostream& os), 

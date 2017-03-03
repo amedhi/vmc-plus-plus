@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:20:56
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-02 23:56:59
+* Last Modified time: 2017-03-03 22:57:16
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "simulator.h"
@@ -53,15 +53,56 @@ int Simulator::optimizing_run(const var::parm_vector& varparms,
   return 0;
 }
 
-double Simulator::operator()(const var::parm_vector& x, Eigen::VectorXd& grad)
+double Simulator::energy_function(const var::parm_vector& x, Eigen::VectorXd& grad)
 {
+  observables.energy_grad().switch_on();
   config.build(x, graph, true);
   run_simulation();
   finalize_energy_grad();
-  //for (unsigned i=0; i<num_varparms_; ++i)
   grad = observables.energy_grad().mean_data();
-  return observables.total_energy().mean();
+  double en = observables.total_energy().mean();
+  //for (unsigned i=0; i<num_varparms_; ++i)
+  std::cout << " grad = " << grad.transpose() << "\n";
+  std::cout << " varp = " << x[0] << " " << x[1] << "\n";
+  std::cout << " energy = " << en << "\n";
+  return en;
 }
+
+double Simulator::sr_function(const Eigen::VectorXd& vparms, Eigen::VectorXd& grad, 
+  Eigen::MatrixXd& sr_matrix)
+{
+  observables.total_energy().switch_on();
+  observables.energy_grad().switch_on();
+  if (!observables.sr_matrix()) {
+    observables.sr_matrix().switch_on();
+    // upper triangular part of the sr_matrix plus '\del(ln(psi))' operators
+    unsigned n = num_varparms_*(num_varparms_+1)/2+num_varparms_;
+    observables.sr_matrix().set_elements(n);
+    sr_matrix_el_.resize(n);
+  }
+  config.build(vparms, graph, true);
+  run_simulation();
+  finalize_energy_grad();
+  // gradient
+  grad.resize(num_varparms_);
+  grad = observables.energy_grad().mean_data();
+  // sr matrix
+  sr_matrix.resize(num_varparms_, num_varparms_);
+  sr_matrix_el_ = observables.sr_matrix().mean_data();
+  unsigned k = num_varparms_;
+  for (unsigned i=0; i<num_varparms_; ++i) {
+    double x = sr_matrix_el_[i];
+    for (unsigned j=i; j<num_varparms_; ++j) {
+      double y = sr_matrix_el_[j];
+      sr_matrix(i,j) = (sr_matrix_el_[k] - x*y)/num_sites_;
+      sr_matrix(j,i) = sr_matrix(i,j);
+      ++k;
+    }
+  }
+  double en = observables.total_energy().mean();
+  return en;
+}
+
 
 int Simulator::run_simulation(void)
 {
@@ -94,6 +135,7 @@ int Simulator::run_simulation(void)
   return 0;
 }
 
+
 void Simulator::print_results(void) 
 {
   if (observables.energy_grad()) finalize_energy_grad();
@@ -107,6 +149,25 @@ void Simulator::print_progress(const int& num_measurement) const
   if (num_measurement%check_interval_==0)
   std::cout<<" measurement = "<< double(100.0*num_measurement)/num_measure_steps_<<" %\n";
 }
+
+/*
+void Simulator::warmup_config(void)
+{
+  for (int n=0; n<num_warmup_steps_; ++n) config.update_state();
+}
+void Simulator::update_config(void)
+{
+  int count = 0;
+  config.reset_accept_ratio();
+  while (count < max_interval_) {
+    config.update_state();
+    if (count>=min_interval_ && config.accept_ratio()>0.5) {
+      config.reset_accept_ratio(); return;
+    }
+    ++count;
+  }
+}
+*/
 
 void Simulator::init_observables(const input::Parameters& inputs)
 {
@@ -138,8 +199,8 @@ void Simulator::init_observables(const input::Parameters& inputs)
   if (optimizing_mode_) {
     observables.switch_off();
     observables.energy().switch_on();
+    observables.energy().set_elements(elem_names);
     observables.total_energy().switch_on();
-    observables.total_energy().set_elements(elem_names);
     observables.energy_grad2().switch_on();
     observables.energy_grad2().set_elements(2*num_varparms_);
     observables.energy_grad2().set_option(false);

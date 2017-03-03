@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-17 23:30:00
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-03 00:08:54
+* Last Modified time: 2017-03-03 23:00:31
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include <iostream>
@@ -15,7 +15,7 @@ int Simulator::do_measurements(void)
   if (optimizing_mode_) {
     double energy = config_energy().sum();
     observables.total_energy() << energy;
-
+    //std::cout << "--------here--------\n";
     if (observables.energy_grad()) {
       config.get_grad_logpsi(grad_logpsi_);
       unsigned n = 0;
@@ -25,6 +25,24 @@ int Simulator::do_measurements(void)
         n += 2;
       }
       observables.energy_grad2() << energy_grad2_;
+    }
+    if (observables.sr_matrix()) {
+      if (!observables.energy_grad()) 
+        throw std::logic_error("Simulator::do_measurements: internal error");
+      // operator 'del(ln(psi))' terms
+      for (unsigned i=0; i<num_varparms_; ++i) 
+        sr_matrix_el_[i] = grad_logpsi_[i];
+      // flatten the upper triangular part to a vector
+      unsigned k = num_varparms_;
+      for (unsigned i=0; i<num_varparms_; ++i) {
+        double x = grad_logpsi_[i];
+        for (unsigned j=i; j<num_varparms_; ++j) {
+          double y = grad_logpsi_[j];
+          sr_matrix_el_[k] = x * y;
+          ++k;
+        }
+      }
+      observables.sr_matrix() << sr_matrix_el_;
     }
     return 0;
   }
@@ -79,6 +97,7 @@ int Simulator::finalize_energy_grad(void)
   observables.energy_grad() << energy_grad_;
   return 0;
 }
+
 
 obs::vector Simulator::config_energy(void) const
 {
