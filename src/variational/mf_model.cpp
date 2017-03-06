@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-28 23:28:04
+* Last Modified time: 2017-03-07 00:02:22
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "mf_model.h"
@@ -39,7 +39,7 @@ void MF_Model::define_model(const input::Parameters& inputs, const lattice::Latt
   std::string order_name = inputs.set_value("mf_order", "NONE");
   boost::to_upper(order_name);
 
-  // chemical potential
+  // chemical potential term
   int info;
   add_parameter(name="mu", defval=0.0, inputs, info);
   if (info == 0) need_noninteracting_mu_ = false;
@@ -65,7 +65,7 @@ void MF_Model::define_model(const input::Parameters& inputs, const lattice::Latt
     cc = CouplingConstant({0, "delta_sc"}, {1, "-delta_sc"});
     add_bondterm(name="pairing", cc, op::pair_create());
     // variational parameters
-    make_variational("delta_sc", lb=0.0, ub=1.0);
+    make_variational("delta_sc", lb=(0.0+box_sep), ub=(2.0-box_sep));
   }
   else if (order_name == "SWAVE_SC") {
     order_ = mf_order::ssc;
@@ -96,6 +96,7 @@ void MF_Model::update(const parm_vector& pvector, const unsigned& start_pos, con
   // for all variational parameters
   unsigned i = 0;
   for (const auto& p : varparms_) {
+    //std::cout << p.name() << " = " << pvector[start_pos+i] << "\n"; getchar();
     Model::update_parameter(p.name(), pvector[start_pos+i]);
     ++i;
   }
@@ -108,6 +109,7 @@ void MF_Model::update(const std::string& pname, const double& pvalue,
 {
   // for one variational parameters
   Model::update_parameter(pname, pvalue);
+  //std::cout << "updated ="<<pname<<"=" << get_parameter_value(pname) << "\n"; getchar();
   //build_unitcell_terms(graph);
   update_unitcell_terms();
 }
@@ -189,8 +191,10 @@ void MF_Model::construct_kspace_block(const Vector3d& kvec)
   // site terms 
   //for (const auto& term : uc_siteterms_) {
   for (const auto& term : usite_terms_) {
+    //std::cout << " --------- here --------\n";
     if (term.qn_operator().spin_up()) {
       quadratic_block_up_ += term.coeff_matrix();
+      //std::cout << " sterm =" << term.coeff_matrix() << "\n"; //getchar();
     }
   }
   //quadratic_block_up_ += work1.adjoint();
@@ -329,7 +333,7 @@ void UnitcellTerm::build_siteterm(const model::HamiltonianTerm& hamterm,
   const lattice::LatticeGraph& graph)
 {
   dim_ = graph.lattice().num_basis_sites();
-  num_out_bonds_ = 0;
+  num_out_bonds_ = 1; // dummy, no real contrib
   bond_vectors_.resize(1);
   coeff_matrices_.resize(1);
   coeff_matrices_[0].resize(dim_,dim_);
@@ -351,7 +355,7 @@ void UnitcellTerm::build_siteterm(const model::HamiltonianTerm& hamterm,
       expr_matrices_[0][i][i] += cc_expr;
     }
   }
-  bond_vectors_[0] = Vector3d(0,0,0);
+  bond_vectors_[0] = Vector3d(0.0,0.0,0.0);
 }
 
 void UnitcellTerm::eval_coupling_constant(const model::ModelParams& pvals, const model::ModelParams& cvals)

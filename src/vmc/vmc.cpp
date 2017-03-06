@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:50
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-06 17:45:40
+* Last Modified time: 2017-03-07 00:06:30
 *----------------------------------------------------------------------------*/
 #include <iomanip>
 #include <nlopt.hpp>
@@ -57,6 +57,7 @@ int VMC::run_optimization(input::Parameters& inputs)
     // starting value of variational parameters
     for (int i=0; i<varp.size(); ++i) 
       varp[i] = simulator.rng().random_real() * (varp_ub_[i]-varp_lb_[i]);
+    //varp = simulator.varp_values();
     // Stochastic reconfiguration iterations
     for (unsigned iter=0; iter<sr_max_iter_; ++iter) {
       std::cout << " iter = " << iter << "\n";

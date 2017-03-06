@@ -32,14 +32,14 @@ private:
 
   // optimization parameters
   bool optimizing_run_{false};
-  unsigned num_opt_samples_{10};
+  unsigned num_opt_samples_{2};
   obs::Observable opt_varp_;
 
   // stochastic reconfiguration parameters
   unsigned sr_max_iter_{500};
   double sr_tstep_{0.05};
   unsigned sr_max_mklen_{30};
-  double sr_mktrend_tol_{0.20};
+  double sr_mktrend_tol_{0.30};
 
   int run_optimization(input::Parameters& inputs);
   static double enfunc(const std::vector<double>& x, std::vector<double>& grad, 
