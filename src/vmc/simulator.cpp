@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:20:56
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-03 22:57:16
+* Last Modified time: 2017-03-04 23:34:22
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "simulator.h"
@@ -53,13 +53,26 @@ int Simulator::optimizing_run(const var::parm_vector& varparms,
   return 0;
 }
 
+double Simulator::energy_function(const var::parm_vector& x)
+{
+  Eigen::VectorXd v; 
+  return energy_function(x, v);
+}
+
 double Simulator::energy_function(const var::parm_vector& x, Eigen::VectorXd& grad)
 {
-  observables.energy_grad().switch_on();
-  config.build(x, graph, true);
+  bool need_gradient = false;
+  //observables.energy_grad().switch_off();
+  //if (grad.size()>0) {
+    need_gradient = true;
+    observables.energy_grad().switch_on();
+ // }
+  config.build(x, graph, need_gradient);
   run_simulation();
-  finalize_energy_grad();
-  grad = observables.energy_grad().mean_data();
+  if (need_gradient) {
+    finalize_energy_grad();
+    grad = observables.energy_grad().mean_data();
+  }
   double en = observables.total_energy().mean();
   //for (unsigned i=0; i<num_varparms_; ++i)
   std::cout << " grad = " << grad.transpose() << "\n";

@@ -3,8 +3,8 @@
 * Copyright (C) 2015-2015 by Amal Medhi <amedhi@iisertvm.ac.in>.
 * All rights reserved.
 * Date:   2015-09-28 10:57:03
-* Last Modified by:   amedhi
-* Last Modified time: 2017-01-29 22:10:51
+* Last Modified by:   Amal Medhi, amedhi@macbook
+* Last Modified time: 2017-03-04 13:06:23
 *----------------------------------------------------------------------------*/
 #include <iostream>
 #include "inputparams.h"
@@ -18,8 +18,8 @@ class AbstractWorker
 {
 public:
   virtual ~AbstractWorker() {};
-  virtual int start(input::Parameters& p) = 0; // start all runs
-  virtual void run(void) = 0; // run for some time (in seconds)
+  virtual int start(input::Parameters& p) = 0; // start the runs
+  virtual int run(input::Parameters& p) = 0; // run 
   virtual void finish(void) = 0; // mark as finished
   virtual void halt(void) = 0; // halt all runs, simulation is finished        
 };
@@ -32,7 +32,7 @@ public:
   
   //virtual void construct(); // needs to be called to finish construction
   int start(input::Parameters& p) override; // start simulation
-  void run(void) override;// run a few steps and return control
+  int run(input::Parameters& p) override; // run 
   virtual void dostep(void)=0; // do a step
   // bool started() const { return started_;}
   void halt(void) override;

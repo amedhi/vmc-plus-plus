@@ -4,7 +4,7 @@
 * All rights reserved.
 * Date:   2015-09-28 11:01:37
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-01 17:32:56
+* Last Modified time: 2017-03-04 13:06:19
 *----------------------------------------------------------------------------*/
 #include "worker.h"
 
@@ -24,10 +24,11 @@ int Worker::start(input::Parameters& p)
   return 0;
 }
 
-void Worker::run()
+int Worker::run(input::Parameters& p)
 {
   //if(started() && !finished_)
-  dostep();
+  //dostep();
+  return 0;
 }
 
 void Worker::halt()

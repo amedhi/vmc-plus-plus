@@ -16,6 +16,7 @@ SRCS+= expression/expression.cpp
 SRCS+= expression/tokens.cpp 
 SRCS+= expression/functions.cpp
 SRCS+= expression/objects.cpp
+SRCS+= utils/utils.cpp 
 SRCS+= lattice/lattice.cpp
 SRCS+= lattice/latticelibrary.cpp
 SRCS+= lattice/graph.cpp
@@ -47,6 +48,7 @@ HDRS=scheduler/optionparser.h scheduler/cmdargs.h \
          expression/expression.h expression/shunting_yard.h \
          expression/tokens.h expression/functions.h expression/objects.h \
          expression/pack.h \
+         utils/utils.h \
          lattice/constants.h lattice/lattice.h lattice/graph.h \
 	 montecarlo/simulator.h \
          model/modelparams.h  model/quantum_op.h \

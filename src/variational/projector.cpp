@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-16 23:17:49
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-02 23:13:00
+* Last Modified time: 2017-03-05 11:47:43
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "./projector.h"
@@ -17,7 +17,7 @@ void WavefunProjector::init(const input::Parameters& parms)
   if (gutzwiller_proj_) {
     g = parms.set_value("gfactor", 1.0);
     if (g<0.0) throw std::range_error("WavefunProjector::init: out-of-range 'g'-value.");
-    varparms_.add("gfactor", g, 1.0E-6, 1.0);
+    varparms_.add("gfactor", g, 1.0E-2, 1.0);
   }
   //pfactors_.insert({"g", g});
   // gw ratio

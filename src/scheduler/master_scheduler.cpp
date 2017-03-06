@@ -4,7 +4,7 @@
 * All rights reserved.
 * Date:   2015-09-28 19:51:04
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-01 17:47:39
+* Last Modified time: 2017-03-04 13:06:30
 *----------------------------------------------------------------------------*/
 #include <ctime>
 #include <string>
@@ -46,7 +46,7 @@ int MasterScheduler::run()
     //------------------------------
 
     input.set_task_parameters(parms, task);
-    theWorker->start(parms);
+    theWorker->run(parms);
     //params << pstore(task_id);
 
     //-------------------------------------
