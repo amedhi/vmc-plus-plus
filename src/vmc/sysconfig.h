@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-18 13:54:54
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-02 23:10:06
+* Last Modified time: 2017-03-08 00:57:51
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef SYSCONFIG_H
@@ -38,6 +38,7 @@ public:
   const std::vector<std::string>& vparm_names(void) const { return vparm_names_; }
   const var::parm_vector& vparm_lbound(void) const { return vparm_lbound_; } 
   const var::parm_vector& vparm_ubound(void) const { return vparm_ubound_; } 
+  const double& hole_doping(void) const { return wf.hole_doping(); }
   int update_state(void);
   double accept_ratio(void);
   void reset_accept_ratio(void);

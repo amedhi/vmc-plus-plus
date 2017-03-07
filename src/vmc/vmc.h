@@ -31,9 +31,9 @@ private:
   var::parm_vector varp_ub_;
 
   // optimization parameters
-  bool optimizing_run_{false};
-  unsigned num_opt_samples_{2};
-  obs::Observable opt_varp_;
+  bool optimization_mode_{false};
+  unsigned num_opt_samples_{1};
+  Observable opt_varp_;
 
   // stochastic reconfiguration parameters
   unsigned sr_max_iter_{500};

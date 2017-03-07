@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:19:36
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-06 17:30:58
+* Last Modified time: 2017-03-08 00:12:48
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef SIMULATOR_H
@@ -12,7 +12,7 @@
 #include "../lattice/lattice.h"
 #include "../lattice/graph.h"
 #include "../model/model.h"
-#include "../mcdata/observables.h"
+#include "./observables.h"
 #include "./sysconfig.h"
 
 namespace vmc {
@@ -53,14 +53,15 @@ private:
   bool optimizing_mode_{false};
 
   // observables
-  obs::ObservableSet observables;
+  using vector_data = Observable::data_t;
+  ObservableSet observables;
   bool need_energy_{false};
   bool need_gradient_{false};
-  mutable obs::vector term_energy_;
-  mutable obs::vector energy_grad2_;
-  mutable obs::vector energy_grad_;
+  mutable vector_data term_energy_;
+  mutable vector_data energy_grad2_;
+  mutable vector_data energy_grad_;
   mutable RealVector grad_logpsi_;
-  mutable obs::vector sr_matrix_el_;
+  mutable vector_data sr_matrix_el_;
   unsigned num_varparms_;
 
   // mc parameters
@@ -80,7 +81,7 @@ private:
   int finalize_energy_grad(void);
   int finalize_sr_matrix(void);
   void print_progress(const int& num_measurement) const;
-  obs::vector config_energy(void) const;
+  vector_data config_energy(void) const;
 };
 
 } // end namespace vmc

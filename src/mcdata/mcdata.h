@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-24 08:44:27
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-25 09:30:18
+* Last Modified time: 2017-03-07 22:25:28
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef NEW_MCDATA_H
@@ -16,13 +16,15 @@
 #include <stdexcept>
 #include <Eigen/Core>
 
-namespace obs {
+namespace mcdata {
+
+using data_t = Eigen::Array<double,Eigen::Dynamic,1>;
+using scalardata_t = Eigen::Array<double,1,1>;
 
 /*----------------------DataBin class------------------*/
 class DataBin 
 {
 public:
-  using data_t = Eigen::Array<double,Eigen::Dynamic,1>;
   DataBin(const unsigned& size=1);
   ~DataBin() {}
   void clear(void);
@@ -51,14 +53,12 @@ private:
 };
 
 /*----------------------mcdata class------------------*/
-class mcdata : private std::vector<DataBin>
+class MC_Data : private std::vector<DataBin>
 {
 public:
-  using data_t = DataBin::data_t;
-  using scalardata_t = Eigen::Array<double,1,1>;
-  mcdata() {}
-  mcdata(const std::string& name, const unsigned& size=1) { init(name,size); }
-  ~mcdata() {}
+  MC_Data() {}
+  MC_Data(const std::string& name, const unsigned& size=1) { init(name,size); }
+  ~MC_Data() {}
   virtual void init(const std::string& name, const unsigned& size=1);
   virtual void resize(const unsigned& size);
   void clear(void);
@@ -80,9 +80,9 @@ public:
   const double& tau(void) const;
   std::string result_str(const int& n=0) const; 
   std::string conv_str(const int& n=0) const; 
-  const mcdata& with_statistic(void) const { show_statistic_=true; return *this; }
+  const MC_Data& with_statistic(void) const { show_statistic_=true; return *this; }
   void show_statistic(std::ostream& os=std::cout) const;
-  friend std::ostream& operator<<(std::ostream& os, const mcdata& obs);
+  friend std::ostream& operator<<(std::ostream& os, const MC_Data& obs);
 private:
   std::string name_;
   static const unsigned max_binlevel_default_ = 20;

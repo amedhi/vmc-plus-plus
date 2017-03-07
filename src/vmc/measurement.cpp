@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-17 23:30:00
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-03 23:00:31
+* Last Modified time: 2017-03-08 01:04:35
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include <iostream>
@@ -48,7 +48,7 @@ int Simulator::do_measurements(void)
   }
 
   // normal run
-  if (need_energy_) {
+  if (observables.need_energy()) {
     term_energy_ = config_energy();
     //std::cout << "--------here--------\n";
     if (observables.energy()) observables.energy() << term_energy_;
@@ -99,7 +99,7 @@ int Simulator::finalize_energy_grad(void)
 }
 
 
-obs::vector Simulator::config_energy(void) const
+Observable::data_t Simulator::config_energy(void) const
 {
   using op_id = model::op_id;
   //for (auto& elem : term_energy_) elem = 0.0;

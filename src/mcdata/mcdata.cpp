@@ -2,12 +2,12 @@
 * Author: Amal Medhi
 * Date:   2017-02-24 08:54:44
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-24 23:47:19
+* Last Modified time: 2017-03-07 22:25:32
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "./mcdata.h"
 
-namespace obs {
+namespace mcdata {
 
 DataBin::DataBin(const unsigned& size) 
 {
@@ -75,8 +75,8 @@ void DataBin::finalize(void) const
   }
 }
 
-/*----------------------mcdata class------------------*/
-void mcdata::init(const std::string& name, const unsigned& size) 
+/*----------------------MC_Data class------------------*/
+void MC_Data::init(const std::string& name, const unsigned& size) 
 {
   std::vector<DataBin>::clear();
   for (unsigned i=0; i<max_binlevel_default_; ++i) 
@@ -87,13 +87,13 @@ void mcdata::init(const std::string& name, const unsigned& size)
   this->clear();
 }
 
-void mcdata::resize(const unsigned& size) 
+void MC_Data::resize(const unsigned& size) 
 {
   for (auto& bin : *this) bin.resize(size);
   this->clear();
 }
 
-void mcdata::clear(void) 
+void MC_Data::clear(void) 
 {
   for (auto& bin : *this) bin.clear();
   dcorr_level_ = 0;
@@ -105,7 +105,7 @@ void mcdata::clear(void)
   convergence_str_ = "NULL";
 }
 
-void mcdata::add_sample(const data_t& sample)
+void MC_Data::add_sample(const data_t& sample)
 {
   auto this_bin = top_bin;  
   data_t new_sample(sample);
@@ -115,61 +115,61 @@ void mcdata::add_sample(const data_t& sample)
   }
 }
 
-void mcdata::add_sample(const double& sample)
+void MC_Data::add_sample(const double& sample)
 {
   data_t new_sample(1);
   new_sample << sample;
   add_sample(new_sample);
 }
 
-void mcdata::operator<<(const data_t& sample) {
+void MC_Data::operator<<(const data_t& sample) {
   add_sample(sample);
 }
 
-void mcdata::operator<<(const double& sample)
+void MC_Data::operator<<(const double& sample)
 {
   data_t new_sample(1);
   new_sample << sample;
   add_sample(new_sample);
 }
 
-const mcdata::data_t& mcdata::mean_data(void) const 
+const data_t& MC_Data::mean_data(void) const 
 {
   this->finalize(); return mean_;
 }
 
-double mcdata::mean(void) const 
+double MC_Data::mean(void) const 
 { 
   this->finalize(); return mean_.sum();
 }
 
-const double& mcdata::mean(const int& n) const 
+const double& MC_Data::mean(const int& n) const 
 { 
   this->finalize(); return mean_(n);
 }
 
-const mcdata::data_t& mcdata::stddev_data(void) const 
+const data_t& MC_Data::stddev_data(void) const 
 {
   this->finalize(); return stddev_;
 }
 
-double mcdata::stddev(void) const 
+double MC_Data::stddev(void) const 
 { 
   this->finalize(); return stddev_.sum();
 } 
 
-const double& mcdata::stddev(const int& n) const 
+const double& MC_Data::stddev(const int& n) const 
 { 
   this->finalize(); return stddev_(n);
 }
 
-const double& mcdata::tau(void) const 
+const double& MC_Data::tau(void) const 
 {
   this->find_conv_and_tau(0);
   return tau_;
 }
 
-void mcdata::finalize(void)  const
+void MC_Data::finalize(void)  const
 { 
   if (top_bin->have_new_samples()) {
     // mean
@@ -185,7 +185,7 @@ void mcdata::finalize(void)  const
   }
 }
 
-void mcdata::find_conv_and_tau(const unsigned& n) const 
+void MC_Data::find_conv_and_tau(const unsigned& n) const 
 { 
   this->finalize();
   std::vector<double> xv, yv;
@@ -211,7 +211,7 @@ void mcdata::find_conv_and_tau(const unsigned& n) const
   if (error_converged_ == "NOT_CONVD") tau_ = -1.0;
 }
 
-void mcdata::check_convergence(const std::vector<double>& xv, const std::vector<double>& yv) const 
+void MC_Data::check_convergence(const std::vector<double>& xv, const std::vector<double>& yv) const 
 {
   error_converged_ = "NOT_CONVD";
   if (xv.size() >= 3) {
@@ -232,7 +232,7 @@ void mcdata::check_convergence(const std::vector<double>& xv, const std::vector<
   }
 } 
 
-std::string mcdata::result_str(const int& n) const 
+std::string MC_Data::result_str(const int& n) const 
 { 
   std::ostringstream os;
   double mean, stddev;
@@ -249,7 +249,7 @@ std::string mcdata::result_str(const int& n) const
   return os.str();
 }
 
-std::string mcdata::conv_str(const int& n) const 
+std::string MC_Data::conv_str(const int& n) const 
 { 
   this->find_conv_and_tau(n);
   std::ostringstream os;
@@ -261,7 +261,7 @@ std::string mcdata::conv_str(const int& n) const
   return os.str();
 }
 
-void mcdata::show_statistic(std::ostream& os) const
+void MC_Data::show_statistic(std::ostream& os) const
 {
   auto bin = top_bin;
   os << name_ << " Statistic:\n";
@@ -280,7 +280,7 @@ void mcdata::show_statistic(std::ostream& os) const
   os << std::right << std::resetiosflags(std::ios_base::floatfield) << std::nouppercase; 
 }
 
-std::ostream& operator<<(std::ostream& os, const mcdata& obs)
+std::ostream& operator<<(std::ostream& os, const MC_Data& obs)
 {
   using namespace std;
   streamsize dp = cout.precision(); 

@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:50
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-07 00:06:30
+* Last Modified time: 2017-03-08 00:05:08
 *----------------------------------------------------------------------------*/
 #include <iomanip>
 #include <nlopt.hpp>
@@ -16,13 +16,13 @@ namespace vmc {
 
 VMC::VMC(const input::Parameters& inputs) : simulator(inputs)
 {
-  optimizing_run_ = inputs.set_value("optimizing_run",false);
+  optimization_mode_ = inputs.set_value("optimizing_run",false);
 }
 
 int VMC::run(input::Parameters& inputs) 
 {
   // optimization run
-  if (optimizing_run_) return run_optimization(inputs);
+  if (optimization_mode_) return run_optimization(inputs);
   // normal run
   std::cout << " starting vmc run\n";
   simulator.start(inputs);
@@ -34,9 +34,9 @@ int VMC::run(input::Parameters& inputs)
 int VMC::run_optimization(input::Parameters& inputs)
 {
   // varp observable 
-  opt_varp_.init("OptimalParameters");
-  opt_varp_.set_elements(simulator.varp_names());
-  opt_varp_.switch_on();
+  //opt_varp_.init(inputs, "OptParams", simulator.varp_names());
+  //opt_varp_.set_elements(simulator.varp_names());
+  //opt_varp_.switch_on();
   // optimizing run
   std::cout << " starting vmc optimization\n";
   simulator.start(inputs, true);
@@ -88,11 +88,8 @@ int VMC::run_optimization(input::Parameters& inputs)
     // next sample
   }
   // print
-  opt_varp_.open_file();
-  std::vector<std::string> xs;
-  std::vector<double> xv;
-  opt_varp_.print_heading(xs);
-  opt_varp_.print_result(xv);
+  //opt_varp_.print_heading();
+  //opt_varp_.print_result();
 
   return 0;
 }

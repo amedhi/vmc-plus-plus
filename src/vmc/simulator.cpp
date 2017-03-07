@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:20:56
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-04 23:34:22
+* Last Modified time: 2017-03-08 00:57:26
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "simulator.h"
@@ -27,7 +27,9 @@ Simulator::Simulator(const input::Parameters& inputs)
   // run mode
   optimizing_mode_ = inputs.set_value("optimizing_run",false);
   // observables
-  init_observables(inputs);
+  observables.init(inputs,copyright_msg,model,varp_names());
+  observables.as_functions_of("x");
+  if (observables.energy()) term_energy_.resize(model.num_terms());
 }
 
 int Simulator::start(const input::Parameters& inputs, const bool& silent)
@@ -153,7 +155,8 @@ void Simulator::print_results(void)
 {
   if (observables.energy_grad()) finalize_energy_grad();
   //observables.print(config.wavefunc().hole_doping());
-  observables.print(config.vparm_vector());
+  //observables.print_results(config.vparm_vector());
+  observables.print_results(config.hole_doping());
   //std::cout << observables.energy().with_statistic() << "\n";
 }
 
@@ -184,6 +187,7 @@ void Simulator::update_config(void)
 
 void Simulator::init_observables(const input::Parameters& inputs)
 {
+  /*
   num_varparms_ = config.num_varparms();
   std::vector<std::string> elem_names;
   grad_logpsi_.resize(num_varparms_);
@@ -230,6 +234,7 @@ void Simulator::init_observables(const input::Parameters& inputs)
 
   // open file & print heading
   observables.print_heading(config.vparm_names(), copyright_msg, model);
+  */
 }
 
 

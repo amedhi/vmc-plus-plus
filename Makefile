@@ -30,11 +30,11 @@ SRCS+= variational/bcsfunction.cpp
 SRCS+= variational/wavefunction.cpp
 SRCS+= variational/projector.cpp
 SRCS+= mcdata/mcdata.cpp
-SRCS+= mcdata/observables.cpp
 #SRCS+= montecarlo/measurement.cpp
 SRCS+= vmc/random.cpp
 SRCS+= vmc/basisstate.cpp
 SRCS+= vmc/sysconfig.cpp
+SRCS+= vmc/observables.cpp
 SRCS+= vmc/simulator.cpp
 SRCS+= vmc/measurement.cpp
 SRCS+= vmc/vmc.cpp
@@ -57,7 +57,7 @@ HDRS=scheduler/optionparser.h scheduler/cmdargs.h \
 	 variational/blochbasis.h \
 	 variational/mf_model.h variational/wavefunction.h \
 	 variational/projector.h \
-	 mcdata/mcdata.h mcdata/observables.h \
+	 mcdata/mcdata.h vmc/observables.h \
 	 vmc/random.h  vmc/basisstate.h vmc/sysconfig.h \
 	 vmc/simulator.h \
 	 vmc/vmc.h \
