@@ -4,7 +4,7 @@
 * All rights reserved.
 * Date:   2015-08-17 13:33:19
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2016-03-18 00:37:48
+* Last Modified time: 2017-03-08 20:57:43
 *----------------------------------------------------------------------------*/
 // File: cmdargs.cpp 
 // Class definitions for handling command line arguments
@@ -40,7 +40,7 @@ CommandArg::CommandArg(int argc, const char *argv[]): progname("program"), input
   if (!valid_) inputfile.clear();
 }
 
-// default desctructor
+// default constructor
 CommandArg::CommandArg(): progname("program"), inputfile("input.parm")
 {
   options = new option::Option[1];

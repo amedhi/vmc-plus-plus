@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:50
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-08 00:05:08
+* Last Modified time: 2017-03-08 20:52:50
 *----------------------------------------------------------------------------*/
 #include <iomanip>
 #include <nlopt.hpp>
@@ -26,7 +26,7 @@ int VMC::run(input::Parameters& inputs)
   // normal run
   std::cout << " starting vmc run\n";
   simulator.start(inputs);
-  simulator.run();
+  simulator.run_simulation();
   simulator.print_results();
   return 0;
 }

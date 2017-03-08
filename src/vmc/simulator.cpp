@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:20:56
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-08 00:57:26
+* Last Modified time: 2017-03-08 21:11:09
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "simulator.h"
@@ -32,27 +32,14 @@ Simulator::Simulator(const input::Parameters& inputs)
   if (observables.energy()) term_energy_.resize(model.num_terms());
 }
 
-int Simulator::start(const input::Parameters& inputs, const bool& silent)
+int Simulator::start(const input::Parameters& inputs, const bool& silent, 
+  const bool& optimizing_mode)
 {
-  silent_ = silent;
   return config.build(inputs, graph, need_gradient_);
-}
-
-int Simulator::run() 
-{
-  run_simulation();
-  return 0;
-}
-
-int Simulator::optimizing_run(const var::parm_vector& varparms, 
-  const bool& need_energy_grad)
-{
-  if (need_energy_grad) observables.energy_grad().switch_on();
-  else observables.energy_grad().switch_off();
-  config.build(varparms, graph, need_energy_grad);
-  run_simulation();
-  if (need_energy_grad) finalize_energy_grad();
-  return 0;
+  silent_mode_ = silent;
+  if (optimizing_mode) {
+    observables.switch_off();
+  }
 }
 
 double Simulator::energy_function(const var::parm_vector& x)
@@ -118,16 +105,15 @@ double Simulator::sr_function(const Eigen::VectorXd& vparms, Eigen::VectorXd& gr
   return en;
 }
 
-
 int Simulator::run_simulation(void)
 {
   // run simulation
   int num_measurement = 0;
   int count = min_interval_;
   // warmup run
-  if (!silent_) std::cout << " warming up... ";
+  if (!silent_mode_) std::cout << " warming up... ";
   for (int n=0; n<num_warmup_steps_; ++n) config.update_state();
-  if (!silent_) std::cout << "done\n";
+  if (!silent_mode_) std::cout << "done\n";
   // measuring run
   observables.reset();
   while (num_measurement < num_measure_steps_) {
@@ -138,12 +124,12 @@ int Simulator::run_simulation(void)
         config.reset_accept_ratio();
         do_measurements();
         ++num_measurement;
-        if (!silent_) print_progress(num_measurement);
+        if (!silent_mode_) print_progress(num_measurement);
       }
     }
     count++;
   }
-  if (!silent_) {
+  if (!silent_mode_) {
     std::cout << " simulation done\n";
     config.print_stats();
   }

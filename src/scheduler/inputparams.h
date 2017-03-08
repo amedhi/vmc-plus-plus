@@ -4,7 +4,7 @@
 * All rights reserved.
 * Date:   2015-08-17 13:33:19
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2016-01-25 18:43:46
+* Last Modified time: 2017-03-08 22:04:30
 *----------------------------------------------------------------------------*/
 // File: inputparams.h 
 
@@ -20,6 +20,35 @@
 namespace input {
 
 enum class value_type {boo, num, str, nan};
+
+class TaskParameters 
+{
+public:
+  TaskParameters() {};
+  ~TaskParameters() {};
+  int set_value(const std::string& pname, const int& defval) const;  
+  int set_value(const std::string& pname, const int& defval, int& info) const;
+  int set_value(const std::string& pname, const int& defval, int& info, bool& is_const) const;
+  double set_value(const std::string& pname, const double& defval) const;  
+  double set_value(const std::string& pname, const double& defval, int& info) const;  
+  double set_value(const std::string& pname, const double& defval, int& info, bool& is_const) const;  
+  std::string set_value(const std::string& pname, const std::string& defval) const;  
+  std::string set_value(const std::string& pname, const std::string& defval, int& info) const;  
+  bool is_constant(const std::string& pname) const;  
+  unsigned task_id(void) const { return this_task; }
+  unsigned task_size(void) const { return n_tasks; }
+  void show(const unsigned&) const;
+private:
+  struct pval {bool is_const; value_type type; bool bool_val; double num_val; std::string str_val;};
+  std::map<std::string, pval> params;
+  unsigned n_params;
+  unsigned this_task;
+  unsigned n_tasks;
+  mutable std::map<std::string, pval>::const_iterator it;
+  void warn_not_found(const std::string& pname) const;
+  void warn_type_mismatch(const std::string& pname, const std::string& type) const;
+};
+
 
 class Parameters;  // forward declaration
 
@@ -48,8 +77,10 @@ private:
   std::map<std::string, std::vector<double> > num_params;
   std::map<std::string, std::vector<std::string> > str_params;
 
-  unsigned int parse(const std::string& inputfile);
+  // task parameters
+  TaskParameters task_parms_;
 
+  unsigned int parse(const std::string& inputfile);
   // bad_input exception
   class bad_input: public std::runtime_error
   {
@@ -92,6 +123,7 @@ private:
   void warn_not_found(const std::string& pname) const;
   void warn_type_mismatch(const std::string& pname, const std::string& type) const;
 };
+
 
 
 

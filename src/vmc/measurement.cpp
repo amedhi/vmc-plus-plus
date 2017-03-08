@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-17 23:30:00
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-08 01:04:35
+* Last Modified time: 2017-03-08 20:48:16
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include <iostream>
@@ -26,6 +26,7 @@ int Simulator::do_measurements(void)
       }
       observables.energy_grad2() << energy_grad2_;
     }
+    
     if (observables.sr_matrix()) {
       if (!observables.energy_grad()) 
         throw std::logic_error("Simulator::do_measurements: internal error");

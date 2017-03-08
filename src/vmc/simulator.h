@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:19:36
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-08 00:12:48
+* Last Modified time: 2017-03-08 21:11:04
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef SIMULATOR_H
@@ -22,10 +22,9 @@ class Simulator
 public:
   Simulator(const input::Parameters& inputs); 
   ~Simulator() {}
-  int start(const input::Parameters& inputs, const bool& silent=false);
-  int run();
-  int optimizing_run(const var::parm_vector& varparms, 
-    const bool& need_energy_grad=false);
+  int start(const input::Parameters& inputs, const bool& silent=false, 
+    const bool& optimizing_mode=false);
+  int run_simulation(void);
   double energy_function(const var::parm_vector& x);
   double energy_function(const var::parm_vector& x, Eigen::VectorXd& grad);
   double sr_function(const Eigen::VectorXd& vparms, Eigen::VectorXd& grad, 
@@ -71,12 +70,11 @@ private:
   int min_interval_{0};
   int max_interval_{0};
   int check_interval_{0};
-  bool silent_{false};
+  bool silent_mode_{false};
 
   void init_observables(const input::Parameters& inputs);
   //void warmup_config(void);
   //void update_config(void);
-  int run_simulation(void);
   int do_measurements(void);
   int finalize_energy_grad(void);
   int finalize_sr_matrix(void);
