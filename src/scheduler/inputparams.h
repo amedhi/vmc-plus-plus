@@ -4,7 +4,7 @@
 * All rights reserved.
 * Date:   2015-08-17 13:33:19
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-08 22:04:30
+* Last Modified time: 2017-03-09 00:59:41
 *----------------------------------------------------------------------------*/
 // File: inputparams.h 
 
@@ -19,13 +19,20 @@
 
 namespace input {
 
-enum class value_type {boo, num, str, nan};
+enum class ptype {boo, num, str, nan};
+struct pval {bool is_const; ptype type; bool bool_val; double num_val; std::string str_val;};
 
-class TaskParameters 
+
+class JobInput;  // forward declaration
+
+class Parameters : private std::map<std::string, pval> 
 {
 public:
-  TaskParameters() {};
-  ~TaskParameters() {};
+  friend class JobInput;
+  using super_type = std::map<std::string, pval>;
+  Parameters() {};
+  ~Parameters() {};
+  void clear(void) { super_type::clear(); }
   int set_value(const std::string& pname, const int& defval) const;  
   int set_value(const std::string& pname, const int& defval, int& info) const;
   int set_value(const std::string& pname, const int& defval, int& info, bool& is_const) const;
@@ -35,52 +42,48 @@ public:
   std::string set_value(const std::string& pname, const std::string& defval) const;  
   std::string set_value(const std::string& pname, const std::string& defval, int& info) const;  
   bool is_constant(const std::string& pname) const;  
-  unsigned task_id(void) const { return this_task; }
-  unsigned task_size(void) const { return n_tasks; }
+  unsigned task_id(void) const { return current_task_; }
+  unsigned task_size(void) const { return total_tasks_; }
   void show(const unsigned&) const;
 private:
-  struct pval {bool is_const; value_type type; bool bool_val; double num_val; std::string str_val;};
   std::map<std::string, pval> params;
-  unsigned n_params;
-  unsigned this_task;
-  unsigned n_tasks;
+  unsigned current_task_{0};
+  unsigned total_tasks_{0};
   mutable std::map<std::string, pval>::const_iterator it;
   void warn_not_found(const std::string& pname) const;
   void warn_type_mismatch(const std::string& pname, const std::string& type) const;
 };
 
-
-class Parameters;  // forward declaration
-
-class JobInput
+class JobInput 
 {
 public:
-  JobInput() {n_tasks=n_params=0; valid=false;} 
+  JobInput() {n_tasks=n_params=0; valid_=false;} 
   JobInput(const std::string& inputfile); 
   ~JobInput() {} 
   bool read_inputs(const std::string& inputfile);
   //bool read_params(const std::string& inputfile);
-  bool not_valid(void) const {return !valid;};
-  unsigned int task_size(void) {return n_tasks;}
+  int init_task_params(void);
+  int set_task_params(const unsigned& task_id);
+  const Parameters& task_params(const unsigned& task_id) 
+    { set_task_params(task_id); return task_params_; }
+  bool not_valid(void) const {return !valid_;};
+  const unsigned& task_size(void) {return n_tasks;}
   void get_task_param(const unsigned& task_id); 
   void init_task_parameters(Parameters& p);
   void set_task_parameters(Parameters& p, const unsigned& task_id); 
-
 private:
-  struct parameter {std::string name; value_type type; unsigned size;};
+  struct parameter {std::string name; ptype type; unsigned size;};
   unsigned int n_params;
   unsigned int n_tasks;
-  bool valid;
+  bool valid_;
   std::string infile;
   std::vector<parameter> param_list;
   std::map<std::string, std::vector<bool> > boo_params;
   std::map<std::string, std::vector<double> > num_params;
   std::map<std::string, std::vector<std::string> > str_params;
-
   // task parameters
-  TaskParameters task_parms_;
+  Parameters task_params_;
 
-  unsigned int parse(const std::string& inputfile);
   // bad_input exception
   class bad_input: public std::runtime_error
   {
@@ -90,41 +93,8 @@ private:
   private:
     int lnum;
   };
+  unsigned int parse(const std::string& inputfile);
 };
-
-
-class Parameters 
-{
-public:
-  Parameters() {};
-  ~Parameters() {};
-  int set_value(const std::string& pname, const int& defval) const;  
-  int set_value(const std::string& pname, const int& defval, int& info) const;
-  int set_value(const std::string& pname, const int& defval, int& info, bool& is_const) const;
-  double set_value(const std::string& pname, const double& defval) const;  
-  double set_value(const std::string& pname, const double& defval, int& info) const;  
-  double set_value(const std::string& pname, const double& defval, int& info, bool& is_const) const;  
-  std::string set_value(const std::string& pname, const std::string& defval) const;  
-  std::string set_value(const std::string& pname, const std::string& defval, int& info) const;  
-  bool is_constant(const std::string& pname) const;  
-  unsigned task_id(void) const { return this_task; }
-  unsigned task_size(void) const { return n_tasks; }
-  void show(const unsigned&) const;
-  friend void JobInput::init_task_parameters(Parameters& p);
-  friend void JobInput::set_task_parameters(Parameters& p, const unsigned& task_id);
-
-private:
-  struct pval {bool is_const; value_type type; bool bool_val; double num_val; std::string str_val;};
-  std::map<std::string, pval> params;
-  unsigned n_params;
-  unsigned this_task;
-  unsigned n_tasks;
-  mutable std::map<std::string, pval>::const_iterator it;
-  void warn_not_found(const std::string& pname) const;
-  void warn_type_mismatch(const std::string& pname, const std::string& type) const;
-};
-
-
 
 
 } // end namespace input

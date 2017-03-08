@@ -3,8 +3,8 @@
 * Copyright (C) 2015-2015 by Amal Medhi <amedhi@iisertvm.ac.in>.
 * All rights reserved.
 * Date:   2015-09-28 10:57:03
-* Last Modified by:   amedhi
-* Last Modified time: 2015-09-28 22:50:08
+* Last Modified by:   Amal Medhi, amedhi@macbook
+* Last Modified time: 2017-03-09 00:45:42
 *----------------------------------------------------------------------------*/
 #include <iostream>
 #include "worker.h"
@@ -18,7 +18,7 @@ class AbstractTask
 {
 public:
   ~AbstractTask() {}
-  virtual Worker* make_worker(input::Parameters& p) const = 0;
+  virtual Worker* make_worker(const input::Parameters& p) const = 0;
   virtual void print_copyright(std::ostream& out) const = 0;
 };
 
@@ -29,7 +29,7 @@ public:
   Task() {}
   ~Task() {}
   //virtual WORKER* make_worker(input::Parameters& p) const;
-  Worker* make_worker(input::Parameters& p) const override
+  Worker* make_worker(const input::Parameters& p) const override
   {
     return new WORKER(p);
   }

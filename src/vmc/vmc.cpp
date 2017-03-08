@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:50
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-08 20:52:50
+* Last Modified time: 2017-03-09 00:35:06
 *----------------------------------------------------------------------------*/
 #include <iomanip>
 #include <nlopt.hpp>
@@ -19,7 +19,7 @@ VMC::VMC(const input::Parameters& inputs) : simulator(inputs)
   optimization_mode_ = inputs.set_value("optimizing_run",false);
 }
 
-int VMC::run(input::Parameters& inputs) 
+int VMC::run(const input::Parameters& inputs) 
 {
   // optimization run
   if (optimization_mode_) return run_optimization(inputs);
@@ -31,7 +31,7 @@ int VMC::run(input::Parameters& inputs)
   return 0;
 }
 
-int VMC::run_optimization(input::Parameters& inputs)
+int VMC::run_optimization(const input::Parameters& inputs)
 {
   // varp observable 
   //opt_varp_.init(inputs, "OptParams", simulator.varp_names());

@@ -4,7 +4,7 @@
 * All rights reserved.
 * Date:   2015-09-28 19:51:04
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-04 13:06:30
+* Last Modified time: 2017-03-09 00:59:54
 *----------------------------------------------------------------------------*/
 #include <ctime>
 #include <string>
@@ -14,16 +14,16 @@
 namespace scheduler {
 
 MasterScheduler::MasterScheduler(int argc, const char *argv[], const AbstractTask& theTask)
-  : Scheduler(), cmdarg(argc, argv), input(), task_size{0}
+  : Scheduler()
+  , cmdarg(argc, argv)
 {
   if (cmdarg.valid()) {
     if (input.read_inputs(cmdarg.filename())) {
       task_size = input.task_size();
-      input.init_task_parameters(parms);
-      // set values for the first task to construct the worker
-      input.set_task_parameters(parms, 0);
+      input.init_task_params();
+      // construct 'worker' with the first set of task parameters
       std::cout << " starting..." << std::endl;
-      theWorker = theTask.make_worker(parms);
+      theWorker = theTask.make_worker(input.task_params(0));
       valid_ = true;
     }
   }
@@ -45,8 +45,7 @@ int MasterScheduler::run()
     auto tstart_t = std::chrono::steady_clock::now();
     //------------------------------
 
-    input.set_task_parameters(parms, task);
-    theWorker->run(parms);
+    theWorker->run(input.task_params(task));
     //params << pstore(task_id);
 
     //-------------------------------------

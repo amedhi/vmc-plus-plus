@@ -4,7 +4,7 @@
 * All rights reserved.
 * Date:   2015-08-17 13:33:19
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-19 14:35:52
+* Last Modified time: 2017-03-09 00:59:48
 *----------------------------------------------------------------------------*/
 // File: scheduler.h 
 // Definition of the Scheduler class.
@@ -28,12 +28,12 @@ public:
   //Scheduler(): simmaster(0) {};
   //Scheduler(Task& theTask) {}
   Scheduler() {}
-  ~Scheduler() {}
+  ~Scheduler() {} 
   virtual int run(void);
 
 protected:
+  //Worker theWorker_;
   AbstractWorker* theWorker;
-  input::Parameters parms;
   bool valid_{false};
 
 private:
@@ -47,7 +47,7 @@ public:
   MasterScheduler(int argc, const char *argv[], const AbstractTask& theTask);
   //MasterScheduler(int argc, const char *argv[], const Task&);
   MasterScheduler() = delete;
-  ~MasterScheduler() { delete [] theWorker; };
+  ~MasterScheduler() {}
   int run(void) override;
 
 private:

@@ -16,8 +16,8 @@ class VMC : public scheduler::Worker
 public:
   VMC(const input::Parameters& parms); 
   ~VMC() {}
-  int start(input::Parameters& parms) override { return 0; }
-  int run(input::Parameters& parms) override;
+  int start(const input::Parameters& parms) override { return 0; }
+  int run(const input::Parameters& parms) override;
   void finish(void) override {} 
   void dostep(void) override {} 
   void halt(void) override {} 
@@ -41,7 +41,7 @@ private:
   unsigned sr_max_mklen_{30};
   double sr_mktrend_tol_{0.30};
 
-  int run_optimization(input::Parameters& inputs);
+  int run_optimization(const input::Parameters& inputs);
   static double enfunc(const std::vector<double>& x, std::vector<double>& grad, 
     void *my_func_data);
 };
