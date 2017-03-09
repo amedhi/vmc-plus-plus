@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-18 14:01:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-07 16:01:53
+* Last Modified time: 2017-03-09 14:17:52
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "./sysconfig.h"
@@ -53,7 +53,7 @@ const std::vector<double>& SysConfig::vparm_vector(void)
   return vparm_vector_;
 }
 
-int SysConfig::build(const input::Parameters& inputs, const lattice::LatticeGraph& graph,
+int SysConfig::build(const lattice::LatticeGraph& graph, const input::Parameters& inputs,
     const bool& with_gradient)
 {
   if (num_sites_==0) return -1;
@@ -62,7 +62,7 @@ int SysConfig::build(const input::Parameters& inputs, const lattice::LatticeGrap
   return init_config();
 }
 
-int SysConfig::build(const var::parm_vector& pvector, const lattice::LatticeGraph& graph,
+int SysConfig::build(const lattice::LatticeGraph& graph, const var::parm_vector& pvector,
   const bool& need_psi_grad)
 {
   if (num_sites_==0) return -1;

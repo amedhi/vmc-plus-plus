@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-05 11:48:05
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-06 17:27:15
+* Last Modified time: 2017-03-09 17:46:28
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef UTILS_H
@@ -32,7 +32,7 @@ public:
   const MK_Statistic& operator<<(const double& x) { return add_data(x); }
   const MK_Statistic& operator<<(const data_t& x) { return add_data(x); }
   void get_series_avg(data_t& mean) const;
-  const double& max_element_trend(void) const { return mk_trend_max_; }
+  const double& elem_max_trend(void) const { return mk_trend_max_; }
   const bool& is_full(void) const { return is_full_; }
 private:
   unsigned data_size_{1};

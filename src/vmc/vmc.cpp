@@ -4,12 +4,11 @@
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:50
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-09 09:36:53
+* Last Modified time: 2017-03-09 17:44:40
 *----------------------------------------------------------------------------*/
 #include <iomanip>
-#include <nlopt.hpp>
 #include "vmc.h"
-#include "../utils/utils.h"
+//#include <nlopt.hpp>
 //#include "../optimizer/LBFGS.h"
 
 namespace vmc {
@@ -17,80 +16,23 @@ namespace vmc {
 VMC::VMC(const input::Parameters& inputs) : simulator(inputs)
 {
   optimization_mode_ = inputs.set_value("optimizing_run",false);
+  if (optimization_mode_) sreconf.init(inputs, simulator);
 }
 
 int VMC::run(const input::Parameters& inputs) 
 {
   // optimization run
-  if (optimization_mode_) return run_optimization(inputs);
+  if (optimization_mode_) {
+    simulator.start(inputs, true, true);
+    sreconf.optimize(simulator);
+    return 0;
+  }
+
   // normal run
   std::cout << " starting vmc run\n";
   simulator.start(inputs);
   simulator.run_simulation();
   simulator.print_results();
-  return 0;
-}
-
-int VMC::run_optimization(const input::Parameters& inputs)
-{
-  // varp observable 
-  //opt_varp_.init(inputs, "OptParams", simulator.varp_names());
-  //opt_varp_.set_elements(simulator.varp_names());
-  //opt_varp_.switch_on();
-  // optimizing run
-  std::cout << " starting vmc optimization\n";
-  simulator.start(inputs, optimization_mode_, true);
-  // variational parameters bound
-  //varparms = simulator.varp_values();
-  varp_lb_ = simulator.varp_lbound();
-  varp_ub_ = simulator.varp_ubound();
-  var::parm_vector varp(varp_lb_.size());
-  // Stochastic Reconfiguration matrix
-  Eigen::MatrixXd sr_matrix;
-  Eigen::VectorXd grad;
-  // Mann-Kendall statistic
-  util::MK_Statistic mk_statistic(varp.size(), sr_max_mklen_);
-  // start optimization
-  for (unsigned n=0; n<num_opt_samples_; ++n) {
-    std::cout << " optimal sample = " << n << "\n";
-    mk_statistic.reset();
-    // starting value of variational parameters
-    for (int i=0; i<varp.size(); ++i) 
-      varp[i] = simulator.rng().random_real() * (varp_ub_[i]-varp_lb_[i]);
-    //varp = simulator.varp_values();
-    // Stochastic reconfiguration iterations
-    for (unsigned iter=0; iter<sr_max_iter_; ++iter) {
-      std::cout << " iter = " << iter << "\n";
-      std::cout << " varp = " << varp.transpose() << "\n";
-      double en = simulator.sr_function(varp, grad, sr_matrix);
-      std::cout << " energy = " << en << "\n";
-      std::cout << " grad = " << grad.transpose() << "\n";
-      double gnorm = grad.squaredNorm();
-      std::cout << " grad (sq) norm = " << gnorm << "\n";
-      std::cout << " srmat = " << sr_matrix << "\n";
-      // apply to stabiliser to sr matrix 
-      for (int i=0; i<varp.size(); ++i) sr_matrix(i,i) += 1.0E-4;
-      // search direction
-      Eigen::VectorXd search_dir = sr_matrix.fullPivLu().solve(-grad);
-      varp += sr_tstep_ * search_dir;
-      // box constraint: project parameters into feasible region
-      varp = varp_lb_.cwiseMax(varp.cwiseMin(varp_ub_));
-      // add data to Mann-Kendall statistic
-      mk_statistic << varp; 
-      std::cout << " trend = " << mk_statistic.max_element_trend() << "\n"; 
-      if (mk_statistic.is_full() && mk_statistic.max_element_trend()<sr_mktrend_tol_) {
-        // converged
-        mk_statistic.get_series_avg(varp);
-        opt_varp_ << varp;
-        break;
-      }
-    }
-    // next sample
-  }
-  // print
-  //opt_varp_.print_heading();
-  //opt_varp_.print_result();
-
   return 0;
 }
 

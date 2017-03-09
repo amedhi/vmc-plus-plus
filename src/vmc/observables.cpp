@@ -133,6 +133,14 @@ void Observable::init(const std::string& name, const unsigned& size)
   fname_ = "res_"+fname_+".txt";
 }
 
+void Observable::init(const std::string& name, const bool& replace_mode, 
+  const unsigned& size) 
+{
+  init(name, size);
+  is_on_ = true;
+  replace_mode_ = replace_mode;
+}
+
 void Observable::check_on(const input::Parameters& inputs, const bool& replace_mode) 
 {
   int no_warn;

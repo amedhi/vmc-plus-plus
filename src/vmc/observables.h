@@ -32,6 +32,7 @@ public:
   Observable(const std::string& name, const unsigned& size=1);
   ~Observable() {}
   void init(const std::string& name, const unsigned& size=1) override; 
+  void init(const std::string& name, const bool& replace_mode, const unsigned& size=1); 
   void resize(const unsigned& size) override;
   void save_result(void);
   void set_have_total(void) { have_total_=true; }

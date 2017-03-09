@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:20:56
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-09 11:57:33
+* Last Modified time: 2017-03-09 17:34:38
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "simulator.h"
@@ -33,12 +33,15 @@ Simulator::Simulator(const input::Parameters& inputs)
 int Simulator::start(const input::Parameters& inputs, const bool& optimizing_mode, 
   const bool& silent)
 {
-  return config.build(inputs, graph, need_gradient_);
+  bool with_psi_grad;
+  if (observables.energy_grad()) with_psi_grad = true;
+  else with_psi_grad = false;
   if (optimizing_mode) {
     observables.switch_off();
     observables.energy().switch_on();
   }
   silent_mode_ = silent;
+  return config.build(graph, inputs, with_psi_grad);
 }
 
 double Simulator::energy_function(const Eigen::VectorXd& varp, Eigen::VectorXd& grad)
@@ -57,7 +60,7 @@ double Simulator::energy_function(const Eigen::VectorXd& varp, Eigen::VectorXd& 
     with_psi_grad = false;
   }
   // build the config from the variational parameters
-  config.build(varp, graph, with_psi_grad);
+  config.build(graph, varp, with_psi_grad);
   run_simulation(observable_set::energy_grad);
   if (observables.energy_grad()) {
     finalize_energy_grad();
@@ -79,6 +82,8 @@ double Simulator::sr_function(const Eigen::VectorXd& varp, Eigen::VectorXd& grad
     observables.energy_grad().switch_on(num_varparms_);
     observables.energy_grad2().switch_on(2*num_varparms_);
     grad_logpsi_.resize(num_varparms_);
+    energy_grad_.resize(num_varparms_);
+    energy_grad2_.resize(2*num_varparms_);
   } 
   if (!observables.sr_coeffs()) {
     observables.sr_coeffs().switch_on();
@@ -89,15 +94,13 @@ double Simulator::sr_function(const Eigen::VectorXd& varp, Eigen::VectorXd& grad
   }
   // build the config from the variational parameters
   bool with_psi_grad = true;
-  config.build(varp, graph, with_psi_grad);
+  config.build(graph, varp, with_psi_grad);
   // run the simulation
   run_simulation(observable_set::sr_coeffs);
   // gradient
   finalize_energy_grad();
-  grad.resize(num_varparms_);
   grad = observables.energy_grad().mean_data();
   // sr matrix
-  sr_matrix.resize(num_varparms_, num_varparms_);
   sr_coeffs_ = observables.sr_coeffs().mean_data();
   unsigned k = num_varparms_;
   for (unsigned i=0; i<num_varparms_; ++i) {
@@ -112,29 +115,30 @@ double Simulator::sr_function(const Eigen::VectorXd& varp, Eigen::VectorXd& grad
   return observables.total_energy().mean();
 }
 
-int Simulator::run_simulation(const observable_set& obs_set)
+int Simulator::run_simulation(const observable_set& obs_set, const int& sample_size)
 {
-  // run simulation
-  int num_measurement = 0;
-  int count = min_interval_;
   // warmup run
   if (!silent_mode_) std::cout << " warming up... ";
   for (int n=0; n<num_warmup_steps_; ++n) config.update_state();
   if (!silent_mode_) std::cout << "done\n";
   // measuring run
+  int num_measurement = num_measure_steps_;
+  if (sample_size>0) num_measurement = sample_size;
+  int measurement_count = 0;
+  int skip_count = min_interval_;
   observables.reset();
-  while (num_measurement < num_measure_steps_) {
+  while (measurement_count < num_measurement) {
     config.update_state();
-    if (count >= min_interval_) {
-      if (config.accept_ratio()>0.5 || count==max_interval_) {
-        count = 0;
+    if (skip_count >= min_interval_) {
+      if (config.accept_ratio()>0.5 || skip_count==max_interval_) {
+        skip_count = 0;
         config.reset_accept_ratio();
         do_measurements(obs_set);
-        ++num_measurement;
-        if (!silent_mode_) print_progress(num_measurement);
+        ++measurement_count;
+        if (!silent_mode_) print_progress(measurement_count);
       }
     }
-    count++;
+    skip_count++;
   }
   if (!silent_mode_) {
     std::cout << " simulation done\n";

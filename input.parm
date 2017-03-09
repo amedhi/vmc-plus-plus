@@ -6,7 +6,7 @@
 # Job Specification 
 #---------------------------------------------
 job = "VMC Simulation" 
-optimizing_run = "NO" 
+optimizing_run = "YES" 
 mode = "NEW" # ("NEW"/"APPEND")
 print_level = -2 #-2
 
@@ -39,7 +39,6 @@ delta_sc = 0.5 # 0.080 #0.01, 0.05, 0.30 #0.080
 mu = -0.89 # -0.4263000
 mu_variational = "YES"
 
-
 #---------------------------------------------
 # List of observable to calculate:
 #---------------------------------------------
@@ -55,6 +54,15 @@ measure_steps = 1000
 warmup_steps = 1000
 min_interval = 2
 max_interval = 20
+
+#---------------------------------------------
+# Optimization parameters
+#---------------------------------------------
+num_opt_samples = 1
+sr_max_iter = 500
+sr_start_tstep = 0.05
+sr_series_len = 40
+sr_fluctuation_tol = 0.20
 
 
 
