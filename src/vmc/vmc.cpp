@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:50
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-09 00:35:06
+* Last Modified time: 2017-03-09 09:36:53
 *----------------------------------------------------------------------------*/
 #include <iomanip>
 #include <nlopt.hpp>
@@ -39,7 +39,7 @@ int VMC::run_optimization(const input::Parameters& inputs)
   //opt_varp_.switch_on();
   // optimizing run
   std::cout << " starting vmc optimization\n";
-  simulator.start(inputs, true);
+  simulator.start(inputs, optimization_mode_, true);
   // variational parameters bound
   //varparms = simulator.varp_values();
   varp_lb_ = simulator.varp_lbound();

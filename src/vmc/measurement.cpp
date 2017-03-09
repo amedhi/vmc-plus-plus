@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-17 23:30:00
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-08 20:48:16
+* Last Modified time: 2017-03-09 11:58:02
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include <iostream>
@@ -10,75 +10,77 @@
 
 namespace vmc {
 
-int Simulator::do_measurements(void)
+void Simulator::do_measurements(const observable_set& obs_set)
 {
-  if (optimizing_mode_) {
-    double energy = config_energy().sum();
-    observables.total_energy() << energy;
-    //std::cout << "--------here--------\n";
-    if (observables.energy_grad()) {
-      config.get_grad_logpsi(grad_logpsi_);
-      unsigned n = 0;
-      for (unsigned i=0; i<num_varparms_; ++i) {
-        energy_grad2_[n] = energy * grad_logpsi_[i];
-        energy_grad2_[n+1] = grad_logpsi_[i];
-        n += 2;
+  // observable_set::normal (as specied in input)
+  if (obs_set==observable_set::normal) {
+    if (observables.need_energy()) {
+      // energy
+      term_energy_ = get_energy();
+      if (observables.energy()) observables.energy() << term_energy_;
+      // energy gradients
+      if (observables.energy_grad()) {
+        double total_energy = term_energy_.sum();
+        observables.total_energy() << total_energy;
+        measure_energy_grad(total_energy);
+      } 
+      // total energy  
+      else if (observables.total_energy()) {
+        double total_energy = term_energy_.sum();
+        observables.total_energy() << total_energy;
       }
-      observables.energy_grad2() << energy_grad2_;
     }
-    
-    if (observables.sr_matrix()) {
-      if (!observables.energy_grad()) 
-        throw std::logic_error("Simulator::do_measurements: internal error");
-      // operator 'del(ln(psi))' terms
-      for (unsigned i=0; i<num_varparms_; ++i) 
-        sr_matrix_el_[i] = grad_logpsi_[i];
-      // flatten the upper triangular part to a vector
-      unsigned k = num_varparms_;
-      for (unsigned i=0; i<num_varparms_; ++i) {
-        double x = grad_logpsi_[i];
-        for (unsigned j=i; j<num_varparms_; ++j) {
-          double y = grad_logpsi_[j];
-          sr_matrix_el_[k] = x * y;
-          ++k;
-        }
-      }
-      observables.sr_matrix() << sr_matrix_el_;
-    }
-    return 0;
+    return;
   }
 
-  // normal run
-  if (observables.need_energy()) {
-    term_energy_ = config_energy();
-    //std::cout << "--------here--------\n";
-    if (observables.energy()) observables.energy() << term_energy_;
-
-    if (observables.energy_grad()) {
-      double energy = term_energy_.sum();
-      observables.total_energy() << energy;
-      config.get_grad_logpsi(grad_logpsi_);
-  //-------------------------------------------------
-      unsigned n = 0;
-      for (unsigned i=0; i<num_varparms_; ++i) {
-        energy_grad2_[n] = energy * grad_logpsi_[i];
-        energy_grad2_[n+1] = grad_logpsi_[i];
-        n += 2;
+  // observable_set::sr_matrix
+  else if (obs_set==observable_set::sr_coeffs) {
+    // total energy
+    double total_energy = get_energy().sum();
+    observables.total_energy() << total_energy;
+    // energy gradient
+    measure_energy_grad(total_energy);
+    // sr matrix
+    // operator 'del(ln(psi))' terms
+    for (unsigned i=0; i<num_varparms_; ++i) sr_coeffs_[i] = grad_logpsi_[i];
+    // flatten the upper triangular part to a vector
+    unsigned k = num_varparms_;
+    for (unsigned i=0; i<num_varparms_; ++i) {
+      double x = grad_logpsi_[i];
+      for (unsigned j=i; j<num_varparms_; ++j) {
+        double y = grad_logpsi_[j];
+        sr_coeffs_[k] = x * y;
+        ++k;
       }
-      observables.energy_grad2() << energy_grad2_;
-    } 
-
-    else if (observables.total_energy()) {
-      double energy = term_energy_.sum();
-      observables.total_energy() << energy;
     }
+    observables.sr_coeffs() << sr_coeffs_;
+    return;
   }
-  /*if (observables_.total_energy()) {
-    double e = config_energy().sum();
-    observables_.total_energy() << e;
-    observables.total_energy() << e;
-  }*/
-  return 0;
+
+  // observable_set::energy_grad
+  else if (obs_set==observable_set::energy_grad) {
+    double total_energy = get_energy().sum();
+    observables.total_energy() << total_energy;
+    if (observables.energy_grad()) {
+      measure_energy_grad(total_energy);
+    }
+    return;
+  }
+  else {
+    throw std::range_error("Simulator::do_measurements: unknown observables set");
+  }
+}
+
+void Simulator::measure_energy_grad(const double& total_en)
+{
+  config.get_grad_logpsi(grad_logpsi_);
+  unsigned n = 0;
+  for (unsigned i=0; i<num_varparms_; ++i) {
+    energy_grad2_[n] = total_en * grad_logpsi_[i];
+    energy_grad2_[n+1] = grad_logpsi_[i];
+    n += 2;
+  }
+  observables.energy_grad2() << energy_grad2_;
 }
 
 int Simulator::finalize_energy_grad(void)
@@ -100,10 +102,11 @@ int Simulator::finalize_energy_grad(void)
 }
 
 
-Observable::data_t Simulator::config_energy(void) const
+Observable::data_t Simulator::get_energy(void) const
 {
   using op_id = model::op_id;
   //for (auto& elem : term_energy_) elem = 0.0;
+  term_energy_.resize(model.num_terms());
   term_energy_.setZero();
   // bond energies
   if (model.has_bondterm()) {

@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:19:36
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-08 21:11:04
+* Last Modified time: 2017-03-09 11:45:32
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef SIMULATOR_H
@@ -22,11 +22,10 @@ class Simulator
 public:
   Simulator(const input::Parameters& inputs); 
   ~Simulator() {}
-  int start(const input::Parameters& inputs, const bool& silent=false, 
-    const bool& optimizing_mode=false);
-  int run_simulation(void);
-  double energy_function(const var::parm_vector& x);
-  double energy_function(const var::parm_vector& x, Eigen::VectorXd& grad);
+  int start(const input::Parameters& inputs, const bool& optimizing_mode=false, 
+    const bool& silent=false);
+  int run_simulation(const observable_set& obs_set=observable_set::normal);
+  double energy_function(const Eigen::VectorXd& varp, Eigen::VectorXd& grad);
   double sr_function(const Eigen::VectorXd& vparms, Eigen::VectorXd& grad, 
     Eigen::MatrixXd& sr_matrix);
   //void get_vparm_values(var::parm_vector& varparms) 
@@ -37,9 +36,6 @@ public:
   const var::parm_vector& varp_ubound(void) { return config.vparm_ubound(); }
   const std::vector<std::string>& varp_names(void) const { return config.vparm_names(); }
   RandomGenerator& rng(void) const { return config.rng(); }
-
-  const bool& optimizing_mode(void) const { return optimizing_mode_; }
-  //void energy_gradient_off(void) { need_energy_grad_=false; }
   void print_results(void); 
   static void copyright_msg(std::ostream& os);
 private:
@@ -47,11 +43,11 @@ private:
   model::Hamiltonian model;
   SysConfig config;
   unsigned num_sites_;
-
-  // optimization
-  bool optimizing_mode_{false};
+  unsigned num_varparms_;
 
   // observables
+  enum class obs_set {normal, energy_grad, sr_matrix};
+  obs_set observable_set_{obs_set::normal};
   using vector_data = Observable::data_t;
   ObservableSet observables;
   bool need_energy_{false};
@@ -59,9 +55,8 @@ private:
   mutable vector_data term_energy_;
   mutable vector_data energy_grad2_;
   mutable vector_data energy_grad_;
+  mutable vector_data sr_coeffs_;
   mutable RealVector grad_logpsi_;
-  mutable vector_data sr_matrix_el_;
-  unsigned num_varparms_;
 
   // mc parameters
   enum move_t {uphop, dnhop, exch, end};
@@ -75,11 +70,12 @@ private:
   void init_observables(const input::Parameters& inputs);
   //void warmup_config(void);
   //void update_config(void);
-  int do_measurements(void);
+  void do_measurements(const observable_set& obs_set);
   int finalize_energy_grad(void);
+  void measure_energy_grad(const double& total_en);
   int finalize_sr_matrix(void);
   void print_progress(const int& num_measurement) const;
-  vector_data config_energy(void) const;
+  vector_data get_energy(void) const;
 };
 
 } // end namespace vmc

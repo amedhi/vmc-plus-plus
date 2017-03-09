@@ -21,6 +21,8 @@
 
 namespace vmc {
 
+enum class observable_set {normal, energy_grad, sr_coeffs};
+
 class Observable : public mcdata::MC_Data
 {
 public:
@@ -38,6 +40,7 @@ public:
   void reset(void) { MC_Data::clear(); }
   void check_on(const input::Parameters& inputs, const bool& replace_mode); 
   void switch_on(void) { is_on_=true; }
+  void switch_on(const unsigned& size) { is_on_=true; set_elements(size); }
   void switch_off(void) { is_on_=false; if (fs_.is_open()) fs_.close(); }
   operator int(void) const { return is_on(); }
   const bool& is_on(void) const { return is_on_; }
@@ -82,7 +85,7 @@ public:
   inline Observable& total_energy(void) { return total_energy_; }
   inline Observable& energy_grad(void) { return energy_grad_; }
   inline Observable& energy_grad2(void) { return energy_grad2_; }
-  inline Observable& sr_matrix(void) { return sr_matrix_; }
+  inline Observable& sr_coeffs(void) { return sr_coeffs_; }
   const bool& need_energy(void) const { return need_energy_; }
   void print_heading(void);
   void print_results(const std::vector<double>& xvals=std::vector<double>()); 
@@ -96,7 +99,7 @@ private:
   Observable total_energy_;
   Observable energy_grad_;
   Observable energy_grad2_;
-  Observable sr_matrix_;
+  Observable sr_coeffs_;
   bool need_energy_{false};
 };
 

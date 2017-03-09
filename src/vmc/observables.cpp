@@ -13,13 +13,13 @@ ObservableSet::ObservableSet()
   , total_energy_("TotalEnergy")
   , energy_grad_("EnergyGradient")
   , energy_grad2_("EnergyGradient2")
-  , sr_matrix_("SRmatrix")
+  , sr_coeffs_("SR_Coefficients")
 {
   push_back(energy_);
   push_back(total_energy_);
   push_back(energy_grad_);
   push_back(energy_grad2_);
-  push_back(sr_matrix_);
+  push_back(sr_coeffs_);
 }
 
 void ObservableSet::init(const input::Parameters& inputs, 
@@ -38,7 +38,7 @@ void ObservableSet::init(const input::Parameters& inputs,
   model.print_info(headstream_);
   num_xvars_ = 0; 
 
-  // Energy
+  // Energy (always set up)
   std::vector<std::string> elem_names;
   model.get_term_names(elem_names);
   energy_.set_elements(elem_names);
