@@ -21,7 +21,7 @@
 
 namespace vmc {
 
-enum class observable_set {normal, energy_grad, sr_coeffs};
+enum class observable_set {normal, energy, energy_grad, sr_coeffs};
 
 class Observable : public mcdata::MC_Data
 {
@@ -46,7 +46,7 @@ public:
   operator int(void) const { return is_on(); }
   const bool& is_on(void) const { return is_on_; }
   bool is_open(void) const { return fs_.is_open(); }
-  std::ofstream& fs_stream(void) { return fs_; }  
+  std::ofstream& fstream(void) { open_file(); return fs_; }  
   const bool& replace_mode(void) const { return replace_mode_; }
   void print_heading(const std::stringstream& header, 
     const std::vector<std::string>& xvars);

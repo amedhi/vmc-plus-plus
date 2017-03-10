@@ -170,6 +170,7 @@ void Observable::print_heading(const std::stringstream& header,
   fs_ << std::setw(9)<<"samples"<<std::setw(12)<<"converged"<<std::setw(6)<<"tau";
   fs_ << std::endl;
   fs_ << "#" << std::string(72, '-') << "\n";
+  fs_ << std::flush;
   heading_printed_ = true;
   close_file();
 }
@@ -190,6 +191,7 @@ void Observable::print_result(const std::vector<double>& xpvals)
     fs_ << MC_Data::result_str(i); 
   fs_ << MC_Data::conv_str(0); //.substr(0,10); 
   fs_ << std::endl;
+  fs_ << std::flush;
   close_file();
 } 
 

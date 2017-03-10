@@ -2,13 +2,15 @@
 * Author: Amal Medhi
 * Date:   2017-03-09 15:07:37
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-09 17:01:24
+* Last Modified time: 2017-03-10 15:19:20
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef STOCHASTIC_RECONF_H
 #define STOCHASTIC_RECONF_H
 
 #include <iostream>
+#include <fstream>
+#include <iomanip>
 #include "../utils/utils.h"
 #include "./simulator.h"
 
@@ -22,6 +24,7 @@ public:
   ~StochasticReconf() {}
   int init(const input::Parameters& parms, const Simulator& simulator);
   int optimize(Simulator& simulator);
+  const var::parm_vector& optimal_parms(void) const { return vparms_; }
   //const var::parm_vector& vp(void) { return varparms; }
 private:
   Observable optimal_parms_;
@@ -33,7 +36,6 @@ private:
   Eigen::VectorXd grad_;
   // Mann-Kendall trend test for converegence
   util::MK_Statistic mk_statistic_;
-
   // optimization parameters
   unsigned num_sim_samples_{1000};
   unsigned num_opt_samples_{30};
@@ -41,7 +43,12 @@ private:
   unsigned refinement_cycle_{100};
   unsigned mk_series_len_{40};
   double start_tstep_{0.05};
+  double grad_tol_{0.01};
   double mk_thresold_{0.30};
+  bool print_progress_{true};
+
+  // progress file
+  std::ofstream progress_;
 };
 
 

@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:20:56
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-09 17:34:38
+* Last Modified time: 2017-03-10 15:41:37
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "simulator.h"
@@ -74,7 +74,7 @@ double Simulator::energy_function(const Eigen::VectorXd& varp, Eigen::VectorXd& 
 }
 
 double Simulator::sr_function(const Eigen::VectorXd& varp, Eigen::VectorXd& grad, 
-  Eigen::MatrixXd& sr_matrix)
+  Eigen::MatrixXd& sr_matrix, const int& sample_size)
 {
   // observables to calculate
   if (!observables.total_energy()) observables.total_energy().switch_on();
@@ -96,7 +96,7 @@ double Simulator::sr_function(const Eigen::VectorXd& varp, Eigen::VectorXd& grad
   bool with_psi_grad = true;
   config.build(graph, varp, with_psi_grad);
   // run the simulation
-  run_simulation(observable_set::sr_coeffs);
+  run_simulation(observable_set::sr_coeffs, sample_size);
   // gradient
   finalize_energy_grad();
   grad = observables.energy_grad().mean_data();
@@ -113,6 +113,15 @@ double Simulator::sr_function(const Eigen::VectorXd& varp, Eigen::VectorXd& grad
     }
   }
   return observables.total_energy().mean();
+}
+
+int Simulator::run_opt_simulation(const Eigen::VectorXd& varp)
+{
+  observables.switch_off();
+  observables.energy().switch_on();
+  config.build(graph, varp);
+  run_simulation();
+  return 0;
 }
 
 int Simulator::run_simulation(const observable_set& obs_set, const int& sample_size)

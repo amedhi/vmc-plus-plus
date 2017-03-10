@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:19:36
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-09 17:08:24
+* Last Modified time: 2017-03-10 15:39:29
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef SIMULATOR_H
@@ -26,9 +26,10 @@ public:
     const bool& silent=false);
   int run_simulation(const observable_set& obs_set=observable_set::normal,  
     const int& sample_size=-1);
+  int run_opt_simulation(const Eigen::VectorXd& varp);
   double energy_function(const Eigen::VectorXd& varp, Eigen::VectorXd& grad);
   double sr_function(const Eigen::VectorXd& vparms, Eigen::VectorXd& grad, 
-    Eigen::MatrixXd& sr_matrix);
+    Eigen::MatrixXd& sr_matrix, const int& sample_size=-1);
   //void get_vparm_values(var::parm_vector& varparms) 
   //  { varparms = config.vparm_values(); }
   const unsigned& num_varp(void) const { return config.num_varparms(); } 
@@ -39,6 +40,7 @@ public:
   RandomGenerator& rng(void) const { return config.rng(); }
   const double& hole_doping(void) const { return config.hole_doping(); }
   void print_results(void); 
+  std::ostream& print_info(std::ostream& os) const { return model.print_info(os); }
   static void copyright_msg(std::ostream& os);
 private:
   lattice::LatticeGraph graph;

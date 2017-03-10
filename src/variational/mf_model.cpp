@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-07 16:01:47
+* Last Modified time: 2017-03-10 12:58:20
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "mf_model.h"
@@ -45,7 +45,7 @@ void MF_Model::define_model(const input::Parameters& inputs, const lattice::Latt
   if (info == 0) need_noninteracting_mu_ = false;
   else need_noninteracting_mu_ = true;
   if (inputs.set_value("mu_variational", false, info)) 
-    make_variational("mu", -5.0, +5.0);
+    make_variational("mu", -2.0, +1.0);
 
   // assuming spin up-down symmetry, down-spin operators are not specified 
   if (order_name == "NONE") {
