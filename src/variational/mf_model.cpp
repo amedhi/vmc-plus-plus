@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-10 12:58:20
+* Last Modified time: 2017-03-11 23:05:21
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "mf_model.h"
@@ -70,6 +70,12 @@ void MF_Model::define_model(const input::Parameters& inputs, const lattice::Latt
   else if (order_name == "SWAVE_SC") {
     order_ = mf_order::ssc;
     pairing_type_ = true;
+    add_parameter(name="t", defval=1.0, inputs);
+    add_parameter(name="delta_sc", defval=1.0, inputs);
+    add_bondterm(name="hopping", cc="-t", op::spin_hop());
+    add_bondterm(name="pairing", cc="delta_sc", op::pair_create());
+    add_siteterm(name="mu_term", cc="-mu", op::ni_up());
+    make_variational("delta_sc", lb=(0.0+box_sep), ub=(2.0-box_sep));
   }
   else if (order_name == "DISORDERED_SC") {
     order_ = mf_order::disorder_sc;

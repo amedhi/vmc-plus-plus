@@ -3,7 +3,7 @@
 * All rights reserved.
 * Date:   2016-01-17 21:32:15
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-12 00:03:44
+* Last Modified time: 2017-03-11 23:09:38
 *----------------------------------------------------------------------------*/
 #include <stdexcept>
 #include <iomanip>
@@ -42,13 +42,10 @@ int Lattice::define_lattice(void)
   else if (lname == "SIMPLE_CUBIC") {
     // type
     lid = lattice_id::SIMPLECUBIC;
-
     // basis vectors
     set_basis_vectors(a1=vec(1,0,0), a2=vec(0,1,0), a3=vec(0,0,1));
-
     // add sites
     add_basis_site(type=0, coord=vec(0,0,0));
-
     // add bonds
     add_bond(type=0, ngb=1, src=0, src_offset=pos(0,0,0), tgt=0, tgt_offset=pos(1,0,0));
     add_bond(type=0, ngb=1, src=0, src_offset=pos(0,0,0), tgt=0, tgt_offset=pos(0,1,0));
@@ -60,11 +57,27 @@ int Lattice::define_lattice(void)
     lid = lattice_id::CHAIN;
     extent[dim2] = Extent{1, boundary_type::open, boundary_type::open};
     extent[dim3] = Extent{1, boundary_type::open, boundary_type::open};
-    
     // add sites
     add_basis_site(type=0, coord=vec(0,0,0));
     // add bonds
     add_bond(type=0, ngb=1, src=0, src_offset=pos(0,0,0), tgt=0, tgt_offset=pos(1,0,0));
+  }
+
+  else if (lname == "HONEYCOMB") {
+    // type
+    lid = lattice_id::HONEYCOMB;
+    // basis vectors
+    double x = 0.5; 
+    double y = -0.5*std::sqrt(3.0); 
+    set_basis_vectors(a1=vec(x,y,0), a2=vec(x,-y,0), a3=vec(0,0,0));
+    // sites
+    add_basis_site(type=0, coord=vec(0,0,0));
+    y = 1.0/std::sqrt(3.0); 
+    add_basis_site(type=1, coord=vec(0,y,0));
+    // bonds
+    add_bond(type=0, ngb=1, src=0, src_offset=pos(0,0,0), tgt=1, tgt_offset=pos(0,0,0));
+    add_bond(type=1, ngb=1, src=0, src_offset=pos(0,0,0), tgt=1, tgt_offset=pos(1,0,0));
+    add_bond(type=2, ngb=1, src=1, src_offset=pos(0,0,0), tgt=0, tgt_offset=pos(0,1,0));
   }
 
   /*------------- undefined lattice--------------*/

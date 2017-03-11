@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:50
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-22 22:17:35
+* Last Modified time: 2017-03-10 22:36:58
 *----------------------------------------------------------------------------*/
 #include "model.h"
 
@@ -144,7 +144,8 @@ void Hamiltonian::update_parameters(const input::Parameters& inputs,
   const bool& update_terms)
 {
   // update the parameter values
-  for (auto& p : parms_) p.second = inputs.set_value(p.first, p.second);
+  int info;
+  for (auto& p : parms_) p.second = inputs.set_value(p.first, p.second, info);
   if (update_terms) update_coupling_constants();
 }
 
