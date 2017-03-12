@@ -3,10 +3,10 @@
 * All rights reserved.
 * Author: Amal Medhi
 *----------------------------------------------------------------------------*/
-#ifndef __CMC_PLUS_PLUS_H
-#define __CMC_PLUS_PLUS_H
+#ifndef __VMC_PLUS_PLUS_H
+#define __VMC_PLUS_PLUS_H
 
 #include "./scheduler/scheduler.h"
-#include "./vmc/vmc.h"
+#include "./vmc/simulator.h"
 
 #endif

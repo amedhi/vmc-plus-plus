@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-09 15:07:37
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-10 22:26:31
+* Last Modified time: 2017-03-12 09:48:28
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef STOCHASTIC_RECONF_H
@@ -12,7 +12,7 @@
 #include <fstream>
 #include <iomanip>
 #include "../utils/utils.h"
-#include "./simulator.h"
+#include "./vmc.h"
 
 namespace vmc {
 
@@ -22,8 +22,8 @@ public:
   StochasticReconf() {} 
   StochasticReconf(const input::Parameters& parms); 
   ~StochasticReconf() {}
-  int init(const input::Parameters& parms, const Simulator& simulator);
-  int optimize(Simulator& simulator);
+  int init(const input::Parameters& parms, const VMC& vmc);
+  int optimize(VMC& vmc);
   const var::parm_vector& optimal_parms(void) const { return vparms_; }
   //const var::parm_vector& vp(void) { return varparms; }
 private:

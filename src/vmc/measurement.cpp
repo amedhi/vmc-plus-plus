@@ -2,15 +2,15 @@
 * Author: Amal Medhi
 * Date:   2017-02-17 23:30:00
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-09 17:37:21
+* Last Modified time: 2017-03-12 09:48:48
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include <iostream>
-#include "simulator.h"
+#include "vmc.h"
 
 namespace vmc {
 
-void Simulator::do_measurements(const observable_set& obs_set)
+void VMC::do_measurements(const observable_set& obs_set)
 {
   // observable_set::normal (as specied in input)
   if (obs_set==observable_set::normal) {
@@ -67,11 +67,11 @@ void Simulator::do_measurements(const observable_set& obs_set)
     return;
   }
   else {
-    throw std::range_error("Simulator::do_measurements: unknown observables set");
+    throw std::range_error("VMC::do_measurements: unknown observables set");
   }
 }
 
-void Simulator::measure_energy_grad(const double& total_en)
+void VMC::measure_energy_grad(const double& total_en)
 {
   config.get_grad_logpsi(grad_logpsi_);
   unsigned n = 0;
@@ -83,7 +83,7 @@ void Simulator::measure_energy_grad(const double& total_en)
   observables.energy_grad2() << energy_grad2_;
 }
 
-int Simulator::finalize_energy_grad(void)
+int VMC::finalize_energy_grad(void)
 {
   double mean_energy = observables.total_energy().mean();
   energy_grad2_ = observables.energy_grad2().mean_data(); 
@@ -102,7 +102,7 @@ int Simulator::finalize_energy_grad(void)
 }
 
 
-Observable::data_t Simulator::get_energy(void) const
+Observable::data_t VMC::get_energy(void) const
 {
   using op_id = model::op_id;
   //for (auto& elem : term_energy_) elem = 0.0;

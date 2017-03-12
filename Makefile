@@ -35,10 +35,10 @@ SRCS+= vmc/random.cpp
 SRCS+= vmc/basisstate.cpp
 SRCS+= vmc/sysconfig.cpp
 SRCS+= vmc/observables.cpp
-SRCS+= vmc/simulator.cpp
 SRCS+= vmc/stochastic_reconf.cpp
 SRCS+= vmc/measurement.cpp
 SRCS+= vmc/vmc.cpp
+SRCS+= vmc/simulator.cpp
 SRCS+= main.cpp
 VMC_SRCS = $(addprefix src/,$(SRCS))
 #-------------------------------------------------------------
@@ -60,10 +60,10 @@ HDRS=scheduler/optionparser.h scheduler/cmdargs.h \
 	 variational/projector.h \
 	 mcdata/mcdata.h vmc/observables.h \
 	 vmc/random.h  vmc/basisstate.h vmc/sysconfig.h \
-	 vmc/simulator.h \
 	 vmc/stochastic_reconf.h \
 	 vmc/vmc.h \
-	 simulation.h \
+	 vmc/simulator.h \
+	 vmcpp.h \
 #         model/qn.h model/quantum_operator.h model/sitebasis.h model/modelparams.h \
 #         observable/mcdata.h observable/observables.h \
 #	 montecarlo/observable_operator.h montecarlo/simulator.h \

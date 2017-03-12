@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-09 15:19:43
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-10 22:26:27
+* Last Modified time: 2017-03-12 09:48:25
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include <string>
@@ -12,13 +12,13 @@
 
 namespace vmc {
 
-int StochasticReconf::init(const input::Parameters& inputs, const Simulator& simulator) 
+int StochasticReconf::init(const input::Parameters& inputs, const VMC& vmc) 
 {
   // problem size
-  num_parms_ = simulator.num_varp();
+  num_parms_ = vmc.num_varp();
   vparms_.resize(num_parms_);
-  lbound_ = simulator.varp_lbound();
-  ubound_ = simulator.varp_ubound();
+  lbound_ = vmc.varp_lbound();
+  ubound_ = vmc.varp_ubound();
   grad_.resize(num_parms_);
   sr_matrix_.resize(num_parms_,num_parms_);
 
@@ -45,11 +45,11 @@ int StochasticReconf::init(const input::Parameters& inputs, const Simulator& sim
   bool replace_mode = true;
   if (mode=="APPEND") replace_mode = false;
   optimal_parms_.init("OptParams", replace_mode);
-  optimal_parms_.set_elements(simulator.varp_names());
+  optimal_parms_.set_elements(vmc.varp_names());
   // observable file header
   std::stringstream heading;
-  simulator.copyright_msg(heading);
-  simulator.print_info(heading);
+  vmc.copyright_msg(heading);
+  vmc.print_info(heading);
   std::vector<std::string> as_funct_of{"x"};
   optimal_parms_.print_heading(heading, as_funct_of);
   // progress file
@@ -57,8 +57,8 @@ int StochasticReconf::init(const input::Parameters& inputs, const Simulator& sim
     progress_.open("log_optimization.txt");
     if (!progress_.is_open())
       throw std::runtime_error("StochasticReconf::init: file open failed");
-    simulator.copyright_msg(progress_);
-    simulator.print_info(progress_);
+    vmc.copyright_msg(progress_);
+    vmc.print_info(progress_);
     progress_ << "#" << std::string(72, '-') << std::endl;
     progress_ << "Stochastic Reconfiguration" << std::endl;
     progress_ << "max_iter = " << max_iter_ << std::endl;
@@ -72,7 +72,7 @@ int StochasticReconf::init(const input::Parameters& inputs, const Simulator& sim
   return 0;
 }
 
-int StochasticReconf::optimize(Simulator& simulator)
+int StochasticReconf::optimize(VMC& vmc)
 {
   // start optimization
   optimal_parms_.reset();
@@ -83,14 +83,14 @@ int StochasticReconf::optimize(Simulator& simulator)
         << num_opt_samples_ << " ... " << std::flush;
     }
     // starting value of variational parameters
-    vparms_ = lbound_+(ubound_-lbound_)*simulator.rng().random_real();
+    vparms_ = lbound_+(ubound_-lbound_)*vmc.rng().random_real();
     // Stochastic reconfiguration iterations
     mk_statistic_.reset();
     double search_tstep = start_tstep_;
     int mc_samples = num_sim_samples_;
     unsigned iter;
     for (iter=0; iter<max_iter_; ++iter) {
-      double en = simulator.sr_function(vparms_, grad_, sr_matrix_, mc_samples);
+      double en = vmc.sr_function(vparms_, grad_, sr_matrix_, mc_samples);
       // apply to stabiliser to sr matrix 
       for (unsigned i=0; i<num_parms_; ++i) sr_matrix_(i,i) += 1.0E-4;
       // search direction
@@ -171,7 +171,7 @@ int StochasticReconf::optimize(Simulator& simulator)
   progress_.close();
   // print results
   if (optimal_parms_.num_samples() > 0) {
-    std::vector<double> xv({simulator.hole_doping()});
+    std::vector<double> xv({vmc.hole_doping()});
     optimal_parms_.print_result(xv);
     vparms_ = optimal_parms_.mean_data(); 
     return true;
