@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:46
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-22 22:17:33
+* Last Modified time: 2017-03-13 00:15:50
 *----------------------------------------------------------------------------*/
 #ifndef MODEL_H
 #define MODEL_H
@@ -22,7 +22,7 @@
 namespace model {
 
 enum class model_id {
-  UNDEFINED, HUBBARD, tJ
+  UNDEFINED, HUBBARD, TJ, DISORDERED_TJ
 };
 
 class Hamiltonian 
@@ -58,6 +58,7 @@ public:
   unsigned add_siteterm(const std::string& name, const CouplingConstant& cc, const op::quantum_op& op);
   unsigned add_bondterm(const std::string& name, const CouplingConstant& cc, const op::quantum_op& op);
   void set_no_dbloccupancy(void) { double_occupancy_=false; }
+  void set_have_disorder(void) { have_disorder_=true; }
 
   //const BasisDescriptor& basis(void) const { return basis_; }
   //const SiteBasis& site_basis(const unsigned& site_type) const { return basis_.at(site_type); }
@@ -66,6 +67,7 @@ public:
   const ModelParams& parameters(void) const { return parms_; }
   const ModelParams& constants(void) const { return constants_; }
   const bool& double_occupancy(void) const { return double_occupancy_; }
+  const bool& have_disorder(void) const { return have_disorder_; }
   const bool& has_siteterm(void) const { return has_siteterm_; }
   const bool& has_bondterm(void) const { return has_bondterm_; }
   const siteterm_iterator& siteterms_begin(void) const { return st_begin_; }
@@ -97,6 +99,7 @@ private:
   std::vector<HamiltonianTerm> site_terms_;
 
   bool double_occupancy_{true};
+  bool have_disorder_{false};
   bool has_siteterm_{false};
   bool has_bondterm_{false};
   siteterm_iterator st_begin_;
@@ -107,6 +110,10 @@ private:
   //std::vector<BondTermDescriptor> bondterms_;
   ModelParams parms_;
   ModelParams constants_;
+
+  // disorder potential
+  std::vector<double> disorder_pot_;
+  std::string disorder_file_;
 
   std::ostringstream info_str_;
   void update_coupling_constants(void); 

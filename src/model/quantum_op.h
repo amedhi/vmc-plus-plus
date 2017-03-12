@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 19:03:43
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-18 22:12:37
+* Last Modified time: 2017-03-12 23:00:17
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef QUANTUM_OP_H
@@ -99,6 +99,14 @@ public:
   ni_dn() : quantum_op("ni_dn", op_id::ni_sigma, spin::DN, op_type::quadratic) {}
 };
 
+// implies both UP or DN
+class ni_sigma : public quantum_op
+{
+public:
+  ni_sigma() : quantum_op("ni_sigma", op_id::ni_sigma, spin::SIGMA, op_type::quadratic) {}
+};
+
+// implies both UP or DN
 class spin_hop : public quantum_op
 {
 public:

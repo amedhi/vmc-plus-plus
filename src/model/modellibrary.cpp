@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-11 13:02:35
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-21 22:52:04
+* Last Modified time: 2017-03-13 00:18:03
 *----------------------------------------------------------------------------*/
 #include <cmath>
 #include "model.h"
@@ -39,8 +39,8 @@ int Hamiltonian::define_model(const input::Parameters& inputs, const lattice::La
     add_siteterm(name="hubbard", cc="U", op::hubbard_int());
   }
 
-  else if (model_name == "T-J") {
-    mid = model_id::tJ;
+  else if (model_name == "TJ") {
+    mid = model_id::TJ;
     set_no_dbloccupancy();
     // model parameters
     add_parameter(name="t", defval=1.0, inputs);
@@ -55,6 +55,26 @@ int Hamiltonian::define_model(const input::Parameters& inputs, const lattice::La
     throw std::range_error("*error: modellibrary: undefined model");
   }
 
+  // if the model has disorder
+  int nowarn;
+  if (inputs.set_value("have_disorder",false,nowarn)) {
+    set_have_disorder();
+    add_siteterm(name="disorder", cc="0.0", op::ni_sigma());
+    // file containing disorder potential
+    // model signature string (to be used a folder name)
+    std::ostringstream signature;
+    signature << "L_" << lattice.size1() << "x" 
+      << lattice.size2() << "x" << lattice.size3();
+    signature << "_" << model_name;
+    signature.precision(3);
+    signature.setf(std::ios_base::fixed);
+    for (const auto& p : parms_) info_str_ << "_" << p.first << p.second;
+    disorder_file_ = inputs.set_value("input_prefix","system"); 
+    disorder_file_ += "/";
+    disorder_file_ += signature.str();
+    disorder_file_ += "/";
+    disorder_file_ += "disorder_potential.txt";
+  }
   return 0;
 }
 
