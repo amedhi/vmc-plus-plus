@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-07 16:01:50
+* Last Modified time: 2017-03-12 21:20:23
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "wavefunction.h"
@@ -87,11 +87,12 @@ int Wavefunction::compute_gradients(const lattice::LatticeGraph& graph,
   unsigned num_parm = mf_model_.varparms().size();
   psi_gradients_.resize(num_parm);
   work_mat.resize(num_sites_,num_sites_);
-  double scale = 0.005;
+  //double scale = 0.005;
   unsigned i = 0;
   for (const auto& p : mf_model_.varparms()) {
     psi_gradients_[i].resize(num_sites_,num_sites_);
-    double h = scale * (p.ubound()-p.lbound());
+    //double h = scale * (p.ubound()-p.lbound());
+    double h = p.diff_h();
     double inv_2h = 0.5/h;
     double x = pvector[start_pos+i];
     mf_model_.update(p.name(), x+h, graph);

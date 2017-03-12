@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-12 09:24:00
+* Last Modified time: 2017-03-12 21:12:49
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "mf_model.h"
@@ -65,7 +65,7 @@ void MF_Model::define_model(const input::Parameters& inputs, const lattice::Latt
     cc = CouplingConstant({0, "delta_sc"}, {1, "-delta_sc"});
     add_bondterm(name="pairing", cc, op::pair_create());
     // variational parameters
-    make_variational("delta_sc", lb=(0.0+box_sep), ub=(2.0-box_sep));
+    make_variational("delta_sc", lb=0.0, ub=2.0);
   }
   else if (order_name == "SWAVE_SC") {
     order_ = mf_order::ssc;
@@ -75,7 +75,7 @@ void MF_Model::define_model(const input::Parameters& inputs, const lattice::Latt
     add_bondterm(name="hopping", cc="-t", op::spin_hop());
     add_bondterm(name="pairing", cc="delta_sc", op::pair_create());
     add_siteterm(name="mu_term", cc="-mu", op::ni_up());
-    make_variational("delta_sc", lb=(0.0+box_sep), ub=(2.0-box_sep));
+    make_variational("delta_sc", lb=0.0, ub=2.0);
   }
   else if (order_name == "DISORDERED_SC") {
     order_ = mf_order::disorder_sc;

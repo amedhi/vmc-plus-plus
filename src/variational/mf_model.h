@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 14:51:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-07 16:01:37
+* Last Modified time: 2017-03-12 21:11:09
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef MF_MODEL_H
@@ -27,7 +27,6 @@ constexpr std::complex<double> ii(void) { return std::complex<double>{0.0,static
 
 namespace var {
 using vparm_t = std::pair<std::string,double>;
-const double box_sep = 0.01;
 
 /*
 //class SiteTerm : public std::unordered_map<unsigned, SiteOperatorTerm>

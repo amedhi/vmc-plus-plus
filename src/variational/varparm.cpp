@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-20 10:47:36
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-22 06:37:43
+* Last Modified time: 2017-03-12 20:53:55
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "./varparm.h"
@@ -17,7 +17,7 @@ VariationalParms::VariationalParms(void)
 }
 
 int VariationalParms::add(const std::string& name, const double& val, 
-    const double& lb, const double& ub)
+    const double& lb, const double& ub, const double& diff_h)
 {
   if (val<lb || val>ub) {
     throw std::invalid_argument("VariationalParm::add_parameter: invalid parameter bound");
@@ -26,7 +26,7 @@ int VariationalParms::add(const std::string& name, const double& val,
   bool status;
   std::tie(it, status) = name_id_map_.insert({name,num_parms_});
   if (!status) throw std::logic_error("VariationalParm::add_parameter: parameter already exists");
-  push_back({val, lb, ub});
+  push_back({val, lb, ub, diff_h});
   back().set_name(it);
   ++num_parms_;
   return num_parms_;
