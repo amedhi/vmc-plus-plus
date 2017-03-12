@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:50
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-12 09:47:06
+* Last Modified time: 2017-03-12 10:01:11
 *----------------------------------------------------------------------------*/
 #include <iomanip>
 #include "simulator.h"
@@ -25,7 +25,7 @@ int Simulator::run(const input::Parameters& inputs)
   if (optimization_mode_) {
     vmc.start(inputs, true, true);
     if (sreconf.optimize(vmc)) {
-      vmc.run_opt_simulation(sreconf.optimal_parms());
+      vmc.run_simulation(sreconf.optimal_parms());
       vmc.print_results();
     }
     return 0;

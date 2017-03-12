@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:20:56
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-12 09:44:03
+* Last Modified time: 2017-03-12 10:00:35
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "vmc.h"
@@ -115,7 +115,8 @@ double VMC::sr_function(const Eigen::VectorXd& varp, Eigen::VectorXd& grad,
   return observables.total_energy().mean();
 }
 
-int VMC::run_opt_simulation(const Eigen::VectorXd& varp)
+// simulation after optimization
+int VMC::run_simulation(const Eigen::VectorXd& varp)
 {
   observables.switch_off();
   observables.energy().switch_on();
