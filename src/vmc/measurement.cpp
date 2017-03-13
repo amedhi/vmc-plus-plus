@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-17 23:30:00
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-12 09:48:48
+* Last Modified time: 2017-03-13 22:25:27
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include <iostream>
@@ -109,7 +109,7 @@ Observable::data_t VMC::get_energy(void) const
   term_energy_.resize(model.num_terms());
   term_energy_.setZero();
   // bond energies
-  if (model.has_bondterm()) {
+  if (model.have_bondterm()) {
     Matrix matrix_elem(model.num_bondterms(),graph.num_bond_types());
     matrix_elem.setZero();
     for (auto b=graph.bonds_begin(); b!=graph.bonds_end(); ++b) {
@@ -134,7 +134,7 @@ Observable::data_t VMC::get_energy(void) const
   }
 
   // site energies
-  if (model.has_siteterm()) {
+  if (model.have_siteterm()) {
     Matrix matrix_elem(model.num_siteterms(),graph.num_site_types());
     matrix_elem.setZero();
     Eigen::VectorXi hubbard_nd(graph.num_site_types());

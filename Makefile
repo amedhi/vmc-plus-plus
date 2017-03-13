@@ -34,6 +34,7 @@ SRCS+= mcdata/mcdata.cpp
 SRCS+= vmc/random.cpp
 SRCS+= vmc/basisstate.cpp
 SRCS+= vmc/sysconfig.cpp
+SRCS+= vmc/disorder.cpp
 SRCS+= vmc/observables.cpp
 SRCS+= vmc/stochastic_reconf.cpp
 SRCS+= vmc/measurement.cpp
@@ -53,13 +54,15 @@ HDRS=scheduler/optionparser.h scheduler/cmdargs.h \
          lattice/constants.h lattice/lattice.h lattice/graph.h \
 	 montecarlo/simulator.h \
          model/modelparams.h  model/quantum_op.h \
-	 model/hamiltonian_term.h model/model.h \
+	 model/hamiltonian_term.h \
+	 model/model.h \
 	 variational/varparm.h \
 	 variational/blochbasis.h \
 	 variational/mf_model.h variational/wavefunction.h \
 	 variational/projector.h \
 	 mcdata/mcdata.h vmc/observables.h \
 	 vmc/random.h  vmc/basisstate.h vmc/sysconfig.h \
+	 vmc/disorder.h \
 	 vmc/stochastic_reconf.h \
 	 vmc/vmc.h \
 	 vmc/simulator.h \

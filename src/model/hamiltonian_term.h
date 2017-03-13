@@ -63,9 +63,12 @@ class HamiltonianTerm
 {
 public:
   //using BondSiteMap = std::map<unsigned, std::pair<unsigned, unsigned> >;
+  HamiltonianTerm() {}
   HamiltonianTerm(const std::string& name, const op::quantum_op& op, const CouplingConstant& cc, 
-    const unsigned& size);
+    const unsigned& size) { construct(name, op, cc, size); }
   ~HamiltonianTerm() {}
+  void construct(const std::string& name, const op::quantum_op& op, const CouplingConstant& cc, 
+    const unsigned& size);
   void eval_coupling_constant(const ModelParams& cvals, const ModelParams& pvals);
   const op::quantum_op& qn_operator(void) const { return op_; }
   bool is_defined_for(const unsigned& operand_type) const 

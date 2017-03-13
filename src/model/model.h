@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:46
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-13 00:15:50
+* Last Modified time: 2017-03-13 22:40:21
 *----------------------------------------------------------------------------*/
 #ifndef MODEL_H
 #define MODEL_H
@@ -17,7 +17,7 @@
 #include <map>
 #include <stdexcept>
 #include "../lattice/lattice.h"
-#include "hamiltonian_term.h"
+#include "./hamiltonian_term.h"
 
 namespace model {
 
@@ -57,8 +57,8 @@ public:
     { constants_.insert({cname, val}); return constants_.size(); }
   unsigned add_siteterm(const std::string& name, const CouplingConstant& cc, const op::quantum_op& op);
   unsigned add_bondterm(const std::string& name, const CouplingConstant& cc, const op::quantum_op& op);
+  unsigned add_disorder_term(const std::string& name, const op::quantum_op& op);
   void set_no_dbloccupancy(void) { double_occupancy_=false; }
-  void set_have_disorder(void) { have_disorder_=true; }
 
   //const BasisDescriptor& basis(void) const { return basis_; }
   //const SiteBasis& site_basis(const unsigned& site_type) const { return basis_.at(site_type); }
@@ -67,22 +67,28 @@ public:
   const ModelParams& parameters(void) const { return parms_; }
   const ModelParams& constants(void) const { return constants_; }
   const bool& double_occupancy(void) const { return double_occupancy_; }
-  const bool& have_disorder(void) const { return have_disorder_; }
-  const bool& has_siteterm(void) const { return has_siteterm_; }
-  const bool& has_bondterm(void) const { return has_bondterm_; }
+  const bool& have_disorder_term(void) const { return have_disorder_term_; }
+  const bool& have_siteterm(void) const { return have_siteterm_; }
+  const bool& have_bondterm(void) const { return have_bondterm_; }
   const siteterm_iterator& siteterms_begin(void) const { return st_begin_; }
   const siteterm_iterator& siteterms_end(void) const { return st_end_; }
   const bondterm_iterator& bondterms_begin(void) const { return bt_begin_; }
   const bondterm_iterator& bondterms_end(void) const { return bt_end_; }
+  const siteterm_iterator& disorder_term_begin(void) const { return dterm_begin_; }
+  const siteterm_iterator& disorder_term_end(void) const { return dterm_end_; }
   std::pair<siteterm_iterator, siteterm_iterator> site_terms(void) const 
     { return std::make_pair(site_terms_.cbegin(), site_terms_.cend()); }
   std::pair<bondterm_iterator, bondterm_iterator> bond_terms(void) const 
     { return std::make_pair(bond_terms_.cbegin(), bond_terms_.cend()); }
+  std::pair<siteterm_iterator, siteterm_iterator> disorder_terms(void) const 
+    { return std::make_pair(disorder_terms_.cbegin(), disorder_terms_.cend()); }
   unsigned num_siteterms(void) const { return site_terms_.size(); }
   unsigned num_bondterms(void) const { return bond_terms_.size(); }
+  unsigned num_disorder_terms(void) const { return disorder_terms_.size(); }
   unsigned num_terms(void) const 
-    { return site_terms_.size()+bond_terms_.size(); }
+    { return site_terms_.size()+bond_terms_.size()+disorder_terms_.size(); }
   void get_term_names(std::vector<std::string>& term_names) const;
+  std::string signature_str(void) const { return signature_str_.str(); }
   std::ostream& print_info(std::ostream& os) const { return os << info_str_.str(); }
   //const BondTerm::BondSiteMap& bond_sites_map(void) const { return bond_sites_map_; }
 
@@ -99,9 +105,8 @@ private:
   std::vector<HamiltonianTerm> site_terms_;
 
   bool double_occupancy_{true};
-  bool have_disorder_{false};
-  bool has_siteterm_{false};
-  bool has_bondterm_{false};
+  bool have_siteterm_{false};
+  bool have_bondterm_{false};
   siteterm_iterator st_begin_;
   siteterm_iterator st_end_;
   bondterm_iterator bt_begin_;
@@ -111,11 +116,15 @@ private:
   ModelParams parms_;
   ModelParams constants_;
 
-  // disorder potential
-  std::vector<double> disorder_pot_;
-  std::string disorder_file_;
+  // disorder term
+  bool have_disorder_term_{false};
+  //SiteDisorder site_disorder_;
+  std::vector<HamiltonianTerm> disorder_terms_;
+  siteterm_iterator dterm_begin_;
+  siteterm_iterator dterm_end_;
 
   std::ostringstream info_str_;
+  std::ostringstream signature_str_;
   void update_coupling_constants(void); 
   void set_info_string(const lattice::Lattice& lattice); 
 };

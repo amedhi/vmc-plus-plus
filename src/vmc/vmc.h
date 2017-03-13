@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:19:36
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-12 09:59:42
+* Last Modified time: 2017-03-13 22:17:58
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef VMC_H
@@ -14,6 +14,7 @@
 #include "../model/model.h"
 #include "./observables.h"
 #include "./sysconfig.h"
+#include "./disorder.h"
 
 namespace vmc {
 
@@ -46,6 +47,7 @@ private:
   lattice::LatticeGraph graph;
   model::Hamiltonian model;
   SysConfig config;
+  SiteDisorder disorder_;
   unsigned num_sites_;
   unsigned num_varparms_;
 
