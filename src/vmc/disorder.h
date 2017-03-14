@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-13 11:22:16
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-13 22:41:59
+* Last Modified time: 2017-03-14 16:14:44
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef DISORDER_H
@@ -13,8 +13,10 @@
 #include <sstream>
 #include <iomanip>
 #include <vector>
+#include <Eigen/Core>
 #include "../lattice/graph.h"
 #include "../model/model.h"
+#include "./random.h"
 
 namespace vmc {
 
@@ -23,17 +25,18 @@ class SiteDisorder
 public:
   SiteDisorder() {}
   SiteDisorder(const input::Parameters& inputs, const lattice::LatticeGraph& graph,
-    const model::Hamiltonian& model) { init(inputs, graph, model); }
+    const model::Hamiltonian& model, RandomGenerator& rng)
+  { init(inputs, graph, model, rng); }
   ~SiteDisorder() {}
   int init(const input::Parameters& inputs, const lattice::LatticeGraph& graph,
-    const model::Hamiltonian& model); 
+    const model::Hamiltonian& model, RandomGenerator& rng); 
   const unsigned& num_configs(void) const { return num_configs_; }
 private:
   unsigned num_sites_;
   unsigned num_configs_;
   double bandwidth_{1.0};
   bool potential_set_{false};
-  std::vector<std::vector<double> > disorder_pot_;
+  std::vector<Eigen::VectorXd> disorder_pot_;
   std::string datafile_prefix_;
 };
 

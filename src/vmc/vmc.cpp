@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:20:56
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-13 22:31:59
+* Last Modified time: 2017-03-14 09:46:39
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "vmc.h"
@@ -27,7 +27,8 @@ VMC::VMC(const input::Parameters& inputs)
   check_interval_ = std::max(1,num_measure_steps_/10);
 
   // disorder
-  if (model.have_disorder_term()) disorder_.init(inputs,graph,model);
+  if (model.have_disorder_term()) 
+    disorder_.init(inputs,graph,model,config.rng());
 
   // observables
   observables.init(inputs,copyright_msg,model,varp_names());
