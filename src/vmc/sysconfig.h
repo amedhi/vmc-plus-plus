@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-18 13:54:54
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-09 14:17:55
+* Last Modified time: 2017-03-15 21:46:30
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef SYSCONFIG_H
@@ -26,7 +26,7 @@ class SysConfig : public BasisState
 {
 public:
   SysConfig(const input::Parameters& parms, const lattice::LatticeGraph& graph, 
-    const model::Hamiltonian& model);
+    const model::Hamiltonian& model, const bool& site_disorder=false);
   ~SysConfig() {}
   int build(const lattice::LatticeGraph& graph, const input::Parameters& inputs, 
     const bool& with_gradient=false);

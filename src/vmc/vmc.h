@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:19:36
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-13 22:17:58
+* Last Modified time: 2017-03-15 00:43:01
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef VMC_H
@@ -45,9 +45,9 @@ public:
   static void copyright_msg(std::ostream& os);
 private:
   lattice::LatticeGraph graph;
+  SiteDisorder site_disorder;
   model::Hamiltonian model;
   SysConfig config;
-  SiteDisorder disorder_;
   unsigned num_sites_;
   unsigned num_varparms_;
 

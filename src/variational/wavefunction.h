@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 14:51:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-02 23:14:08
+* Last Modified time: 2017-03-16 17:48:57
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef WAVEFUNCTION_H
@@ -17,19 +17,20 @@
 #include <stdexcept>
 #include <Eigen/Eigenvalues>
 #include "../scheduler/task.h"
-#include "mf_model.h"
-#include "matrix.h"
+#include "./mf_model.h"
+#include "./matrix.h"
 
 namespace var {
 
-enum class wf_type {fermisea, bcs_oneband, bcs_multiband};
+enum class wf_type {fermisea, bcs_oneband, bcs_multiband, bcs_disordered};
 
 // Wavefunction in 'Wannier space' (amplitudes in Wannier representation)
 class Wavefunction 
 {
 public:
   //Wavefunction() {}
-  Wavefunction(const lattice::LatticeGraph& graph, const input::Parameters& inputs);
+  Wavefunction(const lattice::LatticeGraph& graph, const input::Parameters& inputs,
+    const bool& site_disorder=false);
   ~Wavefunction() {}
   const VariationalParms& varparms(void) const { return mf_model_.varparms(); }
   int compute(const lattice::LatticeGraph& graph, const input::Parameters& inputs, 
@@ -55,9 +56,9 @@ public:
   void get_gradients(Matrix& psi_grad, const int& n, 
     const std::vector<int>& row, const std::vector<int>& col) const;
 private:
+  basis::BlochBasis blochbasis_;
   wf_type type_;
   MF_Model mf_model_;
-  basis::BlochBasis blochbasis_;
   unsigned num_kpoints_;
   unsigned block_dim_;
   unsigned num_sites_;
@@ -91,10 +92,10 @@ private:
   void pair_amplitudes(const lattice::LatticeGraph& graph, Matrix& psi_mat);
   void fermisea_amplitudes(const lattice::LatticeGraph& graph) {}
   //void (Wavefunction::*construct_groundstate)(void);
-  void bcs_init(const lattice::LatticeGraph& graph);
+  void bcs_init(void);
   void bcs_oneband(void);
   void bcs_multiband(void);
-  void bcs_disordered(void);
+  void bcs_disordered(const lattice::LatticeGraph& graph);
   void fermisea(void) {}
 };
 

@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-13 11:34:21
+* Last Modified time: 2017-03-16 17:51:02
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "mf_model.h"
@@ -12,16 +12,20 @@
 
 namespace var {
 
-MF_Model::MF_Model(const input::Parameters& inputs, 
-  const lattice::LatticeGraph& graph)
+MF_Model::MF_Model(const input::Parameters& inputs, const lattice::LatticeGraph& graph)
 {
   // mean-field model
   define_model(inputs, graph);
-  // 'unitcell representation' of the hamiltonian
-  build_unitcell_terms(graph);
-
-  // kspace matrices
-  dim_ = graph.lattice().num_basis_sites();
+  // build 'unitcell representation' of the hamiltonian
+  if (order_ == mf_order::disordered_sc) {
+    dim_ = graph.num_sites();
+  }
+  else {
+    dim_ = graph.lattice().num_basis_sites();
+    build_unitcell_terms(graph);
+  }
+  // kspace block matrices
+  // dim_ = blochbasis.subspace_dimension();
   quadratic_block_up_.resize(dim_,dim_);
   pairing_block_.resize(dim_,dim_);
   work.resize(dim_,dim_);
@@ -78,8 +82,32 @@ void MF_Model::define_model(const input::Parameters& inputs, const lattice::Latt
     make_variational("delta_sc", lb=0.0, ub=2.0);
   }
   else if (order_name == "DISORDERED_SC") {
-    order_ = mf_order::disorder_sc;
+    order_ = mf_order::disordered_sc;
     pairing_type_ = true;
+    add_bondterm(name="hopping", cc="-1.0", op::spin_hop());
+    add_siteterm(name="site_mu", cc="0.0", op::ni_up());
+    add_bondterm(name="pairing", cc="1.0", op::pair_create());
+    // variational parameters
+    need_noninteracting_mu_ = false;
+    varparms_.clear();
+    // hoping amplitudes
+    bond_parms_start_ = 0;
+    for (unsigned i=0; i<graph.num_bonds(); ++i) {
+      name = "t_" + std::to_string(i);
+      varparms_.add(name, -1.0, -2.0, 2.0);
+    }
+    // site potentials
+    site_parms_start_ = varparms_.size();
+    for (unsigned i=0; i<graph.num_sites(); ++i) {
+      name = "mu_" + std::to_string(i);
+      varparms_.add(name, 0.0, -4.0, 4.0);
+    }
+    // delta paraeters
+    pair_parms_start_ = varparms_.size();
+    for (unsigned i=0; i<graph.num_sites(); ++i) {
+      name = "delta_" + std::to_string(i);
+      varparms_.add(name, 0.5, -4.0, 4.0);
+    }
   }
   else {
     throw std::range_error("*error: mf_order: undefined order");
@@ -89,6 +117,8 @@ void MF_Model::define_model(const input::Parameters& inputs, const lattice::Latt
 
 void MF_Model::update(const input::Parameters& inputs, const lattice::LatticeGraph& graph)
 {
+  if (order_ == mf_order::disordered_sc) return; // nothing to do
+
   Model::update_parameters(inputs);
   // update variational parameters
   for (auto& p : varparms_) 
@@ -100,6 +130,15 @@ void MF_Model::update(const input::Parameters& inputs, const lattice::LatticeGra
 void MF_Model::update(const parm_vector& pvector, const unsigned& start_pos, const lattice::LatticeGraph& graph)
 {
   // for all variational parameters
+  if (order_ == mf_order::disordered_sc) {
+    unsigned i = 0;
+    for (auto& p : varparms_) {
+      p.change_value(pvector[start_pos+i]);
+      ++i;
+    }
+    return;
+  }
+
   unsigned i = 0;
   for (const auto& p : varparms_) {
     //std::cout << p.name() << " = " << pvector[start_pos+i] << "\n"; getchar();
@@ -174,8 +213,8 @@ void MF_Model::build_unitcell_terms(const lattice::LatticeGraph& graph)
 void MF_Model::construct_kspace_block(const Vector3d& kvec)
 {
   work.setZero(); 
-  //work2 = Matrix::Zero(dim_,dim_);
   pairing_block_.setZero();
+  //work2 = Matrix::Zero(dim_,dim_);
   // bond terms
   //for (const auto& term : uc_bondterms_) {
   for (const auto& term : ubond_terms_) {
@@ -208,6 +247,39 @@ void MF_Model::construct_kspace_block(const Vector3d& kvec)
   //pairing_block_ += work2.adjoint();
   // site terms
   //std::cout << "ek = " << quadratic_block_(0,0) << "\n";
+}
+
+const ComplexMatrix& MF_Model::quadratic_up_matrix(const lattice::LatticeGraph& graph) 
+{
+  if (num_bondterms() != 1)
+    throw std::logic_error("MF_Model::quadratic_up_matrix: internal error");
+  if (num_siteterms() != 1)
+    throw std::logic_error("MF_Model::quadratic_up_matrix: internal error");
+
+  work.setZero(); 
+  int n = 0;
+  // bond operator matrix elements
+  for (auto b=graph.bonds_begin(); b!=graph.bonds_end(); ++b) {
+    int site_i = graph.source(b);
+    int site_j = graph.target(b);
+    // matrix elements 
+    work(site_i, site_j) = varparms_[n].value();
+    ++n;
+  }
+  quadratic_block_up_ = work + work.adjoint();
+  // site operator matrix elements
+  n = graph.num_bonds();
+  for (unsigned i=0; i<graph.num_sites(); ++i) {
+    quadratic_block_up_(i,i) += varparms_[n].value();
+    ++n;
+  }
+  return quadratic_block_up_;
+}
+
+void MF_Model::get_pairing_varparms(ComplexMatrix& delta_k) const
+{
+  for (unsigned i=0; i<dim_; ++i)
+    delta_k(i,i) = varparms_[pair_parms_start_+i].value();
 }
 
 void MF_Model::update_unitcell_terms(void)

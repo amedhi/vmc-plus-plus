@@ -2,7 +2,7 @@
 # Makefile for cmc++ library
 #-------------------------------------------------------------
 #include ../root_dir.mk # must be included first
-include ./options.mk
+include ./make_options.mk
 #-------------------------------------------------------------
 # Source files
 SRCS = scheduler/cmdargs.cpp 

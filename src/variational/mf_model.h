@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 14:51:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-13 11:34:24
+* Last Modified time: 2017-03-16 17:50:19
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef MF_MODEL_H
@@ -18,10 +18,10 @@
 #include "../model/model.h"
 #include "../lattice/graph.h"
 #include "./varparm.h"
-#include "blochbasis.h"
-#include "matrix.h"
+#include "./blochbasis.h"
+#include "./matrix.h"
 
-enum class mf_order {none, af, fm, ssc, dsc, pplusip, af_dsc, disorder_sc};
+enum class mf_order {none, af, fm, ssc, dsc, pplusip, af_dsc, disordered_sc};
 
 constexpr std::complex<double> ii(void) { return std::complex<double>{0.0,static_cast<double>(1.0)}; }
 
@@ -84,11 +84,14 @@ public:
   void update(const parm_vector& pvector, const unsigned& start_pos, const lattice::LatticeGraph& graph);
   void update_mu(const double& mu, const lattice::LatticeGraph& graph);
   //void update_parameters(const var_parm& vparms_);
+  const mf_order& order(void) const { return order_; }
   const bool& is_pairing(void) const { return pairing_type_; }
   const bool& need_noninteracting_mu(void) const { return need_noninteracting_mu_; }
   void construct_kspace_block(const Vector3d& kvec);
   const ComplexMatrix& quadratic_spinup_block(void) const { return quadratic_block_up_; }
   const ComplexMatrix& pairing_part(void) const { return pairing_block_; }
+  const ComplexMatrix& quadratic_up_matrix(const lattice::LatticeGraph& graph); 
+  void get_pairing_varparms(ComplexMatrix& delta_k) const;
 private:
   using Model = model::Hamiltonian;
   mf_order order_;
@@ -105,6 +108,11 @@ private:
   ComplexMatrix quadratic_block_dn_;
   ComplexMatrix pairing_block_;
   ComplexMatrix work; //, work2;
+
+  // for disordered system
+  unsigned bond_parms_start_{0};
+  unsigned site_parms_start_{0};
+  unsigned pair_parms_start_{0};
 
   //void check_xml(void);
   void define_model(const input::Parameters& inputs, const lattice::LatticeGraph& graph);

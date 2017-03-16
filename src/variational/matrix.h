@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-16 22:12:57
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-05 11:47:47
+* Last Modified time: 2017-03-16 17:34:18
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 //#define EIGEN_USE_MKL_ALL
@@ -18,6 +18,7 @@ using Vector3d = Eigen::Vector3d;
 using Diagonal3d = Eigen::DiagonalMatrix<double,3>;
 using RealVector = Eigen::VectorXd;
 using RealMatrix = Eigen::MatrixXd;
+using ComplexVector = Eigen::VectorXcd;
 using ComplexMatrix = Eigen::MatrixXcd;
 
 #ifdef REAL_WAVEFUNCTION

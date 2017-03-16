@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:46
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-13 22:40:21
+* Last Modified time: 2017-03-15 21:45:36
 *----------------------------------------------------------------------------*/
 #ifndef MODEL_H
 #define MODEL_H
@@ -31,12 +31,15 @@ public:
   using siteterm_iterator = std::vector<HamiltonianTerm>::const_iterator; 
   using bondterm_iterator = std::vector<HamiltonianTerm>::const_iterator; 
   Hamiltonian() {}
-  Hamiltonian(const input::Parameters& inputs, const lattice::Lattice& lattice)
-  { construct(inputs, lattice); }
+  Hamiltonian(const input::Parameters& inputs, const lattice::Lattice& lattice,
+    const bool& site_disorder=false)
+  { construct(inputs, lattice, site_disorder); }
   ~Hamiltonian() {}
-  int construct(const input::Parameters& inputs, const lattice::Lattice& lattice);
+  int construct(const input::Parameters& inputs, const lattice::Lattice& lattice,
+    const bool& site_disorder=false);
   int init(const lattice::Lattice& lattice);
-  int define_model(const input::Parameters& inputs, const lattice::Lattice& lattice);
+  int define_model(const input::Parameters& inputs, const lattice::Lattice& lattice,
+    const bool& site_disorder=false);
   int finalize(const lattice::Lattice& lattice);
 
   //unsigned add_sitebasis(SiteBasis& sitebasis);

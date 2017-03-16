@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-09 22:48:45
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-21 22:57:26
+* Last Modified time: 2017-03-16 17:45:08
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include <algorithm>
@@ -10,7 +10,7 @@
 
 namespace var {
 
-void Wavefunction::bcs_init(const lattice::LatticeGraph& graph)
+void Wavefunction::bcs_init(void)
 {
   // resizing
   mat_work.resize(block_dim_,block_dim_);
@@ -19,7 +19,6 @@ void Wavefunction::bcs_init(const lattice::LatticeGraph& graph)
   mat_dphi_k.resize(block_dim_,block_dim_);
   cphi_k.resize(num_kpoints_);
   for (unsigned k=0; k<num_kpoints_; ++k) cphi_k[k].resize(block_dim_,block_dim_);
-
   bcs_large_number_ = 1.0E+2;
 }
 
@@ -92,9 +91,29 @@ void Wavefunction::bcs_multiband(void)
   } 
 }
 
-void Wavefunction::bcs_disordered(void)
+void Wavefunction::bcs_disordered(const lattice::LatticeGraph& graph)
 {
-  
+  assert (cphi_k.size() == 1);  // only k=0 point
+  // diagonalize quadratic part
+  hk.compute(mf_model_.quadratic_up_matrix(graph));
+  mf_model_.get_pairing_varparms(mat_delta_k); // assuming only diagonal elems
+  mat_dphi_k.setZero();
+  for (unsigned i=0; i<block_dim_; ++i) {
+    double ek = hk.eigenvalues()[i] + hminusk.eigenvalues()[i];
+    double deltak_sq = std::norm(mat_delta_k(i,i));
+    double ek_plus_Ek = ek + std::sqrt(ek*ek + 4.0*deltak_sq);
+    if (deltak_sq<1.0E-12 && ek<0.0) {
+      mat_dphi_k(i,i) = bcs_large_number_ * std::exp(ii()*std::arg(mat_delta_k(i,i)));
+    }
+    else {
+      mat_dphi_k(i,i) = 2.0*mat_delta_k(i,i)/ek_plus_Ek;
+    }
+  }
+  // bcs ampitudes in original basis 
+  for (unsigned i=0; i<block_dim_; ++i) 
+    mat_work.col(i) = hk.eigenvectors().col(i) * mat_dphi_k(i,i);
+  cphi_k[0] = mat_work * hk.eigenvectors().transpose();
+  //std::cout << delta_k << "\n";
 }
 
 double Wavefunction::get_noninteracting_mu(void)

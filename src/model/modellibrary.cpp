@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-11 13:02:35
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-14 21:59:17
+* Last Modified time: 2017-03-15 21:45:44
 *----------------------------------------------------------------------------*/
 #include <cmath>
 #include "model.h"
@@ -12,7 +12,8 @@
 
 namespace model {
 
-int Hamiltonian::define_model(const input::Parameters& inputs, const lattice::Lattice& lattice)
+int Hamiltonian::define_model(const input::Parameters& inputs, 
+  const lattice::Lattice& lattice, const bool& site_disorder)
 {
   //int info;
   //unsigned ntypes;
@@ -56,18 +57,18 @@ int Hamiltonian::define_model(const input::Parameters& inputs, const lattice::La
   }
 
   // if the model has site disorder
-  int nowarn;
-  if (inputs.set_value("have_disorder",false,nowarn)) {
+  if (site_disorder) {
     add_disorder_term(name="disorder", op::ni_sigma());
   }
   
   return 0;
 }
 
-int Hamiltonian::construct(const input::Parameters& inputs, const lattice::Lattice& lattice)
+int Hamiltonian::construct(const input::Parameters& inputs, 
+  const lattice::Lattice& lattice, const bool& site_disorder)
 {
   init(lattice);
-  define_model(inputs, lattice);
+  define_model(inputs, lattice, site_disorder);
   finalize(lattice);
   return 0;
 }

@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:20:56
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-14 09:46:39
+* Last Modified time: 2017-03-15 21:45:16
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "vmc.h"
@@ -12,8 +12,9 @@ namespace vmc {
 
 VMC::VMC(const input::Parameters& inputs) 
   : graph(inputs) 
-  , model(inputs, graph.lattice()) 
-  , config(inputs, graph, model)
+  , site_disorder(inputs)
+  , model(inputs, graph.lattice(), site_disorder) 
+  , config(inputs, graph, model, site_disorder)
   , num_varparms_{config.num_varparms()}
 {
   // seed random generator
@@ -28,7 +29,7 @@ VMC::VMC(const input::Parameters& inputs)
 
   // disorder
   if (model.have_disorder_term()) 
-    disorder_.init(inputs,graph,model,config.rng());
+    //disorder_.init(inputs,graph,model,config.rng());
 
   // observables
   observables.init(inputs,copyright_msg,model,varp_names());

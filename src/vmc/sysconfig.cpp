@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-18 14:01:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-09 14:17:52
+* Last Modified time: 2017-03-15 22:04:13
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "./sysconfig.h"
@@ -11,7 +11,8 @@
 namespace vmc {
 
 SysConfig::SysConfig(const input::Parameters& inputs, 
-  const lattice::LatticeGraph& graph, const model::Hamiltonian& model) 
+  const lattice::LatticeGraph& graph, const model::Hamiltonian& model,
+  const bool& site_disorder) 
   : BasisState(graph.num_sites(), model.double_occupancy())
   , wf(graph, inputs)
   , pj(inputs)

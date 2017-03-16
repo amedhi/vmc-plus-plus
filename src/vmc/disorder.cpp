@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-13 11:23:45
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-14 16:38:15
+* Last Modified time: 2017-03-15 00:25:04
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 //#define BOOST_FILESYSTEM_NO_DEPRECATED
@@ -11,6 +11,12 @@
 #include "./disorder.h"
 
 namespace vmc {
+
+SiteDisorder::SiteDisorder(const input::Parameters& inputs)
+{
+  int nowarn;
+  exists_ = inputs.set_value("put_site_disorder",false,nowarn);
+}
 
 int SiteDisorder::init(const input::Parameters& inputs, const lattice::LatticeGraph& graph,
     const model::Hamiltonian& model, RandomGenerator& rng)

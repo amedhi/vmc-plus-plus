@@ -2,17 +2,45 @@
 * Author: Amal Medhi
 * Date:   2017-02-01 21:13:27
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-21 22:55:07
+* Last Modified time: 2017-03-16 17:57:37
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "blochbasis.h"
 
 namespace basis {
 
-void BlochBasis::construct(const lattice::LatticeGraph& graph)
+BlochBasis::BlochBasis(const lattice::LatticeGraph& graph, const bool& disorded_system) 
 {
+  construct(graph, disorded_system);
+}
+
+int BlochBasis::construct(const lattice::LatticeGraph& graph, const bool& disorded_system)
+{
+  if (disorded_system) {
+    // no translational symmetry
+    // only k=0 point
+    num_kpoint_ = 1;
+    this->clear();
+    this->push_back(Vector3d(0.0,0.0,0.0));
+    // subspace basis
+    subspace_dimension_ = graph.num_sites();
+    subspace_basis_.resize(subspace_dimension_);
+    for (unsigned i=0; i<subspace_dimension_; ++i) {
+      basis_state s = graph.site(i);
+      subspace_basis_[i] = s; 
+    }
+    null_idx_ = subspace_basis_.size();
+    // index of the 'representative state' of a site
+    representative_state_idx_.resize(graph.num_sites());
+    for (unsigned i=0; i<graph.num_sites(); ++i) {
+      representative_state_idx_[i] = i;
+    }
+    return 0;
+  }
+  // normal case
   make_kpoints(graph.lattice());
   make_subspace_basis(graph);
+  return 0;
 }
 
 void BlochBasis::make_kpoints(const lattice::Lattice& lattice)

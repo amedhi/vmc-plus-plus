@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-12 22:52:25
+* Last Modified time: 2017-03-16 18:04:14
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "wavefunction.h"
@@ -10,9 +10,9 @@
 namespace var {
 
 Wavefunction::Wavefunction(const lattice::LatticeGraph& graph,
-  const input::Parameters& inputs)
-  : mf_model_(inputs, graph)
-  , blochbasis_(graph)
+  const input::Parameters& inputs, const bool& site_disorder)
+  : blochbasis_(graph, site_disorder)
+  , mf_model_(inputs, graph)
   , num_kpoints_(blochbasis_.num_kpoints())
   , block_dim_(blochbasis_.subspace_dimension())
   , num_sites_(graph.num_sites())
@@ -22,9 +22,11 @@ Wavefunction::Wavefunction(const lattice::LatticeGraph& graph,
 {
   set_particle_num(inputs);
   if (mf_model_.is_pairing()) {
-    bcs_init(graph);
+    bcs_init();
     if (block_dim_==1) type_ = wf_type::bcs_oneband;
     else type_ = wf_type::bcs_multiband;
+    if (mf_model_.order() == mf_order::disordered_sc)
+      type_ = wf_type::bcs_disordered;
   }
   else {
     type_ = wf_type::fermisea;
@@ -120,6 +122,10 @@ int Wavefunction::compute_amplitudes(Matrix& psi_mat, const lattice::LatticeGrap
       bcs_multiband(); 
       pair_amplitudes(graph, psi_mat);
       break;
+    case wf_type::bcs_disordered: 
+      bcs_disordered(graph); 
+      pair_amplitudes(graph, psi_mat);
+      break;
     case wf_type::fermisea: 
       fermisea(); 
       fermisea_amplitudes(graph); 
@@ -132,10 +138,12 @@ void Wavefunction::pair_amplitudes(const lattice::LatticeGraph& graph, Matrix& p
 {
   double one_by_nk = 1.0/static_cast<double>(num_kpoints_);
   for (unsigned i=0; i<num_sites_; ++i) {
-    unsigned m = graph.site_uid(i);
+    //unsigned m = graph.site_uid(i);
+    unsigned m = blochbasis_.representative_state_idx(i);
     auto Ri = graph.site_cellcord(i);
     for (unsigned j=0; j<num_sites_; ++j) {
-      unsigned n = graph.site_uid(j);
+      //unsigned n = graph.site_uid(j);
+      unsigned n = blochbasis_.representative_state_idx(j);
       auto Rj = graph.site_cellcord(j);
       std::complex<double> ksum(0.0);
       for (unsigned k=0; k<num_kpoints_; ++k) {
