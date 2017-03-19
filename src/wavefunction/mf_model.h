@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 14:51:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-16 17:50:19
+* Last Modified time: 2017-03-19 23:03:49
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef MF_MODEL_H
@@ -75,8 +75,10 @@ private:
 class MF_Model : public model::Hamiltonian
 {
 public:
+  MF_Model() {}
   MF_Model(const input::Parameters& inputs, const lattice::LatticeGraph& graph);
   ~MF_Model() {}
+  int finalize(const lattice::LatticeGraph& graph);
   void refresh_varparms(void);
   const VariationalParms& varparms(void) const { return varparms_; }
   void update(const input::Parameters& inputs, const lattice::LatticeGraph& graph);

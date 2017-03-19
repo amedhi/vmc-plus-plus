@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 14:51:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-16 17:48:57
+* Last Modified time: 2017-03-19 23:17:59
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef WAVEFUNCTION_H
@@ -13,16 +13,18 @@
 #include <string>
 #include <complex>
 #include <vector>
-#include <map>
+//#include <map>
+#include <memory>
 #include <stdexcept>
 #include <Eigen/Eigenvalues>
 #include "../scheduler/task.h"
 #include "./mf_model.h"
 #include "./matrix.h"
+#include "./bcs_state.h"
 
 namespace var {
 
-enum class wf_type {fermisea, bcs_oneband, bcs_multiband, bcs_disordered};
+enum class wf_type {normal, bcs_oneband, bcs_multiband, bcs_disordered};
 
 // Wavefunction in 'Wannier space' (amplitudes in Wannier representation)
 class Wavefunction 
@@ -56,9 +58,15 @@ public:
   void get_gradients(Matrix& psi_grad, const int& n, 
     const std::vector<int>& row, const std::vector<int>& col) const;
 private:
-  basis::BlochBasis blochbasis_;
+  std::unique_ptr<GroundState> ground_state_;
+  //wf_descriptor wf_;
+  std::string name_;
+  bool pairing_type_{false};
   wf_type type_;
+  basis::BlochBasis blochbasis_;
   MF_Model mf_model_;
+  VariationalParms varparms_;
+  bool need_noninteracting_mu_{true};
   unsigned num_kpoints_;
   unsigned block_dim_;
   unsigned num_sites_;

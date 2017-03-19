@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-09 22:48:45
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-16 17:45:08
+* Last Modified time: 2017-03-20 00:44:00
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include <algorithm>
@@ -15,7 +15,6 @@ void Wavefunction::bcs_init(void)
   // resizing
   mat_work.resize(block_dim_,block_dim_);
   mat_delta_k.resize(block_dim_,block_dim_);
-  mat_dphi_k.resize(block_dim_,block_dim_);
   mat_dphi_k.resize(block_dim_,block_dim_);
   cphi_k.resize(num_kpoints_);
   for (unsigned k=0; k<num_kpoints_; ++k) cphi_k[k].resize(block_dim_,block_dim_);

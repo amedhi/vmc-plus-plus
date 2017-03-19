@@ -2,17 +2,18 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-16 18:04:14
+* Last Modified time: 2017-03-20 00:50:21
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "wavefunction.h"
+#include <boost/algorithm/string.hpp>
 
 namespace var {
 
 Wavefunction::Wavefunction(const lattice::LatticeGraph& graph,
   const input::Parameters& inputs, const bool& site_disorder)
   : blochbasis_(graph, site_disorder)
-  , mf_model_(inputs, graph)
+  //, mf_model_(inputs, graph)
   , num_kpoints_(blochbasis_.num_kpoints())
   , block_dim_(blochbasis_.subspace_dimension())
   , num_sites_(graph.num_sites())
@@ -20,8 +21,48 @@ Wavefunction::Wavefunction(const lattice::LatticeGraph& graph,
   , num_upspins_(0)
   , num_dnspins_(0)
 {
+  // wavefunction & mean-field Hamiltonian 
+  //varparms_.clear();
+  name_ = inputs.set_value("wavefunction", "NORMAL");
+  boost::to_upper(name_);
+  // chemical potential
+  /*int info;
+  mf_model_.add_parameter(name="mu", defval=0.0, inputs, info);
+  if (info == 0) need_noninteracting_mu_ = false;
+  else need_noninteracting_mu_ = true;
+  if (inputs.set_value("mu_variational", false, info)) 
+    varparms_.add("mu", defval=0.0, -2.0, +1.0);
+  */
+
+  if (name_ == "NORMAL") {
+  }
+  else if (name_ == "SWAVE_SC") {
+    ground_state_.reset(new BCS_State(bcs::swave,inputs,graph,blochbasis_));
+  }
+  else if (name_ == "DWAVE_SC") {
+    ground_state_.reset(new BCS_State(bcs::dwave,inputs,graph,blochbasis_));
+  }
+  else if (name_ == "DISORDERED_SC") {
+  }
+
+  else {
+    throw std::range_error("Wavefunction::Wavefunction: unidefined wavefunction");
+  }
+  // finalize MF Hamiltonian
+  mf_model_.finalize(graph);
+  // initialize wf 
   set_particle_num(inputs);
-  if (mf_model_.is_pairing()) {
+  switch (type_) {
+    case wf_type::normal:
+      throw std::range_error("Wavefunction::Wavefunction: 'Normal' state not implemented");
+    case wf_type::bcs_oneband:
+      bcs_init(); break;
+    case wf_type::bcs_multiband:
+      bcs_init(); break;
+    case wf_type::bcs_disordered:
+      bcs_init(); break;
+  } 
+  /*if (pairing_type_) {
     bcs_init();
     if (block_dim_==1) type_ = wf_type::bcs_oneband;
     else type_ = wf_type::bcs_multiband;
@@ -31,6 +72,7 @@ Wavefunction::Wavefunction(const lattice::LatticeGraph& graph,
   else {
     type_ = wf_type::fermisea;
   }
+  */
   psi_up_.resize(num_sites_,num_sites_);
 }
 
@@ -126,7 +168,7 @@ int Wavefunction::compute_amplitudes(Matrix& psi_mat, const lattice::LatticeGrap
       bcs_disordered(graph); 
       pair_amplitudes(graph, psi_mat);
       break;
-    case wf_type::fermisea: 
+    case wf_type::normal: 
       fermisea(); 
       fermisea_amplitudes(graph); 
       break;
@@ -162,7 +204,7 @@ void Wavefunction::set_particle_num(const input::Parameters& inputs)
   hole_doping_ = inputs.set_value("hole_doping", 0.0);
   band_filling_ = 1.0-hole_doping_;
   int num_sites = static_cast<int>(num_sites_);
-  if (mf_model_.is_pairing()) {
+  if (pairing_type_) {
     int n = static_cast<int>(std::round(0.5*band_filling_*num_sites));
     if (n<0 || n>num_sites) throw std::range_error("Wavefunction:: hole doping out-of-range");
     num_upspins_ = static_cast<unsigned>(n);

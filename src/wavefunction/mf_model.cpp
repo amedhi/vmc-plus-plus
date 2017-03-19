@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-16 17:51:02
+* Last Modified time: 2017-03-19 23:03:54
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "mf_model.h"
@@ -11,6 +11,17 @@
 //#include "../xml/pugixml.hpp"
 
 namespace var {
+
+int MF_Model::finalize(const lattice::LatticeGraph& graph)
+{
+  Model::finalize(graph.lattice());
+  dim_ = graph.lattice().num_basis_sites();
+  quadratic_block_up_.resize(dim_,dim_);
+  pairing_block_.resize(dim_,dim_);
+  work.resize(dim_,dim_);
+  build_unitcell_terms(graph);
+  return 0;
+}
 
 MF_Model::MF_Model(const input::Parameters& inputs, const lattice::LatticeGraph& graph)
 {

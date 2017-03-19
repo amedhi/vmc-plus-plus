@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-18 13:54:54
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-15 21:46:30
+* Last Modified time: 2017-03-17 09:49:05
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef SYSCONFIG_H
@@ -12,9 +12,9 @@
 #include "../lattice/lattice.h"
 #include "../lattice/graph.h"
 #include "../model/model.h"
-#include "../variational/wavefunction.h"
-#include "../variational/projector.h"
-#include "../variational/matrix.h"
+#include "../wavefunction/wavefunction.h"
+#include "../wavefunction/projector.h"
+#include "../wavefunction/matrix.h"
 #include "./basisstate.h"
 
 namespace vmc {

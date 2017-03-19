@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:46
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-15 21:45:36
+* Last Modified time: 2017-03-18 12:29:33
 *----------------------------------------------------------------------------*/
 #ifndef MODEL_H
 #define MODEL_H
@@ -37,7 +37,7 @@ public:
   ~Hamiltonian() {}
   int construct(const input::Parameters& inputs, const lattice::Lattice& lattice,
     const bool& site_disorder=false);
-  int init(const lattice::Lattice& lattice);
+  virtual int init(const lattice::Lattice& lattice);
   int define_model(const input::Parameters& inputs, const lattice::Lattice& lattice,
     const bool& site_disorder=false);
   int finalize(const lattice::Lattice& lattice);

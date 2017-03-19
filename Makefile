@@ -23,12 +23,13 @@ SRCS+= lattice/graph.cpp
 SRCS+= model/hamiltonian_term.cpp
 SRCS+= model/model.cpp
 SRCS+= model/modellibrary.cpp
-SRCS+= variational/varparm.cpp
-SRCS+= variational/blochbasis.cpp
-SRCS+= variational/mf_model.cpp
-SRCS+= variational/bcsfunction.cpp
-SRCS+= variational/wavefunction.cpp
-SRCS+= variational/projector.cpp
+SRCS+= wavefunction/varparm.cpp
+SRCS+= wavefunction/blochbasis.cpp
+SRCS+= wavefunction/mf_model.cpp
+SRCS+= wavefunction/bcs_state.cpp
+SRCS+= wavefunction/bcsfunction.cpp
+SRCS+= wavefunction/wavefunction.cpp
+SRCS+= wavefunction/projector.cpp
 SRCS+= mcdata/mcdata.cpp
 #SRCS+= montecarlo/measurement.cpp
 SRCS+= vmc/random.cpp
@@ -56,10 +57,13 @@ HDRS=scheduler/optionparser.h scheduler/cmdargs.h \
          model/modelparams.h  model/quantum_op.h \
 	 model/hamiltonian_term.h \
 	 model/model.h \
-	 variational/varparm.h \
-	 variational/blochbasis.h \
-	 variational/mf_model.h variational/wavefunction.h \
-	 variational/projector.h \
+	 wavefunction/varparm.h \
+	 wavefunction/blochbasis.h \
+	 wavefunction/mf_model.h \
+	 wavefunction/groundstate.h \
+	 wavefunction/bcs_state.h \
+	 variational/wavefunction.h \
+	 wavefunction/projector.h \
 	 mcdata/mcdata.h vmc/observables.h \
 	 vmc/random.h  vmc/basisstate.h vmc/sysconfig.h \
 	 vmc/disorder.h \
