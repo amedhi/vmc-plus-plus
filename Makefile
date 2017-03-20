@@ -26,6 +26,7 @@ SRCS+= model/modellibrary.cpp
 SRCS+= wavefunction/varparm.cpp
 SRCS+= wavefunction/blochbasis.cpp
 SRCS+= wavefunction/mf_model.cpp
+SRCS+= wavefunction/groundstate.cpp
 SRCS+= wavefunction/bcs_state.cpp
 SRCS+= wavefunction/bcsfunction.cpp
 SRCS+= wavefunction/wavefunction.cpp

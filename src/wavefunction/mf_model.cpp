@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-19 23:03:54
+* Last Modified time: 2017-03-20 16:36:23
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "mf_model.h"
@@ -126,10 +126,8 @@ void MF_Model::define_model(const input::Parameters& inputs, const lattice::Latt
   Model::finalize(graph.lattice());
 }
 
-void MF_Model::update(const input::Parameters& inputs, const lattice::LatticeGraph& graph)
+void MF_Model::update_parameters(const input::Parameters& inputs)
 {
-  if (order_ == mf_order::disordered_sc) return; // nothing to do
-
   Model::update_parameters(inputs);
   // update variational parameters
   for (auto& p : varparms_) 
@@ -160,28 +158,19 @@ void MF_Model::update(const parm_vector& pvector, const unsigned& start_pos, con
   update_unitcell_terms();
 }
 
-void MF_Model::update(const std::string& pname, const double& pvalue, 
-  const lattice::LatticeGraph& graph)
+void MF_Model::update_parameter(const std::string& pname, const double& pvalue)
 {
-  // for one variational parameters
-  Model::update_parameter(pname, pvalue);
+  Model::update_parameter(pname, pvalue, false);
   //std::cout << "updated ="<<pname<<"=" << get_parameter_value(pname) << "\n"; getchar();
-  //build_unitcell_terms(graph);
   update_unitcell_terms();
 }
 
-void MF_Model::update_mu(const double& mu, const lattice::LatticeGraph& graph)
+void MF_Model::update_site_parameter(const std::string& pname, const double& pvalue)
 {
-  Model::update_parameter("mu", mu);
-  /*unsigned i = 0;
-  for (auto sterm=siteterms_begin(); sterm!=siteterms_end(); ++sterm) {
-    uc_siteterms_[i].build_siteterm(*sterm, graph);
-    i++;
-  }*/
+  Model::update_parameter(pname, pvalue, false);
   for (unsigned i=0; i<usite_terms_.size(); ++i) 
     usite_terms_[i].eval_coupling_constant(Model::parameters(),Model::constants());
 }
-
 
 void MF_Model::make_variational(const std::string& name, const double& lb, const double& ub)
 {

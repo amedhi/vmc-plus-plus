@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 14:51:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-19 23:03:49
+* Last Modified time: 2017-03-20 16:36:19
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef MF_MODEL_H
@@ -81,10 +81,11 @@ public:
   int finalize(const lattice::LatticeGraph& graph);
   void refresh_varparms(void);
   const VariationalParms& varparms(void) const { return varparms_; }
+  void update_parameters(const input::Parameters& inputs);
+  void update_parameter(const std::string& pname, const double& pvalue); 
+  void update_site_parameter(const std::string& pname, const double& pvalue);
   void update(const input::Parameters& inputs, const lattice::LatticeGraph& graph);
-  void update(const std::string& pname, const double& pvalue, const lattice::LatticeGraph& graph);
   void update(const parm_vector& pvector, const unsigned& start_pos, const lattice::LatticeGraph& graph);
-  void update_mu(const double& mu, const lattice::LatticeGraph& graph);
   //void update_parameters(const var_parm& vparms_);
   const mf_order& order(void) const { return order_; }
   const bool& is_pairing(void) const { return pairing_type_; }

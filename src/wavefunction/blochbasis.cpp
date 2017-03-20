@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-01 21:13:27
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-16 17:57:37
+* Last Modified time: 2017-03-21 00:21:17
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "blochbasis.h"
@@ -144,11 +144,13 @@ void BlochBasis::make_subspace_basis(const lattice::LatticeGraph& graph)
   null_idx_ = subspace_basis_.size();
   // index of the 'representative state' of a site
   representative_state_idx_.resize(graph.num_sites());
+  translation_vectors_.resize(graph.num_sites());
   for (auto& idx : representative_state_idx_) idx = null_idx_;
   for (unsigned i=0; i<graph.num_sites(); ++i) {
     basis_state s = graph.site(i);
     unsigned uid = graph.site_uid(i);
     representative_state_idx_[s] = uid;
+    translation_vectors_[s] = graph.site_cellcord(i);
   }
 }
 

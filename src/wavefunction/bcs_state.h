@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-19 22:41:38
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-20 01:01:54
+* Last Modified time: 2017-03-21 00:27:01
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef BCS_STATE_H
@@ -26,25 +26,28 @@ enum class bcs {swave, dwave, af_swave, af_dwave};
 class BCS_State : public GroundState
 {
 public:
-  BCS_State() {}
+  BCS_State() : GroundState(true) {}
   BCS_State(const bcs& order_type, const input::Parameters& inputs, 
-    const lattice::LatticeGraph& graph, const basis::BlochBasis& blochbasis); 
+    const lattice::LatticeGraph& graph); 
   ~BCS_State() {} 
   int init(const bcs& order_type, const input::Parameters& inputs, 
-    const lattice::LatticeGraph& graph, const basis::BlochBasis& blochbasis);
-  int pair_amplitudes(std::vector<ComplexMatrix>& phi_k);
-  bool pairing_type(void) const override { return true; }
+    const lattice::LatticeGraph& graph);
+  void get_wf_amplitudes(const input::Parameters& inputs, 
+    Matrix& psi) override;
 private:
   bcs order_type_;
-  MF_Model mf_model_;
+  bool noninteracting_mu_{true};
   double large_number_{1.0E+2};
   // matrices
-  ComplexMatrix work;
-  ComplexMatrix delta_k;
-  ComplexMatrix dphi_k;
-  Eigen::SelfAdjointEigenSolver<ComplexMatrix> solver_Hk;
-  Eigen::SelfAdjointEigenSolver<ComplexMatrix> solver_Hmk;
+  ComplexMatrix work_;
+  ComplexMatrix delta_k_;
+  ComplexMatrix dphi_k_;
+  std::vector<ComplexMatrix> phi_k_;
 
+  void update_parameters(const input::Parameters& inputs);
+  void pair_amplitudes_oneband(std::vector<ComplexMatrix>& phi_k);
+  void pair_amplitudes_multiband(std::vector<ComplexMatrix>& phi_k);
+  void pair_amplitudes_sitebasis(const std::vector<ComplexMatrix>& phi_k, Matrix& psi);
 };
 
 

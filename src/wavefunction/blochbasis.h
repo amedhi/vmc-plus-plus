@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-01 21:13:21
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-15 22:04:20
+* Last Modified time: 2017-03-21 00:21:20
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef BLOCHBASIS_H
@@ -34,6 +34,8 @@ public:
     { return subspace_basis_[idx]; }
   const unsigned& representative_state_idx(const basis_state& s) const 
     { return representative_state_idx_[s]; }
+  const Vector3d& translation_vector(const basis_state& s) const 
+    { return translation_vectors_[s]; }
   //const basis_state& representative_state(const unsigned& site);
   /*
   unsigned dimension(void) const { return basis_states.size(); }
@@ -52,7 +54,7 @@ private:
   Vector3d b3;
   unsigned num_kpoint_;
   unsigned subspace_dimension_;
-  //std::vector<Vector3d> kpoints_;
+  std::vector<Vector3d> translation_vectors_;
   //std::vector<Vector3i> translation_vectors;
   std::vector<basis_state> subspace_basis_;
   std::vector<unsigned> representative_state_idx_;

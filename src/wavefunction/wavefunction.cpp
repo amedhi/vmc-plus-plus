@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-20 00:50:21
+* Last Modified time: 2017-03-20 18:25:08
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "wavefunction.h"
@@ -37,10 +37,10 @@ Wavefunction::Wavefunction(const lattice::LatticeGraph& graph,
   if (name_ == "NORMAL") {
   }
   else if (name_ == "SWAVE_SC") {
-    ground_state_.reset(new BCS_State(bcs::swave,inputs,graph,blochbasis_));
+    ground_state_.reset(new BCS_State(bcs::swave,inputs,graph));
   }
   else if (name_ == "DWAVE_SC") {
-    ground_state_.reset(new BCS_State(bcs::dwave,inputs,graph,blochbasis_));
+    ground_state_.reset(new BCS_State(bcs::dwave,inputs,graph));
   }
   else if (name_ == "DISORDERED_SC") {
   }
@@ -79,13 +79,18 @@ Wavefunction::Wavefunction(const lattice::LatticeGraph& graph,
 int Wavefunction::compute(const lattice::LatticeGraph& graph, 
   const input::Parameters& inputs, const bool& psi_gradient)
 {
-  set_particle_num(inputs);
-  mf_model_.update(inputs,graph);
+  //ground_state_.update(inputs, graph);
+  //ground_state_->get_pair_amplitudes(inputs, cphi_k);
+  ground_state_->get_wf_amplitudes(inputs, psi_up_);
+  //ground_state_->get_amplitude_grads(grad_phi_k);
+
+  /*set_particle_num(inputs);
+  //mf_model_.update(inputs,graph);
   if (mf_model_.need_noninteracting_mu()) {
     double mu = get_noninteracting_mu();
     //std::cout << "mu = " << mu << "\n"; getchar();
-    mf_model_.update_mu(mu, graph); 
-  }
+    //mf_model_.update_mu(mu, graph); 
+  }*/
   compute_amplitudes(psi_up_,graph);
   // psi gradients
   if (psi_gradient) {
@@ -139,12 +144,12 @@ int Wavefunction::compute_gradients(const lattice::LatticeGraph& graph,
     double h = p.diff_h();
     double inv_2h = 0.5/h;
     double x = pvector[start_pos+i];
-    mf_model_.update(p.name(), x+h, graph);
+    mf_model_.update_parameter(p.name(), x+h);
     compute_amplitudes(psi_gradients_[i], graph);
-    mf_model_.update(p.name(), x-h, graph);
+    mf_model_.update_parameter(p.name(), x-h);
     compute_amplitudes(work_mat, graph);
     // model to original state
-    mf_model_.update(p.name(), x, graph);
+    mf_model_.update_parameter(p.name(), x);
     // derivative
     psi_gradients_[i] -= work_mat;
     psi_gradients_[i] *= inv_2h;
