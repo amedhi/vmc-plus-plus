@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-19 23:06:41
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-21 01:20:35
+* Last Modified time: 2017-03-22 00:26:41
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "./bcs_state.h"
@@ -65,6 +65,7 @@ int BCS_State::init(const bcs& order_type, const input::Parameters& inputs,
     varparms_.add("mu", defval=0.0, -2.0, +1.0);
   // finalize MF Hamiltonian
   mf_model_.finalize(graph);
+  num_varparms_ = varparms_.size();
 
   // bloch basis
   blochbasis_.construct(graph);
@@ -77,44 +78,87 @@ int BCS_State::init(const bcs& order_type, const input::Parameters& inputs,
   delta_k_.resize(kblock_dim_,kblock_dim_);
   dphi_k_.resize(kblock_dim_,kblock_dim_);
   phi_k_.resize(num_kpoints_);
-  for (unsigned k=0; k<num_kpoints_; ++k) 
+  work_k_.resize(num_kpoints_);
+  for (unsigned k=0; k<num_kpoints_; ++k) {
     phi_k_[k].resize(kblock_dim_,kblock_dim_);
+    work_k_[k].resize(kblock_dim_,kblock_dim_);
+  } 
   return 0;
 }
 
-void BCS_State::get_wf_amplitudes(const input::Parameters& inputs, Matrix& psi) 
+void BCS_State::update(const input::Parameters& inputs)
 {
-  update_parameters(inputs);
-  // k-space pair amplitudes
-  if (kblock_dim_==1) {
-    pair_amplitudes_oneband(phi_k_);
+  // update from input parameters
+  // hole doping might have changed
+  set_particle_num(inputs);
+  // update MF model
+  mf_model_.update(inputs);
+  // update variational parameters
+  for (auto& p : varparms_) 
+    p.change_value(mf_model_.get_parameter_value(p.name()));
+  // chemical potential
+  if (noninteracting_mu_) {
+    double mu_0 = get_noninteracting_mu();
+    mf_model_.update_site_parameter("mu", mu_0);
   }
-  else {
-    pair_amplitudes_multiband(phi_k_);
-  }
-  // 'lattice space' pair amplitudes
-  //pair_amplitudes_sitebasis(graph, phi_k, psi)
-
-  /*double one_by_nk = 1.0/static_cast<double>(num_kpoints_);
-  for (unsigned i=0; i<num_sites_; ++i) {
-    unsigned m = graph.site_uid(i);
-    auto Ri = graph.site_cellcord(i);
-    for (unsigned j=0; j<num_sites_; ++j) {
-      unsigned n = graph.site_uid(j);
-      auto Rj = graph.site_cellcord(j);
-      std::complex<double> ksum(0.0);
-      for (unsigned k=0; k<num_kpoints_; ++k) {
-        Vector3d kvec = blochbasis_.kvector(k);
-        ksum += phi_k[k](m,n) * std::exp(ii()*kvec.dot(Ri-Rj));
-      }
-      psi(i,j) = ampl_part(ksum) * one_by_nk;
-      //std::cout << psi_up_(i,j) << "\n"; 
-      //getchar();
-    }
-  }*/
 }
 
-void BCS_State::pair_amplitudes_sitebasis(const std::vector<ComplexMatrix>& phi_k, 
+void BCS_State::update(const var::parm_vector& pvector, const unsigned& start_pos)
+{
+  // update from variational parameters
+  unsigned i = 0;
+  for (auto& p : varparms_) {
+    auto x = pvector[start_pos+i];
+    p.change_value(x);
+    mf_model_.update_parameter(p.name(), x);
+    ++i;
+  }
+  mf_model_.update_terms();
+}
+
+void BCS_State::get_wf_amplitudes(Matrix& psi) 
+{
+  // k-space pair amplitudes
+  if (kblock_dim_==1) {
+    get_pair_amplitudes_oneband(phi_k_);
+  }
+  else {
+    get_pair_amplitudes_multiband(phi_k_);
+  }
+  // 'lattice space' pair amplitudes
+  get_pair_amplitudes_sitebasis(phi_k_, psi);
+}
+
+void BCS_State::get_wf_gradient(std::vector<Matrix>& psi_gradient) 
+{
+  unsigned i=0; 
+  for (const auto& p : varparms_) {
+    double h = p.diff_h();
+    double inv_2h = 0.5/h;
+    double x = p.value();
+    mf_model_.update_parameter(p.name(), x+h);
+    mf_model_.update_terms();
+    if (kblock_dim_==1) get_pair_amplitudes_oneband(phi_k_);
+    else get_pair_amplitudes_multiband(phi_k_);
+    mf_model_.update_parameter(p.name(), x-h);
+    mf_model_.update_terms();
+    if (kblock_dim_==1) get_pair_amplitudes_oneband(work_k_);
+    else get_pair_amplitudes_multiband(work_k_);
+    // model to original state
+    mf_model_.update_parameter(p.name(), x);
+    mf_model_.update_terms();
+    for (unsigned k=0; k<num_kpoints_; ++k) {
+      phi_k_[k] -= work_k_[k];
+      phi_k_[k] *= inv_2h;
+    }
+    // phi_k_ is now the derivative wrt i-th parameter
+    // wave function gradients
+    get_pair_amplitudes_sitebasis(phi_k_, psi_gradient[i]);
+    ++i;
+  }
+}
+
+void BCS_State::get_pair_amplitudes_sitebasis(const std::vector<ComplexMatrix>& phi_k, 
   Matrix& psi)
 {
   // psi = FTU_ * PHI_K * conjugate(transpose(FTU_))
@@ -123,7 +167,7 @@ void BCS_State::pair_amplitudes_sitebasis(const std::vector<ComplexMatrix>& phi_
     for (unsigned j=0; j<num_kpoints_; ++j) {
       work_.setZero();
       for (unsigned k=0; k<num_kpoints_; ++k) {
-        work_ += FTU_(i,k) * phi_k[j] * std::conj(FTU_(i,k));
+        work_ += FTU_(i,k) * phi_k[k] * std::conj(FTU_(j,k));
       }
       // copy transformed block
       for (unsigned m=0; m<kblock_dim_; ++m) {
@@ -134,18 +178,7 @@ void BCS_State::pair_amplitudes_sitebasis(const std::vector<ComplexMatrix>& phi_
   }
 }
 
-
-void BCS_State::update_parameters(const input::Parameters& inputs)
-{
-  set_particle_num(inputs);
-  mf_model_.update_parameters(inputs);
-  if (noninteracting_mu_) {
-    double mu_0 = get_noninteracting_mu();
-    mf_model_.update_site_parameter("mu", mu_0);
-  }
-}
-
-void BCS_State::pair_amplitudes_oneband(std::vector<ComplexMatrix>& phi_k)
+void BCS_State::get_pair_amplitudes_oneband(std::vector<ComplexMatrix>& phi_k)
 {
   // BCS pair amplitudes for one band system 
   for (unsigned k=0; k<num_kpoints_; ++k) {
@@ -172,7 +205,7 @@ void BCS_State::pair_amplitudes_oneband(std::vector<ComplexMatrix>& phi_k)
   }
 }
 
-void BCS_State::pair_amplitudes_multiband(std::vector<ComplexMatrix>& phi_k)
+void BCS_State::get_pair_amplitudes_multiband(std::vector<ComplexMatrix>& phi_k)
 {
   // BCS pair amplitudes for multi-band system (INTRABAND pairing only)
   for (unsigned k=0; k<num_kpoints_; ++k) {

@@ -28,7 +28,6 @@ SRCS+= wavefunction/blochbasis.cpp
 SRCS+= wavefunction/mf_model.cpp
 SRCS+= wavefunction/groundstate.cpp
 SRCS+= wavefunction/bcs_state.cpp
-SRCS+= wavefunction/bcsfunction.cpp
 SRCS+= wavefunction/wavefunction.cpp
 SRCS+= wavefunction/projector.cpp
 SRCS+= mcdata/mcdata.cpp

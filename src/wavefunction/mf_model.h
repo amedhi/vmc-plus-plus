@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 14:51:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-20 16:36:19
+* Last Modified time: 2017-03-22 00:35:51
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef MF_MODEL_H
@@ -76,33 +76,18 @@ class MF_Model : public model::Hamiltonian
 {
 public:
   MF_Model() {}
-  MF_Model(const input::Parameters& inputs, const lattice::LatticeGraph& graph);
   ~MF_Model() {}
+  int init(const lattice::Lattice& lattice) override;
   int finalize(const lattice::LatticeGraph& graph);
-  void refresh_varparms(void);
-  const VariationalParms& varparms(void) const { return varparms_; }
-  void update_parameters(const input::Parameters& inputs);
-  void update_parameter(const std::string& pname, const double& pvalue); 
+  void update(const input::Parameters& inputs);
+  void update_terms(void) override;
   void update_site_parameter(const std::string& pname, const double& pvalue);
-  void update(const input::Parameters& inputs, const lattice::LatticeGraph& graph);
-  void update(const parm_vector& pvector, const unsigned& start_pos, const lattice::LatticeGraph& graph);
-  //void update_parameters(const var_parm& vparms_);
-  const mf_order& order(void) const { return order_; }
-  const bool& is_pairing(void) const { return pairing_type_; }
-  const bool& need_noninteracting_mu(void) const { return need_noninteracting_mu_; }
   void construct_kspace_block(const Vector3d& kvec);
   const ComplexMatrix& quadratic_spinup_block(void) const { return quadratic_block_up_; }
   const ComplexMatrix& pairing_part(void) const { return pairing_block_; }
-  const ComplexMatrix& quadratic_up_matrix(const lattice::LatticeGraph& graph); 
-  void get_pairing_varparms(ComplexMatrix& delta_k) const;
+
 private:
   using Model = model::Hamiltonian;
-  mf_order order_;
-  bool pairing_type_;
-  bool need_noninteracting_mu_;
-  VariationalParms varparms_;
-  //std::vector<Unitcell_Term> uc_siteterms_;
-  //std::vector<Unitcell_Term> uc_bondterms_;
   std::vector<UnitcellTerm> usite_terms_;
   std::vector<UnitcellTerm> ubond_terms_;
   // matrices in kspace representation
@@ -112,19 +97,8 @@ private:
   ComplexMatrix pairing_block_;
   ComplexMatrix work; //, work2;
 
-  // for disordered system
-  unsigned bond_parms_start_{0};
-  unsigned site_parms_start_{0};
-  unsigned pair_parms_start_{0};
-
-  //void check_xml(void);
-  void define_model(const input::Parameters& inputs, const lattice::LatticeGraph& graph);
-  void deine_pairing(const std::vector<std::string>& pnames);
-  void make_variational(const std::string& name, const double& lb, const double& ub);
-  //void make_variational(const std::vector<std::string>& pnames);
   void build_unitcell_terms(const lattice::LatticeGraph& graph);
   void update_unitcell_terms(void);
-  //void build_ucterms(const lattice::LatticeGraph& graph);
 };
 
 

@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-19 22:32:43
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-20 23:31:20
+* Last Modified time: 2017-03-21 23:51:18
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef GROUNDSTATE_H
@@ -22,9 +22,12 @@ public:
   GroundState(const bool& pairing_type)
     : pairing_type_{pairing_type} {}
   ~GroundState() {} 
-  virtual void get_wf_amplitudes(const input::Parameters& inputs, 
-    Matrix& psi);
+  virtual void update(const input::Parameters& inputs);
+  virtual void update(const var::parm_vector& pvector, const unsigned& start_pos=0);
+  virtual void get_wf_amplitudes(Matrix& psi);
+  virtual void get_wf_gradient(std::vector<Matrix>& psi_gradient); 
   const VariationalParms& varparms(void) { return varparms_; }
+  const unsigned& num_varparms(void) const { return num_varparms_; }
   const bool& pairing_type(void) const { return pairing_type_; }
   const unsigned& num_upspins(void) const { return num_upspins_; }
   const unsigned& num_dnspins(void) const { return num_dnspins_; }
@@ -33,6 +36,7 @@ protected:
   unsigned num_sites_{0};
   unsigned num_kpoints_{0};
   unsigned kblock_dim_{0};
+  unsigned num_varparms_{0};
   basis::BlochBasis blochbasis_;
   MF_Model mf_model_;
   VariationalParms varparms_;

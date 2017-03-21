@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-20 09:43:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-21 01:10:16
+* Last Modified time: 2017-03-21 23:51:07
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include <stdexcept>
@@ -10,9 +10,24 @@
 
 namespace var {
 
-void GroundState::get_wf_amplitudes(const input::Parameters& inputs, Matrix& psi)
+void GroundState::update(const input::Parameters& inputs)
+{
+  throw std::runtime_error("GroundState::update_parameters: function must be overriden");
+}
+
+void GroundState::update(const var::parm_vector& pvector, const unsigned& start_pos)
+{
+  throw std::runtime_error("GroundState::update_parameters: function must be overriden");
+}
+
+void GroundState::get_wf_amplitudes(Matrix& psi)
 {
   throw std::runtime_error("GroundState::get_wf_amplitudes: function must be overriden");
+}
+
+void GroundState::get_wf_gradient(std::vector<Matrix>& psi_gradient)
+{
+  throw std::runtime_error("GroundState::get_wf_gradients: function must be overriden");
 }
 
 void GroundState::set_particle_num(const input::Parameters& inputs)

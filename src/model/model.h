@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:46
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-18 12:29:33
+* Last Modified time: 2017-03-22 00:35:43
 *----------------------------------------------------------------------------*/
 #ifndef MODEL_H
 #define MODEL_H
@@ -52,8 +52,9 @@ public:
     { parms_[pname] = inputs.set_value(pname, defval, info); return parms_.size(); }
   unsigned add_parameter(const std::string& pname, const double& val) 
     { parms_[pname] = val; return parms_.size(); }
-  void update_parameters(const input::Parameters& inputs, const bool& update_terms=true);
-  void update_parameter(const std::string& pname, const double& val, const bool& update_terms=true); 
+  void update_parameters(const input::Parameters& inputs);
+  void update_parameter(const std::string& pname, const double& val); 
+  virtual void update_terms(void);
   //void change_parameter_value(const std::string& pname, const double& pval);
   double get_parameter_value(const std::string& pname) const;
   unsigned add_constant(const std::string& cname, const double& val) 
@@ -128,7 +129,6 @@ private:
 
   std::ostringstream info_str_;
   std::ostringstream signature_str_;
-  void update_coupling_constants(void); 
   void set_info_string(const lattice::Lattice& lattice); 
 };
 
