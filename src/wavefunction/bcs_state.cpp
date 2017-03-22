@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-19 23:06:41
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-22 11:07:10
+* Last Modified time: 2017-03-22 15:37:10
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "./bcs_state.h"
@@ -164,7 +164,9 @@ void BCS_State::get_pair_amplitudes_sitebasis(const std::vector<ComplexMatrix>& 
 {
   // psi = FTU_ * PHI_K * conjugate(transpose(FTU_))
   // PHI_K is block diagonal (k-th block is phi_k) 
+  unsigned p = 0;
   for (unsigned i=0; i<num_kpoints_; ++i) {
+    unsigned q = 0;
     for (unsigned j=0; j<num_kpoints_; ++j) {
       work_.setZero();
       for (unsigned k=0; k<num_kpoints_; ++k) {
@@ -173,9 +175,11 @@ void BCS_State::get_pair_amplitudes_sitebasis(const std::vector<ComplexMatrix>& 
       // copy transformed block
       for (unsigned m=0; m<kblock_dim_; ++m) {
         for (unsigned n=0; n<kblock_dim_; ++n) 
-          psi(i+m,j+n) = ampl_part(work_(m,n));
+          psi(p+m,q+n) = ampl_part(work_(m,n));
       }
+      q += kblock_dim_;
     }
+    p += kblock_dim_;
   }
 }
 

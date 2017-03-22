@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-20 09:43:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-22 11:17:48
+* Last Modified time: 2017-03-22 15:39:56
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include <stdexcept>
@@ -81,11 +81,12 @@ void GroundState::set_ft_matrix(const lattice::LatticeGraph& graph)
   unsigned i = 0;
   for (unsigned n=0; n<num_kpoints_; ++n) {
     auto Ri = graph.site_cellcord(i);
+    //std::cout << Ri << "\n"; getchar();
     for (unsigned k=0; k<num_kpoints_; ++k) {
       Vector3d kvec = blochbasis_.kvector(k);
       FTU_(n,k) = std::exp(ii()*kvec.dot(Ri)) * one_by_sqrt_nk;
     }
-    i = n + kblock_dim_;
+    i += kblock_dim_;
     // i is first basis site in next unitcell
   }
   //std::cout << FTU_ << "\n"; 
