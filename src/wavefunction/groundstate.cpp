@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-20 09:43:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-21 23:51:07
+* Last Modified time: 2017-03-22 11:17:48
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include <stdexcept>
@@ -73,23 +73,23 @@ double GroundState::get_noninteracting_mu(void)
     return ek[num_upspins_-1];
 }
 
-void GroundState::set_ft_matrix(void)
+void GroundState::set_ft_matrix(const lattice::LatticeGraph& graph)
 {
   // matrix for transformation from site-basis to k-basis
   FTU_.resize(num_kpoints_,num_kpoints_);
-  std::vector<unsigned> rstates(num_kpoints_);
-  for (unsigned i=0; i<num_sites_; ++i) {
-    unsigned m = blochbasis_.representative_state_idx(i);
-    rstates[m] = i;
-  }
   double one_by_sqrt_nk = 1.0/std::sqrt(static_cast<double>(num_kpoints_));
+  unsigned i = 0;
   for (unsigned n=0; n<num_kpoints_; ++n) {
-    auto Ri = blochbasis_.translation_vector(rstates[n]);
+    auto Ri = graph.site_cellcord(i);
     for (unsigned k=0; k<num_kpoints_; ++k) {
       Vector3d kvec = blochbasis_.kvector(k);
       FTU_(n,k) = std::exp(ii()*kvec.dot(Ri)) * one_by_sqrt_nk;
     }
+    i = n + kblock_dim_;
+    // i is first basis site in next unitcell
   }
+  //std::cout << FTU_ << "\n"; 
+  //getchar();
 }
 
 

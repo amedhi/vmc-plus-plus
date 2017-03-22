@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-19 23:06:41
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-22 00:26:41
+* Last Modified time: 2017-03-22 11:07:10
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "./bcs_state.h"
@@ -72,7 +72,7 @@ int BCS_State::init(const bcs& order_type, const input::Parameters& inputs,
   num_kpoints_ = blochbasis_.num_kpoints();
   kblock_dim_ = blochbasis_.subspace_dimension();
   // FT matrix for transformation from 'site basis' to k-basis
-  set_ft_matrix();
+  set_ft_matrix(graph);
   // work arrays
   work_.resize(kblock_dim_,kblock_dim_);
   delta_k_.resize(kblock_dim_,kblock_dim_);
@@ -151,6 +151,7 @@ void BCS_State::get_wf_gradient(std::vector<Matrix>& psi_gradient)
       phi_k_[k] -= work_k_[k];
       phi_k_[k] *= inv_2h;
     }
+    //std::cout << phi_k_[0] << "\n"; getchar();
     // phi_k_ is now the derivative wrt i-th parameter
     // wave function gradients
     get_pair_amplitudes_sitebasis(phi_k_, psi_gradient[i]);

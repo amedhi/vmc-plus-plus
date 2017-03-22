@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-19 22:32:43
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-21 23:51:18
+* Last Modified time: 2017-03-22 10:40:05
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef GROUNDSTATE_H
@@ -48,7 +48,7 @@ protected:
 
   void set_pairing_type(const bool& pairing_type) { pairing_type_=pairing_type; }
   void set_particle_num(const input::Parameters& inputs);
-  void set_ft_matrix(void);
+  void set_ft_matrix(const lattice::LatticeGraph& graph);
   double get_noninteracting_mu(void);
 private:
   bool pairing_type_{false};

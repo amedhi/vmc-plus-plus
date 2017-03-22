@@ -32,6 +32,7 @@ U = 8.0
 # Variational wavefunction
 #---------------------------------------------
 mf_order = "DWAVE_SC"
+wavefunction = "DWAVE_SC"
 gutzwiller_proj = "YES"
 hole_doping = 0.16
 gfactor = 0.5 # 0.1, 0.1, 1.0  # 0.3037000

@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-22 00:34:29
+* Last Modified time: 2017-03-22 07:30:07
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "wavefunction.h"
@@ -17,6 +17,7 @@ Wavefunction::Wavefunction(const lattice::LatticeGraph& graph,
   name_ = inputs.set_value("wavefunction", "NORMAL");
   boost::to_upper(name_);
   if (name_ == "NORMAL") {
+    throw std::range_error("Wavefunction::Wavefunction: unidefined wavefunction");
   }
   else if (name_ == "SWAVE_SC") {
     groundstate_.reset(new BCS_State(bcs::swave,inputs,graph));
