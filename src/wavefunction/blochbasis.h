@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-01 21:13:21
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-22 11:07:16
+* Last Modified time: 2017-03-22 22:41:27
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef BLOCHBASIS_H
@@ -24,9 +24,9 @@ class BlochBasis : public std::vector<kpoint>
 public:
   // ctors
   BlochBasis() {}
-  BlochBasis(const lattice::LatticeGraph& graph, const bool& disorded_system=false);
+  BlochBasis(const lattice::LatticeGraph& graph);
   ~BlochBasis() {}
-  int construct(const lattice::LatticeGraph& graph, const bool& disorded_system=false);
+  int construct(const lattice::LatticeGraph& graph);
   const unsigned& num_kpoints(void) const { return num_kpoint_; }
   const unsigned& subspace_dimension(void) const { return subspace_dimension_; }
   kpoint kvector(const unsigned& k) const { return operator[](k); }

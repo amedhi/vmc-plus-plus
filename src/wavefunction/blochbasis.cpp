@@ -2,20 +2,21 @@
 * Author: Amal Medhi
 * Date:   2017-02-01 21:13:27
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-22 11:07:19
+* Last Modified time: 2017-03-22 22:41:24
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "blochbasis.h"
 
 namespace basis {
 
-BlochBasis::BlochBasis(const lattice::LatticeGraph& graph, const bool& disorded_system) 
+BlochBasis::BlochBasis(const lattice::LatticeGraph& graph) 
 {
-  construct(graph, disorded_system);
+  construct(graph);
 }
 
-int BlochBasis::construct(const lattice::LatticeGraph& graph, const bool& disorded_system)
+int BlochBasis::construct(const lattice::LatticeGraph& graph)
 {
+  /*
   if (disorded_system) {
     // no translational symmetry
     // only k=0 point
@@ -37,7 +38,7 @@ int BlochBasis::construct(const lattice::LatticeGraph& graph, const bool& disord
     }
     return 0;
   }
-  // normal case
+  */
   make_kpoints(graph.lattice());
   make_subspace_basis(graph);
   return 0;

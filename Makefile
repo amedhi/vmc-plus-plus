@@ -28,6 +28,7 @@ SRCS+= wavefunction/blochbasis.cpp
 SRCS+= wavefunction/mf_model.cpp
 SRCS+= wavefunction/groundstate.cpp
 SRCS+= wavefunction/bcs_state.cpp
+SRCS+= wavefunction/disordered_sc.cpp
 SRCS+= wavefunction/wavefunction.cpp
 SRCS+= wavefunction/projector.cpp
 SRCS+= mcdata/mcdata.cpp
@@ -62,6 +63,7 @@ HDRS=scheduler/optionparser.h scheduler/cmdargs.h \
 	 wavefunction/mf_model.h \
 	 wavefunction/groundstate.h \
 	 wavefunction/bcs_state.h \
+	 wavefunction/disordered_sc.h \
 	 variational/wavefunction.h \
 	 wavefunction/projector.h \
 	 mcdata/mcdata.h vmc/observables.h \

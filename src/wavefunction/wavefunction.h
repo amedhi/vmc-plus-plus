@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 14:51:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-22 00:30:32
+* Last Modified time: 2017-03-22 23:02:26
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef WAVEFUNCTION_H
@@ -21,6 +21,7 @@
 #include "./mf_model.h"
 #include "./matrix.h"
 #include "./bcs_state.h"
+#include "./disordered_sc.h"
 
 namespace var {
 

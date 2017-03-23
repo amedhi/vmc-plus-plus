@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-22 07:30:07
+* Last Modified time: 2017-03-22 23:03:00
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "wavefunction.h"
@@ -26,6 +26,7 @@ Wavefunction::Wavefunction(const lattice::LatticeGraph& graph,
     groundstate_.reset(new BCS_State(bcs::dwave,inputs,graph));
   }
   else if (name_ == "DISORDERED_SC") {
+    groundstate_.reset(new DisorderedSC(inputs,graph));
   }
   else {
     throw std::range_error("Wavefunction::Wavefunction: unidefined wavefunction");

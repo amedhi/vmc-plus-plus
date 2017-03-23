@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-19 23:06:41
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-22 15:37:10
+* Last Modified time: 2017-03-23 11:07:23
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "./bcs_state.h"
@@ -173,6 +173,7 @@ void BCS_State::get_pair_amplitudes_sitebasis(const std::vector<ComplexMatrix>& 
         work_ += FTU_(i,k) * phi_k[k] * std::conj(FTU_(j,k));
       }
       // copy transformed block
+      //psi.block(p,q,kblock_dim_,kblock_dim_) = 
       for (unsigned m=0; m<kblock_dim_; ++m) {
         for (unsigned n=0; n<kblock_dim_; ++n) 
           psi(p+m,q+n) = ampl_part(work_(m,n));
