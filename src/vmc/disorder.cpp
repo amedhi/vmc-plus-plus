@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-13 11:23:45
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-17 09:44:37
+* Last Modified time: 2017-03-25 23:00:36
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 //#define BOOST_FILESYSTEM_NO_DEPRECATED
@@ -35,7 +35,7 @@ int SiteDisorder::init(const input::Parameters& inputs, const lattice::LatticeGr
   // load disorder potential from file, if available, otherwise 
   // generate the potentials
   std::string path = datafile_prefix_+"/cnf";
-  for (int i=0; i<num_configs_; ++i) {
+  for (unsigned i=0; i<num_configs_; ++i) {
     std::ostringstream cnf_id;
     cnf_id.width(3);
     cnf_id.fill('0');
@@ -45,7 +45,7 @@ int SiteDisorder::init(const input::Parameters& inputs, const lattice::LatticeGr
     std::ifstream fin(fname);
     if (fin.is_open()) {
       double x;
-      int n = 0;
+      unsigned n = 0;
       while (fin>>x && n<num_sites_) {
         disorder_pot_[i][n++] = x;
       }

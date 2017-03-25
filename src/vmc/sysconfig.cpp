@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-18 14:01:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-15 22:04:13
+* Last Modified time: 2017-03-25 22:57:29
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "./sysconfig.h"
@@ -219,7 +219,7 @@ int SysConfig::do_dnspin_hop(void)
 
 int SysConfig::do_spin_exchange(void)
 {
-  int upspin, up_tosite;
+  unsigned upspin, up_tosite;
   std::tie(upspin, up_tosite) = gen_exchange_move();
   if (up_tosite < 0) return 0; // valid move not found
   num_proposed_moves_[move_t::exch]++;
@@ -230,7 +230,7 @@ int SysConfig::do_spin_exchange(void)
   if (std::abs(det_ratio1) < dratio_cutoff()) return 0; // for safety
 
   // now for dnspin hop backward
-  int dnspin, dn_tosite;
+  unsigned dnspin, dn_tosite;
   std::tie(dnspin, dn_tosite) = exchange_move_part();
   // new col for this move
   wf.get_amplitudes(psi_col, upspin_sites(), dn_tosite);
@@ -239,11 +239,11 @@ int SysConfig::do_spin_exchange(void)
   // updated 'dnspin'-th row of psi_inv
   amplitude_t ratio_inv = amplitude_t(1.0)/det_ratio1;
   // elements other than 'upspin'-th
-  for (int i=0; i<upspin; ++i) {
+  for (unsigned i=0; i<upspin; ++i) {
     amplitude_t beta = ratio_inv*psi_row.cwiseProduct(psi_inv.col(i)).sum();
     inv_row(i) = psi_inv(dnspin,i) - beta * psi_inv(dnspin,upspin);
   }
-  for (int i=upspin+1; i<num_upspins_; ++i) {
+  for (unsigned i=upspin+1; i<num_upspins_; ++i) {
     amplitude_t beta = ratio_inv*psi_row.cwiseProduct(psi_inv.col(i)).sum();
     inv_row(i) = psi_inv(dnspin,i) - beta * psi_inv(dnspin,upspin);
   }
@@ -268,16 +268,16 @@ int SysConfig::do_spin_exchange(void)
   return 0;
 }
 
-int SysConfig::inv_update_upspin(const int& upspin, const ColVector& psi_row, 
+int SysConfig::inv_update_upspin(const unsigned& upspin, const ColVector& psi_row, 
   const amplitude_t& det_ratio)
 {
   psi_mat.row(upspin) = psi_row;
   amplitude_t ratio_inv = amplitude_t(1.0)/det_ratio;
-  for (int i=0; i<upspin; ++i) {
+  for (unsigned i=0; i<upspin; ++i) {
     amplitude_t beta = ratio_inv*psi_row.cwiseProduct(psi_inv.col(i)).sum();
     psi_inv.col(i) -= beta * psi_inv.col(upspin);
   }
-  for (int i=upspin+1; i<num_upspins_; ++i) {
+  for (unsigned i=upspin+1; i<num_upspins_; ++i) {
     amplitude_t beta = ratio_inv*psi_row.cwiseProduct(psi_inv.col(i)).sum();
     psi_inv.col(i) -= beta * psi_inv.col(upspin);
   }
@@ -285,16 +285,16 @@ int SysConfig::inv_update_upspin(const int& upspin, const ColVector& psi_row,
   return 0;
 }
 
-int SysConfig::inv_update_dnspin(const int& dnspin, const RowVector& psi_col, 
+int SysConfig::inv_update_dnspin(const unsigned& dnspin, const RowVector& psi_col, 
   const amplitude_t& det_ratio)
 {
   psi_mat.col(dnspin) = psi_col;
   amplitude_t ratio_inv = amplitude_t(1.0)/det_ratio;
-  for (int i=0; i<dnspin; ++i) {
+  for (unsigned i=0; i<dnspin; ++i) {
     amplitude_t beta = ratio_inv*psi_col.cwiseProduct(psi_inv.row(i)).sum();
     psi_inv.row(i) -= beta * psi_inv.row(dnspin);
   }
-  for (int i=dnspin+1; i<num_dnspins_; ++i) {
+  for (unsigned i=dnspin+1; i<num_dnspins_; ++i) {
     amplitude_t beta = ratio_inv*psi_col.cwiseProduct(psi_inv.row(i)).sum();
     psi_inv.row(i) -= beta * psi_inv.row(dnspin);
   }
@@ -428,8 +428,8 @@ amplitude_t SysConfig::apply_sisj_plus(const unsigned& i, const unsigned& j) con
   // if any of the two sites doubly occupied, no exchange possible
   if (state_i->count()==2 || state_j->count()==2) return amplitude_t(ninj_term);
 
-  int upspin, up_tosite;
-  int dnspin, dn_tosite;
+  unsigned upspin, up_tosite;
+  unsigned dnspin, dn_tosite;
   if (state_i->have_upspin() && state_j->have_dnspin()) {
     upspin = state_i->upspin_id();
     up_tosite = j;
@@ -455,11 +455,11 @@ amplitude_t SysConfig::apply_sisj_plus(const unsigned& i, const unsigned& j) con
   // updated 'dnspin'-th row of psi_inv
   amplitude_t ratio_inv = amplitude_t(1.0)/det_ratio1;
   // elements other than 'upspin'-th
-  for (int i=0; i<upspin; ++i) {
+  for (unsigned i=0; i<upspin; ++i) {
     amplitude_t beta = ratio_inv*psi_row.cwiseProduct(psi_inv.col(i)).sum();
     inv_row(i) = psi_inv(dnspin,i) - beta * psi_inv(dnspin,upspin);
   }
-  for (int i=upspin+1; i<num_upspins_; ++i) {
+  for (unsigned i=upspin+1; i<num_upspins_; ++i) {
     amplitude_t beta = ratio_inv*psi_row.cwiseProduct(psi_inv.col(i)).sum();
     inv_row(i) = psi_inv(dnspin,i) - beta * psi_inv(dnspin,upspin);
   }

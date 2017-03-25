@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-13 10:16:02
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-20 04:54:15
+* Last Modified time: 2017-03-25 22:48:40
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef BASISSTATE_H
@@ -74,7 +74,7 @@ public:
   std::pair<int,int> exchange_move_part(void);
   const int& dblocc_count(void) const { return num_dblocc_sites_; }
   const int& dblocc_increament(void) const { return dblocc_increament_; }
-  const int& site_capacity(void) const { return site_capacity_; }
+  const unsigned& site_capacity(void) const { return site_capacity_; }
   void accept_last_move(void);
   const std::vector<int>& upspin_sites(void) const { return upspin_sites_; }
   const std::vector<int>& dnspin_sites(void) const { return dnspin_sites_; }
@@ -92,7 +92,7 @@ private:
   unsigned num_dnholes_{0};
   int num_dblocc_sites_{0};
   bool double_occupancy_{true};
-  int site_capacity_{2};
+  unsigned site_capacity_{2};
   std::vector<int> upspin_sites_;
   std::vector<int> dnspin_sites_;
   std::vector<int> uphole_sites_;

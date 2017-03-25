@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-18 13:54:54
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-17 09:49:05
+* Last Modified time: 2017-03-25 22:57:26
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef SYSCONFIG_H
@@ -93,9 +93,9 @@ private:
   int do_upspin_hop(void);
   int do_dnspin_hop(void);
   int do_spin_exchange(void);
-  int inv_update_upspin(const int& upspin, const ColVector& psi_row, 
+  int inv_update_upspin(const unsigned& upspin, const ColVector& psi_row, 
     const amplitude_t& det_ratio);
-  int inv_update_dnspin(const int& dnspin, const RowVector& psi_col, 
+  int inv_update_dnspin(const unsigned& dnspin, const RowVector& psi_col, 
     const amplitude_t& det_ratio);
   amplitude_t apply_upspin_hop(const unsigned& i, const unsigned& j,
     const int& bc_phase) const;

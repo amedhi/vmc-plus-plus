@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-22 23:03:00
+* Last Modified time: 2017-03-25 22:44:41
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "wavefunction.h"
@@ -68,22 +68,22 @@ int Wavefunction::compute(const lattice::LatticeGraph& graph, const var::parm_ve
 void Wavefunction::get_amplitudes(Matrix& psi, const std::vector<int>& row, 
   const std::vector<int>& col) const
 {
-  for (int i=0; i<row.size(); ++i)
-    for (int j=0; j<col.size(); ++j)
+  for (unsigned i=0; i<row.size(); ++i)
+    for (unsigned j=0; j<col.size(); ++j)
       psi(i,j) = psi_up_(row[i],col[j]);
 }
 
 void Wavefunction::get_amplitudes(ColVector& psi_vec, const int& irow,  
     const std::vector<int>& col) const
 {
-  for (int j=0; j<col.size(); ++j)
+  for (unsigned j=0; j<col.size(); ++j)
     psi_vec[j] = psi_up_(irow,col[j]);
 }
 
 void Wavefunction::get_amplitudes(RowVector& psi_vec, const std::vector<int>& row,
     const int& icol) const
 {
-  for (int j=0; j<row.size(); ++j)
+  for (unsigned j=0; j<row.size(); ++j)
     psi_vec[j] = psi_up_(row[j],icol);
 }
 
@@ -98,8 +98,8 @@ void Wavefunction::get_gradients(Matrix& psi_grad, const int& n,
 {
   if (!have_gradient_) 
     throw std::logic_error("Wavefunction::get_gradients: gradients were not computed");
-  for (int i=0; i<row.size(); ++i)
-    for (int j=0; j<col.size(); ++j)
+  for (unsigned i=0; i<row.size(); ++i)
+    for (unsigned j=0; j<col.size(); ++j)
       psi_grad(i,j) = psi_gradient_[n](row[i],col[j]);
 }
 

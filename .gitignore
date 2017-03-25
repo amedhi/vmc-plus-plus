@@ -2,7 +2,7 @@
 *.[oa]
 
 # the option.mk file included in Makefile
-options.mk
+make_options.mk
 
 # no a.out
 a.out
