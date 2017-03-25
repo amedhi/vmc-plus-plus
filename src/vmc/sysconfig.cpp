@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-18 14:01:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-25 22:57:29
+* Last Modified time: 2017-03-25 23:09:51
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "./sysconfig.h"
@@ -219,7 +219,7 @@ int SysConfig::do_dnspin_hop(void)
 
 int SysConfig::do_spin_exchange(void)
 {
-  unsigned upspin, up_tosite;
+  int upspin, up_tosite;
   std::tie(upspin, up_tosite) = gen_exchange_move();
   if (up_tosite < 0) return 0; // valid move not found
   num_proposed_moves_[move_t::exch]++;
@@ -230,7 +230,7 @@ int SysConfig::do_spin_exchange(void)
   if (std::abs(det_ratio1) < dratio_cutoff()) return 0; // for safety
 
   // now for dnspin hop backward
-  unsigned dnspin, dn_tosite;
+  int dnspin, dn_tosite;
   std::tie(dnspin, dn_tosite) = exchange_move_part();
   // new col for this move
   wf.get_amplitudes(psi_col, upspin_sites(), dn_tosite);
@@ -239,11 +239,11 @@ int SysConfig::do_spin_exchange(void)
   // updated 'dnspin'-th row of psi_inv
   amplitude_t ratio_inv = amplitude_t(1.0)/det_ratio1;
   // elements other than 'upspin'-th
-  for (unsigned i=0; i<upspin; ++i) {
+  for (int i=0; i<upspin; ++i) {
     amplitude_t beta = ratio_inv*psi_row.cwiseProduct(psi_inv.col(i)).sum();
     inv_row(i) = psi_inv(dnspin,i) - beta * psi_inv(dnspin,upspin);
   }
-  for (unsigned i=upspin+1; i<num_upspins_; ++i) {
+  for (int i=upspin+1; i<static_cast<int>(num_upspins_); ++i) {
     amplitude_t beta = ratio_inv*psi_row.cwiseProduct(psi_inv.col(i)).sum();
     inv_row(i) = psi_inv(dnspin,i) - beta * psi_inv(dnspin,upspin);
   }
