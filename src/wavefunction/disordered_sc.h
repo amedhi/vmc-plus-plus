@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-22 22:41:54
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-24 00:00:39
+* Last Modified time: 2017-03-25 15:25:29
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef DISORDERED_SC_H
@@ -42,13 +42,14 @@ private:
   Eigen::SparseMatrix<double> pairing_ham_;
   Eigen::SparseMatrix<double> work_;
   RealMatrix delta_;
+  Matrix psi_work_;
   std::vector<double> phi_k_;
 
   mutable Eigen::SelfAdjointEigenSolver<RealMatrix> es_quad_;
   mutable Eigen::SelfAdjointEigenSolver<RealMatrix> es_pair_;
 
-  void get_pair_amplitudes(std::vector<ComplexMatrix>& phi_k);
-  void get_pair_amplitudes_sitebasis(const std::vector<ComplexMatrix>& phi_k, Matrix& psi);
+  void get_pair_amplitudes_sitebasis(const Eigen::VectorXd& es_eigenvalues, 
+  const RealMatrix& es_eigenvectors, const RealMatrix& delta, Matrix& psi);
 };
 
 
