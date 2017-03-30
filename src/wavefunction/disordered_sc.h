@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-22 22:41:54
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-25 15:25:29
+* Last Modified time: 2017-03-29 20:28:16
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef DISORDERED_SC_H
@@ -35,19 +35,27 @@ private:
   unsigned t_start_;
   unsigned delta_start_;
   // matrices
+
   using EigenTriplet = Eigen::Triplet<double>;
   std::vector<EigenTriplet> quadratic_coeffs_; 
   std::vector<EigenTriplet> pairing_coeffs_; 
+  RealMatrix quadratic_ham_;
+  RealMatrix pairing_ham_;
+  RealMatrix work_;
+  /*
   Eigen::SparseMatrix<double> quadratic_ham_;
   Eigen::SparseMatrix<double> pairing_ham_;
   Eigen::SparseMatrix<double> work_;
+  ComplexMatrix psi_work2_;
+  */
   RealMatrix delta_;
-  Matrix psi_work_;
   std::vector<double> phi_k_;
+  Matrix psi_work_;
 
   mutable Eigen::SelfAdjointEigenSolver<RealMatrix> es_quad_;
   mutable Eigen::SelfAdjointEigenSolver<RealMatrix> es_pair_;
 
+  void hack_gradient(std::vector<Matrix>& psi_gradient); 
   void get_pair_amplitudes_sitebasis(const Eigen::VectorXd& es_eigenvalues, 
   const RealMatrix& es_eigenvectors, const RealMatrix& delta, Matrix& psi);
 };

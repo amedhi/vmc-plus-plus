@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-19 22:41:38
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-21 23:50:59
+* Last Modified time: 2017-03-25 23:17:51
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef BCS_STATE_H

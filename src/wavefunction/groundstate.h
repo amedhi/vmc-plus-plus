@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-19 22:32:43
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-25 22:46:46
+* Last Modified time: 2017-03-30 09:32:25
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef GROUNDSTATE_H
@@ -55,6 +55,7 @@ private:
   unsigned num_spins_{0};
   unsigned num_upspins_{0};
   unsigned num_dnspins_{0};
+  double last_hole_doping_{2.5}; // unlikely input
   double hole_doping_{0.0};
   double band_filling_{1.0};
   //MF_Model mf_model_;

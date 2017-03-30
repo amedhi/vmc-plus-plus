@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:20:56
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-22 22:38:57
+* Last Modified time: 2017-03-27 19:36:24
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "vmc.h"
@@ -34,6 +34,13 @@ VMC::VMC(const input::Parameters& inputs)
   // observables
   observables.init(inputs,copyright_msg,model,varp_names());
   observables.as_functions_of("x");
+
+  if (observables.energy_grad()) {
+    grad_logpsi_.resize(num_varparms_);
+    energy_grad_.resize(num_varparms_);
+    energy_grad2_.resize(2*num_varparms_);
+  } 
+
 }
 
 int VMC::start(const input::Parameters& inputs, const bool& optimizing_mode, 

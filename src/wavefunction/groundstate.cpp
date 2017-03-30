@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-20 09:43:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-25 22:46:43
+* Last Modified time: 2017-03-30 09:32:46
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include <stdexcept>
@@ -33,6 +33,11 @@ void GroundState::get_wf_gradient(std::vector<Matrix>& psi_gradient)
 void GroundState::set_particle_num(const input::Parameters& inputs)
 {
   hole_doping_ = inputs.set_value("hole_doping", 0.0);
+  if (std::abs(last_hole_doping_-hole_doping_)<1.0E-15) {
+    // no change in hole doping, particle number remails same
+    return;
+  }
+  last_hole_doping_ = hole_doping_;
   band_filling_ = 1.0-hole_doping_;
   int num_sites = static_cast<int>(num_sites_);
   if (pairing_type_) {
@@ -57,6 +62,8 @@ void GroundState::set_particle_num(const input::Parameters& inputs)
 double GroundState::get_noninteracting_mu(void)
 {
   std::vector<double> ek;
+  // the next line is 'really' needed 
+  mf_model_.update_site_parameter("mu", 0.0);
   for (unsigned k=0; k<num_kpoints_; ++k) {
     Vector3d kvec = blochbasis_.kvector(k);
     mf_model_.construct_kspace_block(kvec);
@@ -66,9 +73,11 @@ double GroundState::get_noninteracting_mu(void)
   }
   std::sort(ek.begin(),ek.end());
   //for (const auto& e : ek) std::cout << e << "\n";
-  //std::cout << "spins = " << num_spins_ << "\n";
-  if (num_upspins_ < num_sites_)
+  //std::cout << "upspins = " << num_upspins_ << "\n";
+  if (num_upspins_ < num_sites_) {
+    //std::cout << 0.5*(ek[num_upspins_-1]+ek[num_upspins_]) << "\n";
     return 0.5*(ek[num_upspins_-1]+ek[num_upspins_]);
+  }
   else
     return ek[num_upspins_-1];
 }

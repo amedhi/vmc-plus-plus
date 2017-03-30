@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-19 23:06:41
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-23 11:07:23
+* Last Modified time: 2017-03-30 09:35:16
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "./bcs_state.h"
@@ -24,7 +24,7 @@ int BCS_State::init(const bcs& order_type, const input::Parameters& inputs,
   // particle number
   set_particle_num(inputs);
   // infinity limit
-  large_number_ = 1.0E+2;
+  large_number_ = 5.0E+4;
 
   // build MF Hamiltonian
   order_type_ = order_type;
@@ -47,7 +47,7 @@ int BCS_State::init(const bcs& order_type, const input::Parameters& inputs,
     mf_model_.add_parameter(name="t", defval=1.0, inputs);
     mf_model_.add_parameter(name="delta_sc", defval=1.0, inputs);
     mf_model_.add_bondterm(name="hopping", cc="-t", op::spin_hop());
-    mf_model_.add_siteterm(name="mu_term", cc="-mu", op::ni_up());
+    mf_model_.add_siteterm(name="mu_term", cc="-mu", op::ni_sigma());
     cc = CouplingConstant({0, "delta_sc"}, {1, "-delta_sc"});
     mf_model_.add_bondterm(name="pairing", cc, op::pair_create());
     // variational parameters
@@ -99,6 +99,7 @@ void BCS_State::update(const input::Parameters& inputs)
   // chemical potential
   if (noninteracting_mu_) {
     double mu_0 = get_noninteracting_mu();
+    //std::cout << "mu = " << mu_0 << "\n";
     mf_model_.update_site_parameter("mu", mu_0);
   }
 }
@@ -198,7 +199,7 @@ void BCS_State::get_pair_amplitudes_oneband(std::vector<ComplexMatrix>& phi_k)
     delta_k *= 0.5;
     double deltak_sq = std::norm(delta_k);
     double ek_plus_Ek = ek + std::sqrt(ek*ek + 4.0*deltak_sq);
-    if (deltak_sq<1.0E-12 && ek<0.0) {
+    if (std::sqrt(deltak_sq)<1.0E-12 && ek<0.0) {
       phi_k[k](0,0) = large_number_ * std::exp(ii()*std::arg(delta_k));
     }
     else {
@@ -237,7 +238,7 @@ void BCS_State::get_pair_amplitudes_multiband(std::vector<ComplexMatrix>& phi_k)
       double ek = es_k_up.eigenvalues()[i] + es_minusk_up.eigenvalues()[i];
       double deltak_sq = std::norm(delta_k_(i,i));
       double ek_plus_Ek = ek + std::sqrt(ek*ek + 4.0*deltak_sq);
-      if (deltak_sq<1.0E-12 && ek<0.0) {
+      if (std::sqrt(deltak_sq)<1.0E-12 && ek<0.0) {
         dphi_k_(i,i) = large_number_ * std::exp(ii()*std::arg(delta_k_(i,i)));
       }
       else {
