@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-20 10:18:07
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-12 22:52:19
+* Last Modified time: 2017-03-30 22:12:35
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef VARPARM_H
@@ -30,8 +30,8 @@ public:
   : val_{val}, lb_{lb}, ub_{ub}, diff_h_{diff_h} 
     {
       // actual bounds to allow for differentiation 
-      lb_ += 4*diff_h_;  
-      ub_ -= 4*diff_h_;  
+      lb_ += 2*diff_h_;  
+      ub_ -= 2*diff_h_;  
     }
   ~varparm_t() {}
   bool change_value(const double& newval) 

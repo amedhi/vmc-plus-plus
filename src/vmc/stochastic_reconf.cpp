@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-09 15:19:43
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-22 22:38:52
+* Last Modified time: 2017-03-30 23:09:51
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include <string>
@@ -29,7 +29,7 @@ int StochasticReconf::init(const input::Parameters& inputs, const VMC& vmc)
   max_iter_ = inputs.set_value("sr_max_iter", 500, nowarn);
   start_tstep_ = inputs.set_value("sr_start_tstep", 0.05, nowarn);
   mk_series_len_ = inputs.set_value("sr_series_len", 40, nowarn);
-  mk_thresold_ = inputs.set_value("sr_fluctuation_tol", 0.20, nowarn);
+  mk_thresold_ = inputs.set_value("sr_fluctuation_tol", 0.30, nowarn);
   grad_tol_ = inputs.set_value("sr_grad_tol", 0.05, nowarn);
   print_progress_ = inputs.set_value("sr_print_progress", true, nowarn);
   refinement_cycle_ = max_iter_/5;
@@ -152,7 +152,7 @@ int StochasticReconf::optimize(VMC& vmc)
           progress_ << "next refinement cycle" << std::endl;
         }
         mc_samples *= 2;
-        search_tstep *= 0.5;
+        //search_tstep *= 0.5;
       }
     }
     if (iter>=max_iter_ && print_progress_) {

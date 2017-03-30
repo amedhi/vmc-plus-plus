@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-18 14:01:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-26 00:03:25
+* Last Modified time: 2017-03-30 16:51:53
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "./sysconfig.h"
@@ -95,16 +95,18 @@ int SysConfig::init_config(void)
   // try for a well condictioned amplitude matrix
   double rcond = 0.0;
   int num_attempt = 0;
-  while (rcond < 1.0E-30) {
+  //while (rcond<1.0E-30) {
+  while (rcond<1.0E-15) {
     BasisState::set_random();
     wf.get_amplitudes(psi_mat,upspin_sites(),dnspin_sites());
     // reciprocal conditioning number
     Eigen::JacobiSVD<Matrix> svd(psi_mat);
     // reciprocal cond. num = smallest eigenval/largest eigen val
     rcond = svd.singularValues()(svd.singularValues().size()-1)/svd.singularValues()(0);
+    //if (std::isnan(rcond)) rcond = 0.0; 
     //std::cout << "rcondition number = "<< rcond << "\n";
     if (++num_attempt > 1000) {
-      throw std::underflow_error("*SysConfig::init: Ill conditioned wave function matrix.");
+      throw std::underflow_error("*SysConfig::init: configuration wave function ill conditioned.");
     }
   }
   if (tmp_restriction) allow_double_occupancy(original_state);

@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-22 22:41:54
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-29 20:28:16
+* Last Modified time: 2017-03-30 21:02:48
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef DISORDERED_SC_H
@@ -14,6 +14,29 @@
 #include "./matrix.h"
 
 namespace var {
+
+class MatrixElem
+{
+public:
+  MatrixElem() : bond_phase_{1} {}
+  MatrixElem(const unsigned& row, const unsigned& col, const double& val) 
+    : row_{row}, col_{col}, value_{val}, bond_phase_{1} {}
+  MatrixElem(const unsigned& row, const unsigned& col, const double& val, 
+    const int& bphase) 
+    : row_{row}, col_{col}, value_{val}, bond_phase_{bphase} {}
+  ~MatrixElem() {}
+  void change_value(const double& val) { value_=val; }
+  void set_bond_phase(const int& bphase) { bond_phase_=bphase; }
+  const unsigned& row(void) const { return row_; }
+  const unsigned& col(void) const { return col_; }
+  const double& value(void) const { return value_; }
+  const int& bond_phase(void) const { return bond_phase_; }
+private:
+  unsigned row_{0};
+  unsigned col_{0};
+  double value_{0.0};
+  int bond_phase_{1}; 
+};
 
 class DisorderedSC : public GroundState
 {
@@ -37,8 +60,8 @@ private:
   // matrices
 
   using EigenTriplet = Eigen::Triplet<double>;
-  std::vector<EigenTriplet> quadratic_coeffs_; 
-  std::vector<EigenTriplet> pairing_coeffs_; 
+  std::vector<MatrixElem> quadratic_coeffs_; 
+  std::vector<MatrixElem> pairing_coeffs_; 
   RealMatrix quadratic_ham_;
   RealMatrix pairing_ham_;
   RealMatrix work_;
@@ -57,7 +80,7 @@ private:
 
   void hack_gradient(std::vector<Matrix>& psi_gradient); 
   void get_pair_amplitudes_sitebasis(const Eigen::VectorXd& es_eigenvalues, 
-  const RealMatrix& es_eigenvectors, const RealMatrix& delta, Matrix& psi);
+  const RealMatrix& es_eigenvectors, const Eigen::VectorXd& delta, Matrix& psi);
 };
 
 
