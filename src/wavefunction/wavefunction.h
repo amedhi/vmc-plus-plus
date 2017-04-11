@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 14:51:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-27 10:06:16
+* Last Modified time: 2017-04-11 10:28:23
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef WAVEFUNCTION_H
@@ -44,6 +44,7 @@ public:
   const unsigned& num_upspins(void) const { return groundstate_->num_upspins(); }
   const unsigned& num_dnspins(void) const { return groundstate_->num_dnspins(); }
   const double& hole_doping(void) const { return groundstate_->hole_doping(); }
+  std::string signature_str(void) const; 
   void get_vparm_names(std::vector<std::string>& names, unsigned start_pos) const; 
   void get_vparm_values(var::parm_vector& values, unsigned start_pos);
   void get_vparm_vector(std::vector<double>& vparm_values, unsigned start_pos);

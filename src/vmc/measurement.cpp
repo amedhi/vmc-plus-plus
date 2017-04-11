@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-17 23:30:00
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-22 11:11:09
+* Last Modified time: 2017-04-06 23:35:22
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include <iostream>
@@ -185,6 +185,19 @@ Observable::data_t VMC::get_energy(void) const
       i++;
     }
   }
+
+  // disorder energies
+  if (site_disorder_) {
+    unsigned n = model.num_bondterms()+model.num_siteterms();
+    double disorder_en = 0.0;
+    for (auto s=graph.sites_begin(); s!=graph.sites_end(); ++s) {
+      unsigned site = graph.site(s);
+      int n_i = config.apply(model::op::ni_sigma(), site);
+      disorder_en += std::real(n_i * site_disorder_.potential(site));
+    }
+    term_energy_(n) = disorder_en;
+  }
+
   // energy per site
   return term_energy_/num_sites_;
 }

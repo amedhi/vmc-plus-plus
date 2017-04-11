@@ -2,9 +2,10 @@
 * Author: Amal Medhi
 * Date:   2017-01-30 18:54:09
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-27 10:06:13
+* Last Modified time: 2017-04-11 10:28:20
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
+#include <iomanip>
 #include "wavefunction.h"
 #include <boost/algorithm/string.hpp>
 
@@ -38,6 +39,16 @@ Wavefunction::Wavefunction(const lattice::LatticeGraph& graph,
     psi_gradient_[i].resize(num_sites_,num_sites_);
 }
 
+std::string Wavefunction::signature_str(void) const
+{
+  // signature string
+  std::ostringstream signature;
+  signature << "wf_N"; 
+  signature << std::setfill('0'); 
+  signature << std::setw(3) << groundstate_->num_upspins(); 
+  signature << std::setw(3) << groundstate_->num_dnspins(); 
+  return signature.str();
+}
 
 int Wavefunction::compute(const lattice::LatticeGraph& graph, 
   const input::Parameters& inputs, const bool& psi_gradient)

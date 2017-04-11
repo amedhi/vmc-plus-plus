@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-19 23:06:41
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-30 15:34:17
+* Last Modified time: 2017-03-30 23:25:21
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "./bcs_state.h"
@@ -98,6 +98,8 @@ void BCS_State::update(const input::Parameters& inputs)
     p.change_value(mf_model_.get_parameter_value(p.name()));
   // chemical potential
   if (noninteracting_mu_) {
+    // the next line is 'really' needed 
+    mf_model_.update_site_parameter("mu", 0.0);
     double mu_0 = get_noninteracting_mu();
     //std::cout << "mu = " << mu_0 << "\n";
     mf_model_.update_site_parameter("mu", mu_0);

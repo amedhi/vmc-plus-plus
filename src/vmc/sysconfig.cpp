@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-18 14:01:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-30 16:51:53
+* Last Modified time: 2017-04-04 20:04:31
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "./sysconfig.h"
@@ -11,8 +11,7 @@
 namespace vmc {
 
 SysConfig::SysConfig(const input::Parameters& inputs, 
-  const lattice::LatticeGraph& graph, const model::Hamiltonian& model,
-  const bool& site_disorder) 
+  const lattice::LatticeGraph& graph, const model::Hamiltonian& model)
   : BasisState(graph.num_sites(), model.double_occupancy())
   , wf(graph, inputs)
   , pj(inputs)
@@ -322,19 +321,25 @@ amplitude_t SysConfig::apply(const model::op::quantum_op& qn_op, const unsigned&
   return term;
 }
 
-amplitude_t SysConfig::apply(const model::op::quantum_op& qn_op, const unsigned& site_i) const
+int SysConfig::apply(const model::op::quantum_op& qn_op, const unsigned& site_i) const
 {
   switch (qn_op.id()) {
+    case model::op_id::ni_sigma:
+      return operator[](site_i).count();
+    //case model::op_id::ni_up:
+    //  return static_cast<int>(operator[](site_i).have_upspin());
+    //case model::op_id::ni_dn:
+    //  return static_cast<int>(operator[](site_i).have_dnspin());
     case model::op_id::niup_nidn:
-      return ampl_part(apply_niup_nidn(site_i)); break;
+      return apply_niup_nidn(site_i); 
     default: 
       throw std::range_error("SysConfig::apply: undefined site operator");
   }
 }
 
-int SysConfig::apply_niup_nidn(const unsigned& i) const
+int SysConfig::apply_niup_nidn(const unsigned& site_i) const
 {
-  if (operator[](i).count()==2) return 1;
+  if (operator[](site_i).count()==2) return 1;
   else return 0;
 }
 

@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-20 09:43:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-30 09:32:46
+* Last Modified time: 2017-03-30 23:25:24
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include <stdexcept>
@@ -62,8 +62,6 @@ void GroundState::set_particle_num(const input::Parameters& inputs)
 double GroundState::get_noninteracting_mu(void)
 {
   std::vector<double> ek;
-  // the next line is 'really' needed 
-  mf_model_.update_site_parameter("mu", 0.0);
   for (unsigned k=0; k<num_kpoints_; ++k) {
     Vector3d kvec = blochbasis_.kvector(k);
     mf_model_.construct_kspace_block(kvec);

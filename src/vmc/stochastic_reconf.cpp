@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-09 15:19:43
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-30 23:09:51
+* Last Modified time: 2017-04-11 14:48:50
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include <string>
@@ -116,7 +116,7 @@ int StochasticReconf::optimize(VMC& vmc)
       //if (gnorm < grad_tol_) 
       mk_statistic_ << vparms_;
       double mk_trend = mk_statistic_.elem_max_trend();
-      ///*
+      /*
       double gnorm = grad_.squaredNorm();
       std::cout << " iter = " << iter << "\n";
       std::cout << " search_dir = " << search_dir.transpose() << "\n";
@@ -125,7 +125,7 @@ int StochasticReconf::optimize(VMC& vmc)
       std::cout << " grad = " << grad_.transpose() << "\n";
       std::cout << " gnorm = " << gnorm << "\n";
       std::cout << " trend = " << mk_trend << "\n"; 
-      //*/
+      */
       // convergence criteria
       if (mk_statistic_.is_full() && mk_trend<mk_thresold_) {
         // converged, add data point to store

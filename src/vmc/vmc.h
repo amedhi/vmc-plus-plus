@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:19:36
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-17 09:45:56
+* Last Modified time: 2017-04-11 14:56:37
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef VMC_H
@@ -43,11 +43,23 @@ public:
   void print_results(void); 
   std::ostream& print_info(std::ostream& os) const { return model.print_info(os); }
   static void copyright_msg(std::ostream& os);
+  const bool& disordered_system(void) const { return site_disorder_.exists(); }
+  const unsigned& num_disorder_configs(void) const { return site_disorder_.num_configs(); }
+
+  // disordered case
+  int disorder_start(const input::Parameters& inputs, const unsigned& disorder_config, 
+    const bool& optimizing_mode=false, const bool& silent=false);
+  void save_optimal_parms(const var::parm_vector& optimal_parms) 
+    { site_disorder_.save_optimal_parms(optimal_parms); }
+  bool optimal_parms_exists(const unsigned& config) 
+    { return site_disorder_.optimal_parms_exists(config); } 
+  void set_disorder_config(const unsigned& config) 
+    { site_disorder_.set_current_config(config); }
 private:
   lattice::LatticeGraph graph;
-  SiteDisorder site_disorder;
   model::Hamiltonian model;
   SysConfig config;
+  SiteDisorder site_disorder_;
   unsigned num_sites_;
   unsigned num_varparms_;
 

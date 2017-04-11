@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:50
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-12 22:52:35
+* Last Modified time: 2017-04-11 14:55:56
 *----------------------------------------------------------------------------*/
 #include <iomanip>
 #include "simulator.h"
@@ -21,6 +21,39 @@ Simulator::Simulator(const input::Parameters& inputs) : vmc(inputs)
 
 int Simulator::run(const input::Parameters& inputs) 
 {
+  // disordered system
+  if (vmc.disordered_system()) {
+    // optimizing run
+    if (optimization_mode_) {
+      for (unsigned n=0; n<vmc.num_disorder_configs(); ++n) {
+        std::cout << " optimizing disorder config " << n;
+        std::cout << " of " << vmc.num_disorder_configs() << "\n";
+        if (vmc.optimal_parms_exists(n)) continue;
+        vmc.start(inputs, true, true);
+        vmc.set_disorder_config(n);
+        if (sreconf.optimize(vmc)) {
+          vmc.save_optimal_parms(sreconf.optimal_parms());
+          //vmc.run_simulation(sreconf.optimal_parms());
+          //vmc.print_results();
+        }
+      }
+      return 0;
+    }
+
+    // normal run
+    for (unsigned n=0; n<vmc.num_disorder_configs(); ++n) {
+    //for (unsigned n=0; n<1; ++n) {
+      vmc.disorder_start(inputs, n);
+      vmc.run_simulation();
+    //  vmc.start(inputs, n);
+    //  vmc.run_simulation();
+      //vmc.save_results();
+    }
+    //vmc.print_avg_results();
+    vmc.print_results();
+    return 0;
+  }
+
   // optimization run
   if (optimization_mode_) {
     vmc.start(inputs, true, true);

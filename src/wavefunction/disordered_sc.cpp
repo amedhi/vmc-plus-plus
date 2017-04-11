@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-22 22:46:55
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-30 23:07:10
+* Last Modified time: 2017-03-30 23:24:10
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "./disordered_sc.h"

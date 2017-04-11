@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-18 13:54:54
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-25 22:57:26
+* Last Modified time: 2017-04-11 10:28:30
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef SYSCONFIG_H
@@ -26,12 +26,13 @@ class SysConfig : public BasisState
 {
 public:
   SysConfig(const input::Parameters& parms, const lattice::LatticeGraph& graph, 
-    const model::Hamiltonian& model, const bool& site_disorder=false);
+    const model::Hamiltonian& model);
   ~SysConfig() {}
   int build(const lattice::LatticeGraph& graph, const input::Parameters& inputs, 
     const bool& with_gradient=false);
   int build(const lattice::LatticeGraph& graph, const var::parm_vector& vparms, 
     const bool& need_psi_grad=false);
+  std::string signature_str(void) const { return wf.signature_str(); } 
   const unsigned& num_varparms(void) const { return num_varparms_; } 
   const var::parm_vector& vparm_values(void);
   const std::vector<double>& vparm_vector(void); 
@@ -44,8 +45,8 @@ public:
   void reset_accept_ratio(void);
   amplitude_t apply(const model::op::quantum_op& op, const unsigned& site_i, 
     const unsigned& site_j, const int& bc_phase) const;
-  amplitude_t apply(const model::op::quantum_op& qn_op, const unsigned& site_i) const;
-  int apply_niup_nidn(const unsigned& i) const;
+  int apply(const model::op::quantum_op& qn_op, const unsigned& site_i) const;
+  int apply_niup_nidn(const unsigned& site_i) const;
   void get_grad_logpsi(RealVector& grad_logpsi);
   const int& num_updates(void) const { return num_updates_; }
   const var::Wavefunction& wavefunc(void) const { return wf; }

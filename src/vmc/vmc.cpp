@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:20:56
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-27 19:36:24
+* Last Modified time: 2017-04-10 23:25:19
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "vmc.h"
@@ -12,9 +12,8 @@ namespace vmc {
 
 VMC::VMC(const input::Parameters& inputs) 
   : graph(inputs) 
-  , site_disorder(inputs)
-  , model(inputs, graph.lattice(), site_disorder) 
-  , config(inputs, graph, model, site_disorder)
+  , model(inputs, graph.lattice()) 
+  , config(inputs, graph, model)
   , num_varparms_{config.num_varparms()}
 {
   // seed random generator
@@ -28,13 +27,20 @@ VMC::VMC(const input::Parameters& inputs)
   check_interval_ = std::max(1,num_measure_steps_/10);
 
   // disorder
+  if (site_disorder_.check(inputs)) {
+    site_disorder_.init(inputs,graph,model,config,config.rng());
+    model.add_disorder_term("disorder", model::op::ni_sigma());
+    model.finalize(graph.lattice());
+  }
   //if (model.have_disorder_term()) 
-    //disorder_.init(inputs,graph,model,config.rng());
 
   // observables
   observables.init(inputs,copyright_msg,model,varp_names());
   observables.as_functions_of("x");
 
+  if (observables.energy()) {
+    term_energy_.resize(model.num_terms());
+  }
   if (observables.energy_grad()) {
     grad_logpsi_.resize(num_varparms_);
     energy_grad_.resize(num_varparms_);
@@ -42,6 +48,25 @@ VMC::VMC(const input::Parameters& inputs)
   } 
 
 }
+
+int VMC::disorder_start(const input::Parameters& inputs, 
+  const unsigned& disorder_config, const bool& optimizing_mode, const bool& silent)
+{
+  site_disorder_.set_current_config(disorder_config);
+  //site_disorder_.save_optimal_parms(config.vparm_values());
+  bool with_psi_grad;
+  if (observables.energy_grad()) with_psi_grad = true;
+  else with_psi_grad = false;
+  if (optimizing_mode) {
+    observables.switch_off();
+    observables.energy().switch_on();
+  }
+  silent_mode_ = silent;
+  site_disorder_.get_optimal_parms();
+  //return config.build(graph, inputs, with_psi_grad);
+  return config.build(graph, site_disorder_.get_optimal_parms(), with_psi_grad);
+}
+
 
 int VMC::start(const input::Parameters& inputs, const bool& optimizing_mode, 
   const bool& silent)

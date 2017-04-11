@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-11 13:02:35
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-15 21:45:44
+* Last Modified time: 2017-04-11 12:24:25
 *----------------------------------------------------------------------------*/
 #include <cmath>
 #include "model.h"
@@ -13,7 +13,7 @@
 namespace model {
 
 int Hamiltonian::define_model(const input::Parameters& inputs, 
-  const lattice::Lattice& lattice, const bool& site_disorder)
+  const lattice::Lattice& lattice)
 {
   //int info;
   //unsigned ntypes;
@@ -42,7 +42,9 @@ int Hamiltonian::define_model(const input::Parameters& inputs,
 
   else if (model_name == "TJ") {
     mid = model_id::TJ;
-    set_no_dbloccupancy();
+    int nowarn;
+    if (inputs.set_value("no_double_occupancy",true,nowarn))
+      set_no_dbloccupancy();
     // model parameters
     add_parameter(name="t", defval=1.0, inputs);
     add_parameter(name="J", defval=0.0, inputs);
@@ -57,18 +59,19 @@ int Hamiltonian::define_model(const input::Parameters& inputs,
   }
 
   // if the model has site disorder
+  /*
   if (site_disorder) {
     add_disorder_term(name="disorder", op::ni_sigma());
-  }
+  }*/
   
   return 0;
 }
 
 int Hamiltonian::construct(const input::Parameters& inputs, 
-  const lattice::Lattice& lattice, const bool& site_disorder)
+  const lattice::Lattice& lattice)
 {
   init(lattice);
-  define_model(inputs, lattice, site_disorder);
+  define_model(inputs, lattice);
   finalize(lattice);
   return 0;
 }
