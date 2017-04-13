@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-19 22:41:38
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-25 23:17:51
+* Last Modified time: 2017-04-12 22:57:22
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef BCS_STATE_H
@@ -50,6 +50,7 @@ private:
   void get_pair_amplitudes_oneband(std::vector<ComplexMatrix>& phi_k);
   void get_pair_amplitudes_multiband(std::vector<ComplexMatrix>& phi_k);
   void get_pair_amplitudes_sitebasis(const std::vector<ComplexMatrix>& phi_k, Matrix& psi);
+  double get_mf_energy(void);
 };
 
 

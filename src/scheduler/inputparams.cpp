@@ -5,7 +5,7 @@
 * All rights reserved.
 * Date:   2015-08-17 13:33:19
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-09 00:59:51
+* Last Modified time: 2017-04-13 11:54:26
 *----------------------------------------------------------------------------*/
 // File: inputparams.cc
 
@@ -21,17 +21,20 @@
 
 namespace input {
 
-JobInput::JobInput(const std::string& inputfile): n_params(0), n_tasks(0)
+JobInput::JobInput(const scheduler::CommandArg& cmdarg): n_params(0), n_tasks(0)
 {
-  if (inputfile.length()==0) {
+  if (cmdarg.filename().length()==0) {
     valid_ = false;
     throw std::invalid_argument("JobInput::JobInput: invalid input filename");
   }
   else {
     try {
-      n_tasks = parse(inputfile);
+      n_tasks = parse(cmdarg.filename());
       n_params = param_list.size();
       valid_ = true;
+      // command options
+      task_params_.have_option_quiet_ = cmdarg.have_option(scheduler::quiet);
+      task_params_.have_option_test_ = cmdarg.have_option(scheduler::test);
     }
     catch (JobInput::bad_input& input_error) {
       std::cout << input_error.message() << std::endl;
@@ -40,15 +43,20 @@ JobInput::JobInput(const std::string& inputfile): n_params(0), n_tasks(0)
     }
   }
   // init task parameters
-  init_task_params();
+  //init_task_params();
 }
 
-bool JobInput::read_inputs(const std::string& inputfile)
+//bool JobInput::read_inputs(const std::string& inputfile)
+bool JobInput::read_inputs(const scheduler::CommandArg& cmdarg)
 {
   try {
-    n_tasks = parse(inputfile);
+    n_tasks = parse(cmdarg.filename());
     n_params = param_list.size();
     valid_ = true;
+    // command options
+    task_params_.have_option_quiet_ = cmdarg.have_option(scheduler::quiet);
+    //std::cout << task_params_.have_option_quiet_ << "\n"; getchar();
+    task_params_.have_option_test_ = cmdarg.have_option(scheduler::test);
   }
   catch (JobInput::bad_input& input_error) {
     std::cout << input_error.message() << std::endl;

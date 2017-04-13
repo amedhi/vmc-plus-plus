@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-20 09:43:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-30 23:25:24
+* Last Modified time: 2017-04-13 10:24:52
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include <stdexcept>
@@ -71,6 +71,9 @@ double GroundState::get_noninteracting_mu(void)
   }
   std::sort(ek.begin(),ek.end());
   //for (const auto& e : ek) std::cout << e << "\n";
+  //double e = 0.0;
+  //for (unsigned i=0; i<num_upspins_; ++i) e += ek[i];
+  //std::cout << "energy = " << 2*e/num_sites_ << "\n";
   //std::cout << "upspins = " << num_upspins_ << "\n";
   if (num_upspins_ < num_sites_) {
     //std::cout << 0.5*(ek[num_upspins_-1]+ek[num_upspins_]) << "\n";

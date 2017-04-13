@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-19 23:06:41
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-30 23:25:21
+* Last Modified time: 2017-04-13 14:54:55
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "./bcs_state.h"
@@ -19,8 +19,9 @@ BCS_State::BCS_State(const bcs& order_type, const input::Parameters& inputs,
 int BCS_State::init(const bcs& order_type, const input::Parameters& inputs, 
   const lattice::LatticeGraph& graph)
 {
-  // sites
+  // sites & bonds
   num_sites_ = graph.num_sites();
+  num_bonds_ = graph.num_bonds();
   // particle number
   set_particle_num(inputs);
   // infinity limit
@@ -104,6 +105,8 @@ void BCS_State::update(const input::Parameters& inputs)
     //std::cout << "mu = " << mu_0 << "\n";
     mf_model_.update_site_parameter("mu", mu_0);
   }
+  // check MF energy
+  //std::cout << " MF energy = " << get_mf_energy() << "\n"; 
 }
 
 void BCS_State::update(const var::parm_vector& pvector, const unsigned& start_pos)
@@ -199,6 +202,11 @@ void BCS_State::get_pair_amplitudes_oneband(std::vector<ComplexMatrix>& phi_k)
     ek += std::real(mf_model_.quadratic_spinup_block()(0,0));;
     delta_k += mf_model_.pairing_part()(0,0);
     delta_k *= 0.5;
+    //----------------------------------
+    //std::cout << "** Hack at BCS_State\n";
+    //ek = -4.0*(std::cos(kvec[0])+std::cos(kvec[1]));
+    //delta_k = 0.5 * (std::cos(kvec[0])-std::cos(kvec[1])); 
+    //----------------------------------
     double deltak_sq = std::norm(delta_k);
     double ek_plus_Ek = ek + std::sqrt(ek*ek + 4.0*deltak_sq);
     if (std::sqrt(deltak_sq)<1.0E-12 && ek<0.0) {
@@ -253,6 +261,50 @@ void BCS_State::get_pair_amplitudes_multiband(std::vector<ComplexMatrix>& phi_k)
     phi_k[k] = work_ * es_minusk_up.eigenvectors().transpose();
     //std::cout << delta_k << "\n";
   } 
+}
+
+double BCS_State::get_mf_energy(void)
+{
+  double mf_energy = 0.0;
+  double delta = mf_model_.get_parameter_value("delta_sc");
+  for (unsigned k=0; k<num_kpoints_; ++k) {
+    Vector3d kvec = blochbasis_.kvector(k);
+    /*
+    double ek = -2.0*(std::cos(kvec[0])+std::cos(kvec[1]));
+    double deltak = delta * (std::cos(kvec[0])-std::cos(kvec[1]));
+    double Ek = std::sqrt(ek*ek + deltak*deltak);
+    mf_energy += (ek - Ek);
+    */
+    //-------------'+k block'-------------
+    // hamiltonian in k-space
+    mf_model_.construct_kspace_block(kvec);
+    // diagonalize quadratic part
+    es_k_up.compute(mf_model_.quadratic_spinup_block());
+    // pairing part 
+    delta_k_ = mf_model_.pairing_part();
+    //-------------'-k block'-------------
+    mf_model_.construct_kspace_block(-kvec);
+    es_minusk_up.compute(mf_model_.quadratic_spinup_block());
+    // assuming 'singlet pairing', see notes
+    work_ = 0.5*(delta_k_ + mf_model_.pairing_part().transpose());
+    //std::cout << work_ << "\n"; getchar();
+    // transform pairing part
+    delta_k_ = es_k_up.eigenvectors().adjoint() * work_ * 
+      es_minusk_up.eigenvectors().conjugate();
+    // bcs ampitudes in rotated basis (assuming INTRABAND pairing only)
+    for (unsigned i=0; i<kblock_dim_; ++i) {
+      double ek = es_k_up.eigenvalues()[i];
+      double deltak_sq = std::norm(delta_k_(i,i));
+      double Ek = std::sqrt(ek*ek + deltak_sq);
+      //std::cout << ek << " " << Ek << "\n"; getchar();
+      mf_energy += (ek - Ek);
+    }
+  }
+  // constant term
+  double J = 0.35;  // tJ model
+  mf_energy += num_bonds_*delta*delta/(2.0*J);  
+  //std::cout << delta << " ";
+  return mf_energy/num_sites_;
 }
 
 

@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-19 22:32:43
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-30 09:32:25
+* Last Modified time: 2017-04-13 10:47:01
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef GROUNDSTATE_H
@@ -34,6 +34,7 @@ public:
   const double& hole_doping(void) const { return hole_doping_; }
 protected:
   unsigned num_sites_{0};
+  unsigned num_bonds_{0};
   unsigned num_kpoints_{0};
   unsigned kblock_dim_{0};
   unsigned num_varparms_{0};

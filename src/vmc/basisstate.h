@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-13 10:16:02
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-25 22:48:40
+* Last Modified time: 2017-04-12 21:26:24
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef BASISSTATE_H
@@ -40,6 +40,8 @@ public:
   const unsigned& dnspin_id(void) const { return id_.second; }
   const unsigned& uphole_id(void) const { return id_.first; }
   const unsigned& dnhole_id(void) const { return id_.second; }
+  int num_upspins(void) const { return operator[](spin_UP_); }  
+  int num_dnspins(void) const { return operator[](spin_DN_); }  
   bool have_upspin(void) const { return test(spin_UP_); }  
   bool have_dnspin(void) const { return test(spin_DN_); }  
   bool have_uphole(void) const { return !test(spin_UP_); }  

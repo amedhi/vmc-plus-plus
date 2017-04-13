@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-22 22:41:54
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-30 23:24:13
+* Last Modified time: 2017-04-13 09:43:27
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef DISORDERED_SC_H
@@ -53,7 +53,6 @@ public:
   void get_wf_gradient(std::vector<Matrix>& psi_gradient) override; 
 private:
   double large_number_{1.0E+2};
-  unsigned num_bonds_;
   unsigned mu_start_;
   unsigned t_start_;
   unsigned delta_start_;

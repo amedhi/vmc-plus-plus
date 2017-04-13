@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:50
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-04-11 14:55:56
+* Last Modified time: 2017-04-13 12:02:19
 *----------------------------------------------------------------------------*/
 #include <iomanip>
 #include "simulator.h"
@@ -56,6 +56,7 @@ int Simulator::run(const input::Parameters& inputs)
 
   // optimization run
   if (optimization_mode_) {
+    if (!inputs.have_option_quiet()) std::cout << " starting optimizing run\n";
     vmc.start(inputs, true, true);
     if (sreconf.optimize(vmc)) {
       vmc.run_simulation(sreconf.optimal_parms());
@@ -65,7 +66,7 @@ int Simulator::run(const input::Parameters& inputs)
   }
 
   // normal run
-  std::cout << " starting vmc run\n";
+  if (!inputs.have_option_quiet()) std::cout << " starting vmc run\n";
   vmc.start(inputs);
   vmc.run_simulation();
   vmc.print_results();

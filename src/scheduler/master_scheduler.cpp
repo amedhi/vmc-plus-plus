@@ -4,7 +4,7 @@
 * All rights reserved.
 * Date:   2015-09-28 19:51:04
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-09 00:59:54
+* Last Modified time: 2017-04-13 11:58:48
 *----------------------------------------------------------------------------*/
 #include <ctime>
 #include <string>
@@ -18,11 +18,12 @@ MasterScheduler::MasterScheduler(int argc, const char *argv[], const AbstractTas
   , cmdarg(argc, argv)
 {
   if (cmdarg.valid()) {
-    if (input.read_inputs(cmdarg.filename())) {
+    if (input.read_inputs(cmdarg)) {
       task_size = input.task_size();
       input.init_task_params();
       // construct 'worker' with the first set of task parameters
-      std::cout << " starting..." << std::endl;
+      if (!cmdarg.have_option(quiet)) 
+        std::cout << " starting..." << std::endl;
       theWorker = theTask.make_worker(input.task_params(0));
       valid_ = true;
     }
@@ -58,9 +59,11 @@ int MasterScheduler::run()
   theWorker->finish();
 
   auto end_time = std::chrono::steady_clock::now();
-  std::cout << " finished all tasks\n"; 
-  std::cout << " time: " << elapsed_time(start_time, end_time) << "\n";
-  std::cout << " done!\n";
+  if (!cmdarg.have_option(quiet)) {
+    std::cout << " finished all tasks\n"; 
+    std::cout << " time: " << elapsed_time(start_time, end_time) << "\n";
+    std::cout << " done!\n";
+  }
   return 0;
 }
 

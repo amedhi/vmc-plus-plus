@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:20:56
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-04-10 23:25:19
+* Last Modified time: 2017-04-13 11:56:50
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "vmc.h"
@@ -79,6 +79,7 @@ int VMC::start(const input::Parameters& inputs, const bool& optimizing_mode,
     observables.energy().switch_on();
   }
   silent_mode_ = silent;
+  if (inputs.have_option_quiet()) silent_mode_ = true;
   return config.build(graph, inputs, with_psi_grad);
 }
 

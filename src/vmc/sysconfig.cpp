@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-18 14:01:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-04-04 20:04:31
+* Last Modified time: 2017-04-12 21:26:20
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "./sysconfig.h"
@@ -346,7 +346,8 @@ int SysConfig::apply_niup_nidn(const unsigned& site_i) const
 amplitude_t SysConfig::apply_upspin_hop(const unsigned& i, const unsigned& j,
   const int& bc_phase) const
 {
-  if (i == j) return ampl_part(1.0);
+  //if (i == j) return ampl_part(1.0);
+  if (i == j) return ampl_part(operator[](i).num_upspins());
   int upspin, to_site;
   int delta_nd;
   //check_upspin_hop(i,j)
@@ -380,7 +381,8 @@ amplitude_t SysConfig::apply_upspin_hop(const unsigned& i, const unsigned& j,
 amplitude_t SysConfig::apply_dnspin_hop(const unsigned& i, const unsigned& j,
   const int& bc_phase) const
 {
-  if (i == j) return amplitude_t(1.0);
+  //if (i == j) return amplitude_t(1.0);
+  if (i == j) return ampl_part(operator[](i).num_dnspins());
   int dnspin, to_site;
   int delta_nd;
   const SiteState* state_i = &operator[](i);
