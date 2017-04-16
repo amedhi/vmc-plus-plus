@@ -14,12 +14,14 @@ ObservableSet::ObservableSet()
   , energy_grad_("EnergyGradient")
   , energy_grad2_("EnergyGradient2")
   , sr_coeffs_("SR_Coefficients")
+  , sccf_("SC_Correlation")
 {
   push_back(energy_);
   push_back(total_energy_);
   push_back(energy_grad_);
   push_back(energy_grad2_);
   push_back(sr_coeffs_);
+  push_back(sccf_);
 }
 
 void ObservableSet::init(const input::Parameters& inputs, 

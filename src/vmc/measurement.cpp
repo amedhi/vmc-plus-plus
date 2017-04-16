@@ -2,13 +2,19 @@
 * Author: Amal Medhi
 * Date:   2017-02-17 23:30:00
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-04-06 23:35:22
+* Last Modified time: 2017-04-14 11:10:03
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include <iostream>
 #include "vmc.h"
 
 namespace vmc {
+
+void VMC::init_measurements(void)
+{
+  if (observables.sccf()) {
+  }
+}
 
 void VMC::do_measurements(const observable_set& obs_set)
 {

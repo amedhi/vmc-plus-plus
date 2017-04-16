@@ -87,6 +87,7 @@ public:
   inline Observable& energy_grad(void) { return energy_grad_; }
   inline Observable& energy_grad2(void) { return energy_grad2_; }
   inline Observable& sr_coeffs(void) { return sr_coeffs_; }
+  inline Observable& sccf(void) { return sccf_; }
   const bool& need_energy(void) const { return need_energy_; }
   void print_heading(void);
   void print_results(const std::vector<double>& xvals=std::vector<double>()); 
@@ -101,6 +102,7 @@ private:
   Observable energy_grad_;
   Observable energy_grad2_;
   Observable sr_coeffs_;
+  Observable sccf_;
   bool need_energy_{false};
 };
 

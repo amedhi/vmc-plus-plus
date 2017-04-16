@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:19:36
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-04-11 14:56:37
+* Last Modified time: 2017-04-13 17:59:47
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef VMC_H
@@ -76,6 +76,12 @@ private:
   mutable vector_data sr_coeffs_;
   mutable RealVector grad_logpsi_;
 
+  // pair correlation function
+  using bond_iterator = lattice::LatticeGraph::bond_iterator;
+  using bond_pair = std::pair<bond_iterator,bond_iterator>;
+  std::vector<bond_pair> bond_pairs;
+
+
   // mc parameters
   enum move_t {uphop, dnhop, exch, end};
   int num_measure_steps_{0}; 
@@ -88,6 +94,7 @@ private:
   void init_observables(const input::Parameters& inputs);
   //void warmup_config(void);
   //void update_config(void);
+  void init_measurements(void);
   void do_measurements(const observable_set& obs_set);
   int finalize_energy_grad(void);
   void measure_energy_grad(const double& total_en);

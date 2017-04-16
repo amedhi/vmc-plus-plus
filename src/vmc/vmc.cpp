@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:20:56
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-04-13 11:56:50
+* Last Modified time: 2017-04-13 15:56:42
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "vmc.h"
@@ -46,7 +46,6 @@ VMC::VMC(const input::Parameters& inputs)
     energy_grad_.resize(num_varparms_);
     energy_grad2_.resize(2*num_varparms_);
   } 
-
 }
 
 int VMC::disorder_start(const input::Parameters& inputs, 
