@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-17 23:30:00
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-04-14 11:10:03
+* Last Modified time: 2017-04-17 18:20:48
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include <iostream>
@@ -13,6 +13,7 @@ namespace vmc {
 void VMC::init_measurements(void)
 {
   if (observables.sccf()) {
+    
   }
 }
 

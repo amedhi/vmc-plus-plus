@@ -4,7 +4,7 @@
 * All rights reserved.
 * Date:   2015-08-17 13:33:19
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-09 00:59:48
+* Last Modified time: 2017-04-18 00:15:03
 *----------------------------------------------------------------------------*/
 // File: scheduler.h 
 // Definition of the Scheduler class.
@@ -13,10 +13,11 @@
 #define SCHEDULER_SCHEDULER_H
 
 #include <iostream>
-#include "task.h"
-#include "cmdargs.h"
-#include "inputparams.h"
 #include <chrono>
+#include "./task.h"
+#include "./cmdargs.h"
+#include "./inputparams.h"
+#include "./mpi_comm.h"
 
 namespace scheduler {
 
@@ -28,12 +29,15 @@ public:
   //Scheduler(): simmaster(0) {};
   //Scheduler(Task& theTask) {}
   Scheduler() {}
+  Scheduler(const mpi_communicator& mpi_comm, const AbstractTask& theTask);
   ~Scheduler() {} 
   virtual int run(void);
 
 protected:
   //Worker theWorker_;
   AbstractWorker* theWorker;
+  input::JobInput input;
+  unsigned int task_size;
   bool valid_{false};
 
 private:
@@ -44,7 +48,8 @@ private:
 class MasterScheduler : public Scheduler
 {
 public:
-  MasterScheduler(int argc, const char *argv[], const AbstractTask& theTask);
+  MasterScheduler(int argc, const char *argv[], const mpi_communicator& mpi_comm, 
+    const AbstractTask& theTask);
   //MasterScheduler(int argc, const char *argv[], const Task&);
   MasterScheduler() = delete;
   ~MasterScheduler() {}
@@ -52,8 +57,6 @@ public:
 
 private:
   CommandArg cmdarg;
-  input::JobInput input;
-  unsigned int task_size;
 
   std::string elapsed_time(const std::chrono::steady_clock::time_point& start_time,
     const std::chrono::steady_clock::time_point& end_time) const;

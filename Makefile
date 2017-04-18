@@ -5,6 +5,7 @@
 include ./make_options.mk
 #-------------------------------------------------------------
 # Source files
+SRCS = scheduler/mpi_comm.cpp 
 SRCS = scheduler/cmdargs.cpp 
 SRCS+= scheduler/inputparams.cpp 
 SRCS+= scheduler/taskparams.cpp 
@@ -46,7 +47,8 @@ SRCS+= main.cpp
 VMC_SRCS = $(addprefix src/,$(SRCS))
 #-------------------------------------------------------------
 # Headers
-HDRS=scheduler/optionparser.h scheduler/cmdargs.h \
+HDRS=    scheduler/mpi_comm.h \
+         scheduler/optionparser.h scheduler/cmdargs.h \
          scheduler/inputparams.h scheduler/worker.h scheduler/task.h \
          scheduler/scheduler.h \
          expression/expression.h expression/shunting_yard.h \
@@ -81,6 +83,9 @@ VMC_HDRS = $(addprefix src/,$(HDRS))
 #-------------------------------------------------------------
 # Target
 TAGT=a.out
+ifeq ($(MPI), HAVE_BOOST_MPI)
+TAGT=v.out
+endif
 
 # Put all auto generated stuff to this build dir.
 ifeq ($(BUILD_DIR), $(CURDIR))
@@ -92,30 +97,23 @@ OBJS=$(patsubst %.cpp,$(BUILD_DIR)/%.o,$(VMC_SRCS))
 # GCC/Clang will create these .d files containing dependencies.
 DEPS=$(patsubst %.o,%.d,$(OBJS)) 
 # compiler flags
-CXXFLAGS = $(VMC_INCLUDEFLAGS) $(OPTIMIZATIONS) 
-
-#VMC_INCLDIR=$(VMC_INCLUDE)/cmc
-#INCL_HDRS = $(addprefix $(VMC_INCLDIR)/, $(VMC_HDRS))
-
-# $(BOOST_LDFLAGS) $(BOOST_LIBS) 
 
 .PHONY: all
 all: $(TAGT) #$(INCL_HDRS)
 
 $(TAGT): $(OBJS)
-	$(VMC_CXX) -o $(TAGT) $(OBJS) $(VMC_BLDFLAGS) $(VMC_BLIBS)  
+	$(VMC_CXX) -o $(TAGT) $(OBJS) $(VMC_LDFLAGS) $(VMC_LIBS)  
 
 %.o: %.cpp
-	$(VMC_CXX) -c $(CXXBFLAGS) -o $@ $<
-
+	$(VMC_CXX) -c $(VMC_CXXFLAGS) -o $@ $<
 
 # Include all .d files
 -include $(DEPS)
 
 $(BUILD_DIR)/%.o: %.cpp
 	@mkdir -p $(@D)
-	@echo "$(VMC_CXX) -c $(VMC_CXXBFLAGS) -o $(@F) $(<F)"
-	@$(VMC_CXX) -MMD -c $(VMC_CXXBFLAGS) -o $@ $<
+	@echo "$(VMC_CXX) -c $(VMC_CXXFLAGS) -o $(@F) $(<F)"
+	@$(VMC_CXX) -MMD -c $(VMC_CXXFLAGS) -o $@ $<
 
 $(VMC_INCLDIR)/%.h: %.h 
 	@mkdir -p $(@D)

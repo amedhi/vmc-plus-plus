@@ -5,7 +5,7 @@
 * All rights reserved.
 * Date:   2015-08-17 13:33:19
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-04-13 11:54:26
+* Last Modified time: 2017-04-17 18:52:27
 *----------------------------------------------------------------------------*/
 // File: inputparams.cc
 
@@ -29,12 +29,13 @@ JobInput::JobInput(const scheduler::CommandArg& cmdarg): n_params(0), n_tasks(0)
   }
   else {
     try {
-      n_tasks = parse(cmdarg.filename());
-      n_params = param_list.size();
-      valid_ = true;
       // command options
       task_params_.have_option_quiet_ = cmdarg.have_option(scheduler::quiet);
       task_params_.have_option_test_ = cmdarg.have_option(scheduler::test);
+      // parse input files
+      n_tasks = parse(cmdarg.filename());
+      n_params = param_list.size();
+      valid_ = true;
     }
     catch (JobInput::bad_input& input_error) {
       std::cout << input_error.message() << std::endl;
@@ -50,13 +51,14 @@ JobInput::JobInput(const scheduler::CommandArg& cmdarg): n_params(0), n_tasks(0)
 bool JobInput::read_inputs(const scheduler::CommandArg& cmdarg)
 {
   try {
-    n_tasks = parse(cmdarg.filename());
-    n_params = param_list.size();
-    valid_ = true;
     // command options
     task_params_.have_option_quiet_ = cmdarg.have_option(scheduler::quiet);
     //std::cout << task_params_.have_option_quiet_ << "\n"; getchar();
     task_params_.have_option_test_ = cmdarg.have_option(scheduler::test);
+    // parse input files
+    n_tasks = parse(cmdarg.filename());
+    n_params = param_list.size();
+    valid_ = true;
   }
   catch (JobInput::bad_input& input_error) {
     std::cout << input_error.message() << std::endl;
@@ -71,23 +73,28 @@ unsigned int JobInput::parse(const std::string& inputfile)
   std::ifstream fin;
   infile = inputfile;
   if (infile.length() == 0) {
-    std::cout << " input file not specified\n"; 
-    std::cout << " looking for default input file 'input.parm'..."; 
+    if (!task_params_.have_option_quiet_) {
+      std::cout << " input file not specified\n"; 
+      std::cout << " looking for default input file 'input.parm'..."; 
+    }
     infile = "input.parm";
   }
   else {
-    std::cout << " looking for input file '" << infile << "'...";
+    if (!task_params_.have_option_quiet_) 
+      std::cout << " looking for input file '" << infile << "'...";
   }
 
   fin.open(infile);
   if (fin.is_open()) {
-    std::cout << " found\n reading input file '" << infile << "'...";
+    if (!task_params_.have_option_quiet_) 
+      std::cout << " found\n reading input file '" << infile << "'...";
   }
   else {
     std::cout << " not found\n";
     throw bad_input("input file '"+infile+"' does not exist");
   }
-  std::cout << "\n";
+  if (!task_params_.have_option_quiet_) 
+    std::cout << "\n";
 
   // parsing starts
   unsigned line_no = 0;
