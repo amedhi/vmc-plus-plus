@@ -4,7 +4,7 @@
 * All rights reserved.
 * Date:   2015-09-28 19:51:04
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-04-18 15:26:48
+* Last Modified time: 2017-04-21 00:12:10
 *----------------------------------------------------------------------------*/
 #include <ctime>
 #include <string>
@@ -18,16 +18,15 @@ int start(int argc, const char *argv[], const AbstractTask& theTask)
   mpi_environment mpi_env;
   mpi_communicator mpi_comm;
   Scheduler* theScheduler;
-  int res = 0;
   if (mpi_comm.is_master()) {
     theScheduler = new MasterScheduler(argc, argv, mpi_comm, theTask);
-    res = theScheduler->run();
     //MasterScheduler master_scheduler(argc, argv, theTask);
     //int res = master_scheduler.run();
   }
   else {
     theScheduler = new Scheduler(mpi_comm, theTask);
   }
+  int res = theScheduler->run(mpi_comm);
   return res; 
 }
 
@@ -49,14 +48,13 @@ MasterScheduler::MasterScheduler(int argc, const char *argv[],
       // send to slave schedulers
       for (int rank=0; rank<mpi_comm.size(); ++rank) {
         if (rank != mpi_comm.master())
-          mpi_comm.send(rank,MP_task_parms,input.task_params());
+          mpi_comm.isend(rank,MP_make_task,input.task_params());
       }
-
     }
   }
 }
 
-int MasterScheduler::run() 
+int MasterScheduler::run(const mpi_communicator& mpi_comm) 
 {
   if (!valid_) return -1;
   auto start_time = std::chrono::steady_clock::now();
@@ -72,8 +70,24 @@ int MasterScheduler::run()
     auto tstart_t = std::chrono::steady_clock::now();
     //------------------------------
     input.set_task_params(task);
-    theWorker->run(input.task_params());
     //params << pstore(task_id);
+    // send to slave schedulers
+    for (int rank=0; rank<mpi_comm.size(); ++rank) {
+      if (rank != mpi_comm.master()) {
+        mpi_comm.isend(rank,MP_task_params,input.task_params());
+        mpi_comm.isend(rank,MP_run_task,task);
+      }
+    }
+    // run own task
+    theWorker->run(input.task_params());
+
+    // wave for slave process
+    int sig;
+    for (int rank=0; rank<mpi_comm.size(); ++rank) {
+      if (rank != mpi_comm.master()) {
+        mpi_comm.recv(rank,MP_task_finished,sig);
+      }
+    }
 
     //-------------------------------------
     auto tend_t = std::chrono::steady_clock::now();
@@ -82,6 +96,11 @@ int MasterScheduler::run()
     //-------------------------------------
   }
   // finish
+  for (int rank=0; rank<mpi_comm.size(); ++rank) {
+    if (rank != mpi_comm.master()) {
+      mpi_comm.send(rank,MP_quit_tasks,0);
+    }
+  }
   theWorker->finish();
 
   auto end_time = std::chrono::steady_clock::now();

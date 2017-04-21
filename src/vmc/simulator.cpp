@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:50
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-04-13 12:02:19
+* Last Modified time: 2017-04-21 17:38:26
 *----------------------------------------------------------------------------*/
 #include <iomanip>
 #include "simulator.h"
@@ -70,6 +70,52 @@ int Simulator::run(const input::Parameters& inputs)
   vmc.start(inputs);
   vmc.run_simulation();
   vmc.print_results();
+  return 0;
+}
+
+// parallel run
+int Simulator::run(const input::Parameters& inputs, 
+  const scheduler::mpi_communicator& mpi_comm)
+{
+  // disordered system
+  if (vmc.disordered_system()) {
+    int num_proc = mpi_comm.size();
+    int num_dconf = vmc.num_disorder_configs();
+    int n1, n2;
+    if (num_proc==num_dconf) {
+      n1 = mpi_comm.rank();
+      n2 = mpi_comm.rank();
+    }
+    else if (num_proc > num_dconf) {
+      n1 = mpi_comm.rank();
+      n2 = mpi_comm.rank();
+      if (n1 >= num_dconf) return 0; // no job for you
+    }
+    else {
+      int n = std::nearbyint(static_cast<double>(num_dconf)/num_proc);
+      n1 = n * mpi_comm.rank();
+      n2 = n1 + n;
+      if (n1 >= num_dconf) return 0; // no job for you
+      if (mpi_comm.rank()==(num_proc-1)) {
+        n2 = num_dconf;
+      }
+    }
+    // optimizing run
+    if (optimization_mode_) {
+      for (unsigned n=n1; n<n2; ++n) {
+        std::cout << " optimizing disorder config " << n;
+        std::cout << " of " << vmc.num_disorder_configs() << "\n";
+        if (vmc.optimal_parms_exists(n)) continue;
+        vmc.start(inputs, true, true);
+        vmc.set_disorder_config(n);
+        if (sreconf.optimize(vmc)) {
+          vmc.save_optimal_parms(sreconf.optimal_parms());
+          //vmc.run_simulation(sreconf.optimal_parms());
+          //vmc.print_results();
+        }
+      }
+    }
+  }
   return 0;
 }
 

@@ -4,7 +4,7 @@
 * All rights reserved.
 * Date:   2015-08-17 13:33:19
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-04-18 00:15:03
+* Last Modified time: 2017-04-21 00:12:10
 *----------------------------------------------------------------------------*/
 // File: scheduler.h 
 // Definition of the Scheduler class.
@@ -31,7 +31,7 @@ public:
   Scheduler() {}
   Scheduler(const mpi_communicator& mpi_comm, const AbstractTask& theTask);
   ~Scheduler() {} 
-  virtual int run(void);
+  virtual int run(const mpi_communicator& mpi_comm);
 
 protected:
   //Worker theWorker_;
@@ -53,7 +53,7 @@ public:
   //MasterScheduler(int argc, const char *argv[], const Task&);
   MasterScheduler() = delete;
   ~MasterScheduler() {}
-  int run(void) override;
+  int run(const mpi_communicator& mpi_comm) override;
 
 private:
   CommandArg cmdarg;

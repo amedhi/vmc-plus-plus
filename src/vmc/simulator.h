@@ -19,6 +19,8 @@ public:
   ~Simulator() {}
   int start(const input::Parameters& parms) override { return 0; }
   int run(const input::Parameters& parms) override;
+  int run(const input::Parameters& parms, 
+    const scheduler::mpi_communicator& mpi_comm) override;
   void finish(void) override {} 
   void dostep(void) override {} 
   void halt(void) override {} 

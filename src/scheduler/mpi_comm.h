@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-04-17 23:13:06
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-04-18 15:24:27
+* Last Modified time: 2017-04-21 00:12:10
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef MPI_COMM_H
@@ -16,9 +16,16 @@
 
 namespace scheduler {
 
-const int MP_task_parms = 0;
+enum {MP_make_task, MP_task_params, MP_run_task, MP_task_finished,
+  MP_quit_tasks};
+
+//const int MP_task_params = 0;
+//const int MP_run_task = 1;
+//const int MP_quit_tasks = 2;
 
 #ifdef HAVE_BOOST_MPI
+
+using mpi_status = boost::mpi::status;
 //  using mpi_environment = boost::mpi::environment;
 //  using mpi_communicator = boost::mpi::communicator;
 class mpi_environment : public boost::mpi::environment
@@ -64,6 +71,6 @@ private:
 
 
 
-} // end namespace input
+} // end namespace scheduler
 
 #endif

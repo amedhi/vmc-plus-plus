@@ -4,7 +4,7 @@
 * All rights reserved.
 * Date:   2015-09-28 11:01:37
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-09 00:32:33
+* Last Modified time: 2017-04-21 00:17:41
 *----------------------------------------------------------------------------*/
 #include "worker.h"
 
@@ -28,6 +28,11 @@ int Worker::run(const input::Parameters& p)
 {
   //if(started() && !finished_)
   //dostep();
+  return 0;
+}
+
+int Worker::run(const input::Parameters& parms, const mpi_communicator& mpi_comm) 
+{
   return 0;
 }
 

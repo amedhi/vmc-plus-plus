@@ -2,13 +2,14 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:19:36
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-04-13 17:59:47
+* Last Modified time: 2017-04-21 00:12:10
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef VMC_H
 #define VMC_H
 
 #include "../scheduler/worker.h"
+#include "../scheduler/mpi_comm.h"
 #include "../lattice/lattice.h"
 #include "../lattice/graph.h"
 #include "../model/model.h"
