@@ -6,7 +6,7 @@ include ./make_options.mk
 #-------------------------------------------------------------
 # Source files
 SRCS = scheduler/mpi_comm.cpp 
-SRCS = scheduler/cmdargs.cpp 
+SRCS+= scheduler/cmdargs.cpp 
 SRCS+= scheduler/inputparams.cpp 
 SRCS+= scheduler/taskparams.cpp 
 SRCS+= scheduler/worker.cpp 

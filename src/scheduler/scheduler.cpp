@@ -4,7 +4,7 @@
 * All rights reserved.
 * Date:   2015-08-17 12:44:04
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-04-21 00:12:10
+* Last Modified time: 2017-04-21 22:27:08
 *----------------------------------------------------------------------------*/
 #include <iostream>
 #include "scheduler.h"
@@ -16,30 +16,25 @@ Scheduler::Scheduler(const mpi_communicator& mpi_comm, const AbstractTask& theTa
 {
   mpi_comm.recv(mpi_comm.master(),MP_make_task,input.task_params());
   theWorker = theTask.make_worker(input.task_params());
-  std::cout << "I am slave " << mpi_comm.rank() << "\n";
+  //std::cout << "I am slave " << mpi_comm.rank() << "\n";
   //std::cout << "id = " << input.task_params().task_id() << "\n";
   //std::cout << "size = " << input.task_params().task_size() << "\n";
 }
 
 int Scheduler::run(const mpi_communicator& mpi_comm) 
 {
-  int sig;
   bool task_exist = false;
   while (true) {
     mpi_status msg = mpi_comm.probe();
     switch (msg.tag()) {
       case MP_quit_tasks:
-        mpi_comm.recv(msg.source(),msg.tag(),sig);
+        mpi_comm.recv(msg.source(),msg.tag());
         theWorker->finish();
         return 0;
-      case MP_task_params:
-        mpi_comm.recv(msg.source(),msg.tag(),input.task_params());
-        task_exist = true;
-        break;
       case MP_run_task:
-        mpi_comm.recv(msg.source(),msg.tag(),sig);
-        theWorker->run(input.task_params());
-        mpi_comm.send(msg.source(),MP_task_finished,sig);
+        mpi_comm.recv(msg.source(),msg.tag(),input.task_params());
+        theWorker->run(input.task_params(),mpi_comm);
+        mpi_comm.send(msg.source(),MP_task_finished);
         task_exist = false;
         break;
       default:

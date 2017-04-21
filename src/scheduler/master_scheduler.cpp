@@ -4,7 +4,7 @@
 * All rights reserved.
 * Date:   2015-09-28 19:51:04
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-04-21 00:12:10
+* Last Modified time: 2017-04-21 22:24:42
 *----------------------------------------------------------------------------*/
 #include <ctime>
 #include <string>
@@ -46,9 +46,9 @@ MasterScheduler::MasterScheduler(int argc, const char *argv[],
       theWorker = theTask.make_worker(input.task_params());
       valid_ = true;
       // send to slave schedulers
-      for (int rank=0; rank<mpi_comm.size(); ++rank) {
-        if (rank != mpi_comm.master())
-          mpi_comm.isend(rank,MP_make_task,input.task_params());
+      if (mpi_comm.size()>1) {
+        for (const auto& p : mpi_comm.slave_procs())
+          mpi_comm.isend(p, MP_make_task, input.task_params());
       }
     }
   }
@@ -72,21 +72,17 @@ int MasterScheduler::run(const mpi_communicator& mpi_comm)
     input.set_task_params(task);
     //params << pstore(task_id);
     // send to slave schedulers
-    for (int rank=0; rank<mpi_comm.size(); ++rank) {
-      if (rank != mpi_comm.master()) {
-        mpi_comm.isend(rank,MP_task_params,input.task_params());
-        mpi_comm.isend(rank,MP_run_task,task);
-      }
+    if (mpi_comm.size()>1) {
+      for (const auto& p : mpi_comm.slave_procs())
+        mpi_comm.isend(p, MP_run_task,input.task_params());
+      // run own task
+      theWorker->run(input.task_params(),mpi_comm);
+      // wave for slave process
+      for (const auto& p : mpi_comm.slave_procs())
+        mpi_comm.recv(p, MP_task_finished);
     }
-    // run own task
-    theWorker->run(input.task_params());
-
-    // wave for slave process
-    int sig;
-    for (int rank=0; rank<mpi_comm.size(); ++rank) {
-      if (rank != mpi_comm.master()) {
-        mpi_comm.recv(rank,MP_task_finished,sig);
-      }
+    else {
+      theWorker->run(input.task_params());
     }
 
     //-------------------------------------
@@ -96,10 +92,8 @@ int MasterScheduler::run(const mpi_communicator& mpi_comm)
     //-------------------------------------
   }
   // finish
-  for (int rank=0; rank<mpi_comm.size(); ++rank) {
-    if (rank != mpi_comm.master()) {
-      mpi_comm.send(rank,MP_quit_tasks,0);
-    }
+  for (const auto& p : mpi_comm.slave_procs()) {
+    mpi_comm.isend(p, MP_quit_tasks);
   }
   theWorker->finish();
 
