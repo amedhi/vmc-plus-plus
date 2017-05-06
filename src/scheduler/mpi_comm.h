@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-04-17 23:13:06
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-04-21 22:23:27
+* Last Modified time: 2017-05-01 22:49:39
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef MPI_COMM_H
@@ -53,6 +53,22 @@ private:
 
 #else
 
+using plist = std::list<int>;
+
+class mpi_status
+{
+public:
+  mpi_status() {}
+  ~mpi_status() {}
+  int tag(void) const { throw_exception(); return 0; }
+  int source(void) const { throw_exception(); return 0; }
+private:
+  void throw_exception(void) const
+  {
+    throw std::logic_error("** mpi_communicator:: not an mpi program");
+  }
+};
+
 class mpi_environment
 {
 public:
@@ -65,20 +81,32 @@ class mpi_communicator
 public:
   mpi_communicator() {}
   ~mpi_communicator() {}
+  int rank(void) const { return 0; }
+  int size(void) const { return 0; }
   bool is_master(void) const { return rank()==0; }
   int master(void) const { return 0; }
+  void send(int dest, int tag) const
+    { throw_exception(); }
   template<typename T> void send(int dest, int tag, const T & value) const
     { throw_exception(); }
+  template<typename T> void isend(int dest, int tag, const T & value) const
+    { throw_exception(); }
+  void isend(int dest, int tag) const { throw_exception(); }
+  mpi_status recv(int dest, int tag) const 
+    { throw_exception(); return mpi_status(); }
+  template<typename T> mpi_status recv(int dest, int tag, const T & value) const
+    { throw_exception(); return mpi_status(); }
+  mpi_status probe(int dest=0, int tag=0) const 
+    { throw_exception(); return mpi_status(); }
+  mpi_status iprobe(int dest=0, int tag=0) const 
+    { throw_exception(); return mpi_status(); }
   const plist& slave_procs(void) const { return slave_procs_; }
 private:
   plist slave_procs_;
-  int rank(void) const { return 0; }
-  int size(void) const { return 0; }
-  void throw_exception(void) 
+  void throw_exception(void) const
   {
-    throw std::logic_error("** mpi_communicator:: not an MPI program");
+    throw std::logic_error("** mpi_communicator:: not an mpi program");
   }
-private:
 };
 
 #endif

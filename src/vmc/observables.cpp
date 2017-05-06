@@ -15,6 +15,7 @@ ObservableSet::ObservableSet()
   , energy_grad2_("EnergyGradient2")
   , sr_coeffs_("SR_Coefficients")
   , sccf_("SC_Correlation")
+  , sc_corr_("SC_Correlation")
 {
   push_back(energy_);
   push_back(total_energy_);
@@ -22,6 +23,7 @@ ObservableSet::ObservableSet()
   push_back(energy_grad2_);
   push_back(sr_coeffs_);
   push_back(sccf_);
+  push_back(sc_corr_);
 }
 
 void ObservableSet::init(const input::Parameters& inputs, 
@@ -103,6 +105,62 @@ void ObservableSet::print_results(const double& xval)
     }
   }
 }
+
+//--------------------SC Corr-----------------------
+void SC_Correlation::setup(const lattice::LatticeGraph& graph)
+{
+  max_dist_ = graph.lattice().size1()/2+1;
+  num_bond_types_ = graph.num_bond_types();
+  bond_pair_corr_.resize(max_dist_);
+  num_symm_pairs_.resize(max_dist_);
+  for (int d=0; d<max_dist_; ++d) {
+    bond_pair_corr_[d].resize(num_bond_types_,num_bond_types_);
+    num_symm_pairs_[d].resize(num_bond_types_,num_bond_types_);
+    bond_pair_corr_[d].setZero();
+    num_symm_pairs_[d].setZero();
+  }
+  // all the 'source site' pairs (along 'x'-direction) & their distances
+  src_pairs_.clear();
+  pair_distance_.clear();
+  for (auto s=graph.sites_begin(); s!=graph.sites_end(); ++s) {
+    auto si = *s;
+    for (int d=0; d<max_dist_; ++d) {
+      auto sj = graph.translated_site(si, Eigen::Vector3i(d,0,0)); 
+      //std::cout << si << "   " << sj << "\n";
+      src_pairs_.push_back({si, sj});
+      pair_distance_.push_back(d);
+    }
+  }
+  src_pairs_size_ = src_pairs_.size();
+  // number of symmetrical bond pairs at a given distance
+  lattice::LatticeGraph::out_bond_iterator b1, b1_end, b2, b2_end;
+  for (int i=0; i<src_pairs_.size(); ++i) {
+    for (std::tie(b1,b1_end)=graph.out_bonds(src_pairs_[i].first); b1!=b1_end; ++b1) {
+      for (std::tie(b2,b2_end)=graph.out_bonds(src_pairs_[i].second); b2!=b2_end; ++b2) {
+        int d = pair_distance_[i];  
+        num_symm_pairs_[d](graph.bond_type(b1),graph.bond_type(b2)) += 1;
+      }
+    }
+  }
+  /*for (int d=0; d<max_dist_; ++d) {
+    for (int i=0; i<num_bond_types_; ++i) {
+      for (int j=0; j<num_bond_types_; ++j) {
+        std::cout <<"d= "<<d<<" t1= "<<i<<" t2= "<<j<<" n= "<<
+        num_symm_pairs_[d](i,j)<<"\n";
+      }
+    }
+  }*/
+  getchar();
+}
+
+
+
+
+
+
+
+
+
 
 //--------------------Observable class-----------------------
 Observable::Observable() 

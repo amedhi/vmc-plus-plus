@@ -4,7 +4,7 @@
 * Author: amedhi
 * Date:   2016-03-01 00:11:01
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-15 00:41:29
+* Last Modified time: 2017-05-03 11:47:02
 *----------------------------------------------------------------------------*/
 #ifndef GRAPH_H
 #define GRAPH_H
@@ -95,6 +95,9 @@ public:
   const unsigned& site_uid(const unsigned& i) const { return this->operator[](i).uid; }
   const Vector3d& site_cellcord(const site_iterator& vi) const { return this->operator[](*vi).cell_coord; }
   const Vector3d& site_cellcord(const site_descriptor& v) const { return this->operator[](v).cell_coord; }
+  const Vector3i& site_bravindex(const site_iterator& vi) const { return this->operator[](*vi).bravindex; }
+  const Vector3i& site_bravindex(const site_descriptor& v) const { return this->operator[](v).bravindex; }
+  const site_descriptor translated_site(const site_descriptor& vi, const Vector3i& bravidx) const;
 
   /*
   vertex_descriptor vertex(const unsigned& i) const { return boost::vertex(i, *this); }

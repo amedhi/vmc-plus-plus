@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-01-25 18:05:03
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-02-06 11:32:26
+* Last Modified time: 2017-05-03 10:43:50
 *----------------------------------------------------------------------------*/
 #ifndef LATTICE_H
 #define LATTICE_H
@@ -235,6 +235,8 @@ public:
   Vector3i get_next_bravindex(const Vector3i& current_index) const;
   Unitcell get_translated_cell(const Vector3i& bravindex_offset) const;
   int mapped_site_id(const unsigned& local_id, const Vector3i& bravindex) const;
+  unsigned translation_mapped_site(const unsigned& uid, const Vector3i& bravindex,
+    const Vector3i& translation_vec) const;
   bool connect_bond(Bond& bond, const std::vector<Site>& sites) const;
   const Site& basis_site(const unsigned& i) const { return Unitcell::site(i); }
   const Bond& basis_bond(const unsigned& i) const { return Unitcell::bond(i); }

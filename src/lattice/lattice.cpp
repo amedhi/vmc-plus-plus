@@ -3,7 +3,7 @@
 * All rights reserved.
 * Date:   2016-01-17 21:32:15
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2016-03-18 00:45:35
+* Last Modified time: 2017-05-03 10:43:53
 *----------------------------------------------------------------------------*/
 #include <iomanip>
 #include "lattice.h"
@@ -426,6 +426,20 @@ int Lattice::mapped_site_id(const unsigned& local_id, const Vector3i& bravindex)
   int cell_id = bravindex[0] + bravindex[1] * extent[dim1].size + bravindex[2] * num_layer_cells;
   if (cell_id < 0) return -1;
   return (static_cast<int>(local_id) + cell_id * num_basis_sites());
+}
+
+unsigned Lattice::translation_mapped_site(const unsigned& uid, 
+  const Vector3i& bravindex, const Vector3i& translation_vec) const
+{
+  if (uid > Unitcell::num_sites()) return uid;
+  Vector3i translated_cell = bravindex + translation_vec;
+  int sign;
+  boost::tie(translated_cell, sign) = boundary_wrap(translated_cell);
+  unsigned cell_id = translated_cell[0] + translated_cell[1] * extent[dim1].size 
+                   + translated_cell[2] * num_layer_cells;
+  unsigned mapped_id = uid + cell_id * num_basis_sites();
+  if (mapped_id < this->num_sites()) return mapped_id;
+  else return uid;
 }
 
 Eigen::Matrix3d Lattice::rotation_matrix(const Vector3d& r, const Vector3d& rp)

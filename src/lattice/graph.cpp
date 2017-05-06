@@ -4,7 +4,7 @@
 * Author: amedhi
 * Date:   2016-03-01 00:11:01
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-15 00:41:32
+* Last Modified time: 2017-05-03 11:46:59
 *----------------------------------------------------------------------------*/
 #include "graph.h"
 
@@ -115,6 +115,14 @@ void LatticeGraph::construct_graph(void)
   //for (auto it=p.first; it!=p.second;++it) { std::cout << *it << "\n"; }
   //std::pair<in_edge_iterator, in_edge_iterator> po = boost::in_edges(0, *this); 
   //for (auto it=po.first; it!=po.second;++it) { std::cout << *it << "\n"; }
+}
+
+const LatticeGraph::site_descriptor 
+LatticeGraph::translated_site(const LatticeGraph::site_descriptor& v, 
+  const Vector3i& translation_vec) const
+{
+  return static_cast<site_descriptor>(lattice_.translation_mapped_site(
+    site_uid(v), site_bravindex(v), translation_vec)); 
 }
 
 //} // end namespace graph

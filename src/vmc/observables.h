@@ -16,6 +16,7 @@
 #include <iomanip>
 #include "../scheduler/task.h"
 #include "../lattice/lattice.h"
+#include "../lattice/graph.h"
 #include "../model/model.h"
 #include "../mcdata/mcdata.h"
 
@@ -70,6 +71,26 @@ private:
   void close_file(void); 
 };
 
+class SC_Correlation : public Observable
+{
+public:
+  using site_t = lattice::LatticeGraph::site_descriptor;
+  using Observable::Observable;
+  void setup(const lattice::LatticeGraph& graph);
+  const unsigned& num_site_pairs(void) const { return src_pairs_size_; }
+  const std::pair<site_t,site_t>& site_pair(const unsigned& i) const 
+    { return src_pairs_[i]; }
+private:
+  int max_dist_{0};
+  unsigned num_bond_types_{0};
+  unsigned src_pairs_size_{0};
+  std::vector<std::pair<site_t,site_t> > src_pairs_;
+  std::vector<int> pair_distance_;
+  std::vector<Eigen::MatrixXd> bond_pair_corr_;
+  std::vector<Eigen::MatrixXi> num_symm_pairs_;
+};
+
+
 class ObservableSet : private std::vector<std::reference_wrapper<Observable> >
 {
 public:
@@ -88,6 +109,7 @@ public:
   inline Observable& energy_grad2(void) { return energy_grad2_; }
   inline Observable& sr_coeffs(void) { return sr_coeffs_; }
   inline Observable& sccf(void) { return sccf_; }
+  inline SC_Correlation& sc_corr(void) { return sc_corr_; }
   const bool& need_energy(void) const { return need_energy_; }
   void print_heading(void);
   void print_results(const std::vector<double>& xvals=std::vector<double>()); 
@@ -103,8 +125,12 @@ private:
   Observable energy_grad2_;
   Observable sr_coeffs_;
   Observable sccf_;
+  SC_Correlation sc_corr_;
   bool need_energy_{false};
 };
+
+
+
 
 
 } // end namespace vmc
