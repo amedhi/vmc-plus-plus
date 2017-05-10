@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-18 14:01:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-04-12 21:26:20
+* Last Modified time: 2017-05-10 23:35:56
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "./sysconfig.h"
@@ -479,7 +479,124 @@ amplitude_t SysConfig::apply_sisj_plus(const unsigned& i, const unsigned& j) con
   return -0.5 * det_ratio + amplitude_t(ninj_term);
 }
 
-void SysConfig::get_grad_logpsi(RealVector& grad_logpsi)
+amplitude_t SysConfig::apply_bondsinglet_hop(const unsigned& i_dag, 
+  const unsigned& ia_dag, const int& bphase_i, const unsigned& j, 
+  const unsigned& jb, const int& bphase_j) const
+{
+  // Evaluates the following operator:
+  //   F_{ab}(i,j) = (c^{\dag}_{i\up}c^{\dag}_{i+a\dn} -  c^{\dag}_{i\dn}c^{\dag}_{i+a,\up})/sqrt(2)
+  //          x (c_{j+b\dn}c_{j\up} - c_{j+b\up}c_{j\dn})/sqrt(2)
+  //          = 0.5 * [c^{\dag}_{i\up}c_{j\up} x c^{\dag}_{i+a\dn}c_{j+b\dn}
+  //                 + c^{\dag}_{i+a\up}c_{j\up} x c^{\dag}_{i\dn}c_{j+b\dn}
+  //                 + c^{\dag}_{i+a\up}c_{j+b\up} x c^{\dag}_{i\dn}c_{j\dn}
+  //                 + c^{\dag}_{i\up}c_{j+b\up} x c^{\dag}_{i+a\dn}c_{j\dn}]
+
+  int num_terms = 4;
+  unsigned up_fromsite, up_tosite;
+  unsigned dn_fromsite, dn_tosite;
+  amplitude_t net_ratio(0.0);
+  for (int iterm=0; iterm<num_terms; ++iterm) {
+    switch (iterm) {
+      case 0:
+        up_fromsite = j; up_tosite = i_dag;
+        dn_fromsite = jb; dn_tosite = ia_dag;
+        break;
+      case 1:
+        up_fromsite = j; up_tosite = ia_dag;
+        dn_fromsite = jb; dn_tosite = i_dag;
+        break;
+      case 2:
+        up_fromsite = jb; up_tosite = ia_dag;
+        dn_fromsite = j; dn_tosite = i_dag;
+        break;
+      case 3:
+        up_fromsite = jb; up_tosite = i_dag;
+        dn_fromsite = j; dn_tosite = ia_dag;
+        break;
+    }
+    const SiteState* state_j = &operator[](up_fromsite);
+    const SiteState* state_i = &operator[](up_tosite);
+    const SiteState* state_jb = &operator[](dn_fromsite);
+    const SiteState* state_ia = &operator[](dn_tosite);
+
+    //std::cout << " up_from = " << up_fromsite << "\n";
+    //std::cout << " up_to   = " << up_tosite << "\n";
+    //std::cout << " dn_from = " << dn_fromsite << "\n";
+    //std::cout << " dn_to   = " << dn_tosite << "\n\n";
+    // non-zero contribution from term only if followings
+    if (!state_j->have_upspin()) continue;
+    if (state_i->have_upspin() && up_fromsite!=up_tosite) continue;
+    if (!state_jb->have_dnspin()) continue;
+    if (state_ia->have_dnspin() && dn_fromsite!=dn_tosite) continue;
+
+    unsigned upspin, dnspin;
+    int delta_nd = 0;
+    amplitude_t det_ratio1, det_ratio2;
+
+    // first hop the up-spin
+    upspin = state_j->upspin_id();
+    if (up_fromsite == up_tosite) {
+      det_ratio1 = amplitude_t(1.0);
+    }
+    else {
+      wf.get_amplitudes(psi_row, up_tosite, dnspin_sites());
+      det_ratio1 = psi_row.cwiseProduct(psi_inv.col(upspin)).sum();
+    }
+
+    // next hop the dn-spin
+    dnspin = state_jb->dnspin_id();
+    if (dn_fromsite == dn_tosite) {
+      det_ratio2 = amplitude_t(1.0);
+    }
+    else {
+      wf.get_amplitudes(psi_col, upspin_sites(), dn_tosite);
+      // since one upspin have moved
+      wf.get_amplitudes(psi_col(upspin), up_tosite, dn_tosite);
+      // updated 'dnspin'-th row of psi_inv
+      amplitude_t ratio_inv = amplitude_t(1.0)/det_ratio1;
+      // elements other than 'upspin'-th
+      for (unsigned i=0; i<upspin; ++i) {
+        amplitude_t beta = ratio_inv*psi_row.cwiseProduct(psi_inv.col(i)).sum();
+        inv_row(i) = psi_inv(dnspin,i) - beta * psi_inv(dnspin,upspin);
+      }
+      for (unsigned i=upspin+1; i<num_upspins_; ++i) {
+        amplitude_t beta = ratio_inv*psi_row.cwiseProduct(psi_inv.col(i)).sum();
+        inv_row(i) = psi_inv(dnspin,i) - beta * psi_inv(dnspin,upspin);
+      }
+      inv_row(upspin) = ratio_inv * psi_inv(dnspin,upspin);
+      // ratio for the dnspin hop
+      det_ratio2 = psi_col.cwiseProduct(inv_row).sum();
+    }
+    // net ratio for up & dn spin hop
+    amplitude_t det_ratio = ampl_part(std::conj(det_ratio1*det_ratio2));
+
+    if (pj.have_gutzwiller()) {
+      // change in double occupancy for up-spin hop
+      delta_nd = 0;
+      if (up_fromsite != up_tosite) {
+        delta_nd = state_i->count(); // must be 0 or one
+        if (state_j->count()==2) delta_nd--;
+      }
+      // for dn-spin hop
+      if (dn_fromsite != dn_tosite) {
+        delta_nd += state_ia->count(); 
+        if (state_jb->count()==2) delta_nd--;
+      }
+      det_ratio *= pj.gw_ratio(delta_nd);
+    }
+    // contribution from this term
+    net_ratio += det_ratio;
+    //std::cout << " det_ratio1 = " << det_ratio1 << "\n";
+    //std::cout << " det_ratio2 = " << det_ratio2 << "\n";
+    //std::cout << " delta_nd = " << delta_nd << "\n";
+    //getchar();
+  }
+
+  int bc_phase = bphase_i * bphase_j;
+  return 0.5 * bc_phase * net_ratio;
+}
+
+void SysConfig::get_grad_logpsi(RealVector& grad_logpsi) const
 {
   // grad_logpsi wrt pj parameters
   unsigned p = pj.varparms().size();

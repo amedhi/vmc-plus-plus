@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-18 13:54:54
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-04-11 10:28:30
+* Last Modified time: 2017-05-10 23:35:53
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef SYSCONFIG_H
@@ -36,7 +36,7 @@ public:
   const unsigned& num_varparms(void) const { return num_varparms_; } 
   const var::parm_vector& vparm_values(void);
   const std::vector<double>& vparm_vector(void); 
-  const std::vector<std::string>& vparm_names(void) const { return vparm_names_; }
+  const std::vector<std::string>& varp_names(void) const { return vparm_names_; }
   const var::parm_vector& vparm_lbound(void) const { return vparm_lbound_; } 
   const var::parm_vector& vparm_ubound(void) const { return vparm_ubound_; } 
   const double& hole_doping(void) const { return wf.hole_doping(); }
@@ -45,9 +45,12 @@ public:
   void reset_accept_ratio(void);
   amplitude_t apply(const model::op::quantum_op& op, const unsigned& site_i, 
     const unsigned& site_j, const int& bc_phase) const;
+  amplitude_t apply_bondsinglet_hop(const unsigned& idag, const unsigned& ia_dag,
+    const int& bphase_i, const unsigned& j, const unsigned& ja, 
+    const int& bphase_j) const;
   int apply(const model::op::quantum_op& qn_op, const unsigned& site_i) const;
   int apply_niup_nidn(const unsigned& site_i) const;
-  void get_grad_logpsi(RealVector& grad_logpsi);
+  void get_grad_logpsi(RealVector& grad_logpsi) const;
   const int& num_updates(void) const { return num_updates_; }
   const var::Wavefunction& wavefunc(void) const { return wf; }
   void print_stats(std::ostream& os=std::cout) const;

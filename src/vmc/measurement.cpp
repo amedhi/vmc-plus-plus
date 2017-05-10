@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-17 23:30:00
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-04-17 18:20:48
+* Last Modified time: 2017-05-11 00:27:40
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include <iostream>
@@ -12,13 +12,19 @@ namespace vmc {
 
 void VMC::init_measurements(void)
 {
-  if (observables.sccf()) {
-    
-  }
+  //if (observables.sccf()) {
+  //}
 }
 
 void VMC::do_measurements(const observable_set& obs_set)
 {
+  if (observables.sc_corr()) {
+    observables.sc_corr().measure(graph, model, config);
+  } 
+  if (observables.eenergy()) {
+    observables.eenergy().measure(graph, model, config);
+  } 
+
   // observable_set::normal (as specied in input)
   if (obs_set==observable_set::normal) {
     if (observables.need_energy()) {

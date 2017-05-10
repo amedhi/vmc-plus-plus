@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-09 15:07:37
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-12 09:48:28
+* Last Modified time: 2017-05-11 00:31:33
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef STOCHASTIC_RECONF_H
@@ -27,7 +27,7 @@ public:
   const var::parm_vector& optimal_parms(void) const { return vparms_; }
   //const var::parm_vector& vp(void) { return varparms; }
 private:
-  Observable optimal_parms_;
+  mcdata::MC_Observable optimal_parms_;
   unsigned num_parms_;
   var::parm_vector vparms_;
   var::parm_vector lbound_;

@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:19:36
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-04-21 00:12:10
+* Last Modified time: 2017-05-10 12:40:05
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef VMC_H
@@ -38,7 +38,7 @@ public:
   const var::parm_vector& varp_values(void) { return config.vparm_values(); }
   const var::parm_vector& varp_lbound(void) const { return config.vparm_lbound(); }
   const var::parm_vector& varp_ubound(void) const { return config.vparm_ubound(); }
-  const std::vector<std::string>& varp_names(void) const { return config.vparm_names(); }
+  const std::vector<std::string>& varp_names(void) const { return config.varp_names(); }
   RandomGenerator& rng(void) const { return config.rng(); }
   const double& hole_doping(void) const { return config.hole_doping(); }
   void print_results(void); 

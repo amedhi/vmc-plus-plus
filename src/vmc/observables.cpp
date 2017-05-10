@@ -10,25 +10,16 @@ namespace vmc {
 
 ObservableSet::ObservableSet() 
   : energy_("Energy")
-  , total_energy_("TotalEnergy")
   , energy_grad_("EnergyGradient")
-  , energy_grad2_("EnergyGradient2")
   , sr_coeffs_("SR_Coefficients")
-  , sccf_("SC_Correlation")
   , sc_corr_("SC_Correlation")
 {
-  push_back(energy_);
-  push_back(total_energy_);
-  push_back(energy_grad_);
-  push_back(energy_grad2_);
-  push_back(sr_coeffs_);
-  push_back(sccf_);
-  push_back(sc_corr_);
+  //push_back(sr_coeffs_);
 }
 
 void ObservableSet::init(const input::Parameters& inputs, 
-    void (&print_copyright)(std::ostream& os), const model::Hamiltonian& model,
-    const std::vector<std::string>& varp_names)
+    void (&print_copyright)(std::ostream& os), const lattice::LatticeGraph& graph, 
+    const model::Hamiltonian& model, const SysConfig& config)
 {
   // file open mode
   std::string mode = inputs.set_value("mode", "NEW");
@@ -36,26 +27,47 @@ void ObservableSet::init(const input::Parameters& inputs,
   if (mode=="APPEND") replace_mode_ = false;
   else replace_mode_ = true;
   // check which observables to calculate
-  for (auto& obs : *this) obs.get().check_on(inputs, replace_mode_);
+  //for (auto& obs : *this) obs.get().check_on(inputs, replace_mode_);
+  energy_.check_on(inputs, replace_mode_);
+  energy_grad_.check_on(inputs, replace_mode_);
+  if (energy_grad_) energy_.switch_on();
+  sc_corr_.check_on(inputs, replace_mode_);
   // heading message
   print_copyright(headstream_);
   model.print_info(headstream_);
   num_xvars_ = 0; 
 
   // Energy (always set up)
-  std::vector<std::string> elem_names;
-  model.get_term_names(elem_names);
-  energy_.set_elements(elem_names);
-  energy_.set_have_total();
+  //std::vector<std::string> elem_names;
+  //model.get_term_names(elem_names);
+  //eenergy_.set_elements(elem_names);
+  //eenergy_.set_have_total();
+  //unsigned num_varp = config.varp_names().size();
 
-  unsigned num_varp = varp_names.size();
   // Energy Gradient
-  if (energy_grad_) {
-    energy_grad_.set_elements(varp_names);
+  /*if (energy_grad_) {
+    energy_grad_.set_elements(config.varp_names());
     energy_grad2_.set_elements(2*num_varp);
   }
   if (energy_||total_energy_||energy_grad_) need_energy_ = true;
+  */
+
+  if (energy_) energy_.setup(model);
+  if (energy_grad_) energy_grad_.setup(config);
+  if (sc_corr_) sc_corr_.setup(graph);
 }
+
+void ObservableSet::evaluate(const lattice::LatticeGraph& graph, 
+    const model::Hamiltonian& model, const SysConfig& config)
+{
+  if (energy_) energy_.measure(graph,model,config);
+  if (energy_grad_) {
+    if (!energy_) throw std::logic_error("ObservableSet::measure: EnergyGradient");
+    energy_grad_.measure(config, energy_.config_value().sum());
+  }
+  if (sc_corr_) sc_corr_.measure(graph,model,config);
+}
+
 
 void ObservableSet::as_functions_of(const std::vector<std::string>& xvars)
 {
@@ -71,14 +83,18 @@ void ObservableSet::as_functions_of(const std::string& xvar)
 
 void ObservableSet::switch_off(void) {
   for (auto& obs : *this) obs.get().switch_off();
+  energy_.switch_off();
+  sc_corr_.switch_off();
 }
 
 void ObservableSet::print_heading(void)
 {
   for (auto& obs : *this) {
     if (obs.get().is_on() && obs.get().replace_mode()) 
-      obs.get().print_heading(headstream_,xvars_);
+      obs.get().print_heading(headstream_.rdbuf()->str(),xvars_);
   }
+  energy_.print_heading(headstream_.rdbuf()->str(),xvars_);
+  sr_coeffs_.print_heading(headstream_.rdbuf()->str(),xvars_);
 }
 
 void ObservableSet::print_results(const std::vector<double>& xvals) 
@@ -87,74 +103,40 @@ void ObservableSet::print_results(const std::vector<double>& xvals)
     throw std::invalid_argument("Observables::print_result: 'x-vars' size mismatch");
   for (auto& obs : *this) {
     if (obs.get().is_on()) {
-      obs.get().print_heading(headstream_,xvars_);
+      obs.get().print_heading(headstream_.rdbuf()->str(),xvars_);
       obs.get().print_result(xvals);
     }
+  }
+  if (energy_.is_on()) {
+    energy_.print_heading(headstream_.rdbuf()->str(),xvars_);
+    energy_.print_result(xvals);
+  }
+  if (sc_corr_.is_on()) {
+    sc_corr_.print_heading(headstream_.rdbuf()->str(),xvars_);
+    sc_corr_.print_result(xvals);
   }
 }
 
 void ObservableSet::print_results(const double& xval) 
 {
   if (num_xvars_ != 1) 
-    throw std::invalid_argument("Observables::print_result: 'x-vars' size mismatch");
+    throw std::invalid_argument("ObservableSet::print_result: 'x-vars' size mismatch");
   std::vector<double> xvals{xval};
   for (auto& obs : *this) {
     if (obs.get().is_on()) {
-      obs.get().print_heading(headstream_,xvars_);
+      obs.get().print_heading(headstream_.rdbuf()->str(),xvars_);
       obs.get().print_result(xvals);
     }
   }
+  if (energy_.is_on()) {
+    energy_.print_heading(headstream_.rdbuf()->str(),xvars_);
+    energy_.print_result(xvals);
+  }
+  if (sc_corr_.is_on()) {
+    sc_corr_.print_heading(headstream_.rdbuf()->str(),xvars_);
+    sc_corr_.print_result(xvals);
+  }
 }
-
-//--------------------SC Corr-----------------------
-void SC_Correlation::setup(const lattice::LatticeGraph& graph)
-{
-  max_dist_ = graph.lattice().size1()/2+1;
-  num_bond_types_ = graph.num_bond_types();
-  bond_pair_corr_.resize(max_dist_);
-  num_symm_pairs_.resize(max_dist_);
-  for (int d=0; d<max_dist_; ++d) {
-    bond_pair_corr_[d].resize(num_bond_types_,num_bond_types_);
-    num_symm_pairs_[d].resize(num_bond_types_,num_bond_types_);
-    bond_pair_corr_[d].setZero();
-    num_symm_pairs_[d].setZero();
-  }
-  // all the 'source site' pairs (along 'x'-direction) & their distances
-  src_pairs_.clear();
-  pair_distance_.clear();
-  for (auto s=graph.sites_begin(); s!=graph.sites_end(); ++s) {
-    auto si = *s;
-    for (int d=0; d<max_dist_; ++d) {
-      auto sj = graph.translated_site(si, Eigen::Vector3i(d,0,0)); 
-      //std::cout << si << "   " << sj << "\n";
-      src_pairs_.push_back({si, sj});
-      pair_distance_.push_back(d);
-    }
-  }
-  src_pairs_size_ = src_pairs_.size();
-  // number of symmetrical bond pairs at a given distance
-  lattice::LatticeGraph::out_bond_iterator b1, b1_end, b2, b2_end;
-  for (int i=0; i<src_pairs_.size(); ++i) {
-    for (std::tie(b1,b1_end)=graph.out_bonds(src_pairs_[i].first); b1!=b1_end; ++b1) {
-      for (std::tie(b2,b2_end)=graph.out_bonds(src_pairs_[i].second); b2!=b2_end; ++b2) {
-        int d = pair_distance_[i];  
-        num_symm_pairs_[d](graph.bond_type(b1),graph.bond_type(b2)) += 1;
-      }
-    }
-  }
-  /*for (int d=0; d<max_dist_; ++d) {
-    for (int i=0; i<num_bond_types_; ++i) {
-      for (int j=0; j<num_bond_types_; ++j) {
-        std::cout <<"d= "<<d<<" t1= "<<i<<" t2= "<<j<<" n= "<<
-        num_symm_pairs_[d](i,j)<<"\n";
-      }
-    }
-  }*/
-  getchar();
-}
-
-
-
 
 
 
@@ -208,13 +190,13 @@ void Observable::check_on(const input::Parameters& inputs, const bool& replace_m
   replace_mode_ = replace_mode;
 }
 
-void Observable::print_heading(const std::stringstream& header,
+void Observable::print_heading(const std::string& header,
   const std::vector<std::string>& xvars) 
 {
   if (!is_on()) return;
   if (heading_printed_) return;
   if (!fs_.is_open()) open_file();
-  fs_ << header.rdbuf();
+  fs_ << header;
   fs_ << "# Results: " << name() << "\n";
   fs_ << "#" << std::string(72, '-') << "\n";
   fs_ << "# ";

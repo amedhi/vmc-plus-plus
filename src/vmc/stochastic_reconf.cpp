@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-09 15:19:43
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-04-12 20:43:42
+* Last Modified time: 2017-05-11 00:31:29
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include <string>
@@ -45,13 +45,13 @@ int StochasticReconf::init(const input::Parameters& inputs, const VMC& vmc)
   bool replace_mode = true;
   if (mode=="APPEND") replace_mode = false;
   optimal_parms_.init("OptParams", replace_mode);
-  optimal_parms_.set_elements(vmc.varp_names());
+  optimal_parms_.resize(vmc.num_varp(), vmc.varp_names());
   // observable file header
   std::stringstream heading;
   vmc.copyright_msg(heading);
   vmc.print_info(heading);
   std::vector<std::string> as_funct_of{"x"};
-  optimal_parms_.print_heading(heading, as_funct_of);
+  optimal_parms_.print_heading(heading.rdbuf()->str(), as_funct_of);
   // progress file
   if (print_progress_) {
     progress_.open("log_optimization.txt");

@@ -18,7 +18,10 @@
 #include "../lattice/lattice.h"
 #include "../lattice/graph.h"
 #include "../model/model.h"
-#include "../mcdata/mcdata.h"
+#include "../mcdata/mc_observable.h"
+#include "./sysconfig.h"
+#include "./energy.h"
+#include "./sccorr.h"
 
 namespace vmc {
 
@@ -49,7 +52,7 @@ public:
   bool is_open(void) const { return fs_.is_open(); }
   std::ofstream& fstream(void) { open_file(); return fs_; }  
   const bool& replace_mode(void) const { return replace_mode_; }
-  void print_heading(const std::stringstream& header, 
+  void print_heading(const std::string& header, 
     const std::vector<std::string>& xvars);
   void print_result(const std::vector<double>& xvals); 
 private:
@@ -71,25 +74,6 @@ private:
   void close_file(void); 
 };
 
-class SC_Correlation : public Observable
-{
-public:
-  using site_t = lattice::LatticeGraph::site_descriptor;
-  using Observable::Observable;
-  void setup(const lattice::LatticeGraph& graph);
-  const unsigned& num_site_pairs(void) const { return src_pairs_size_; }
-  const std::pair<site_t,site_t>& site_pair(const unsigned& i) const 
-    { return src_pairs_[i]; }
-private:
-  int max_dist_{0};
-  unsigned num_bond_types_{0};
-  unsigned src_pairs_size_{0};
-  std::vector<std::pair<site_t,site_t> > src_pairs_;
-  std::vector<int> pair_distance_;
-  std::vector<Eigen::MatrixXd> bond_pair_corr_;
-  std::vector<Eigen::MatrixXi> num_symm_pairs_;
-};
-
 
 class ObservableSet : private std::vector<std::reference_wrapper<Observable> >
 {
@@ -97,18 +81,20 @@ public:
   ObservableSet();
   ~ObservableSet() {}
   void init(const input::Parameters& inputs, 
-    void (&print_copyright)(std::ostream& os), const model::Hamiltonian& model,
-    const std::vector<std::string>& varp_names);
+    void (&print_copyright)(std::ostream& os), const lattice::LatticeGraph& graph, 
+    const model::Hamiltonian& model, const SysConfig& config);
   void as_functions_of(const std::vector<std::string>& xvars=std::vector<std::string>());
   void as_functions_of(const std::string& xvar);
   void switch_off(void);
   void reset(void) { for (auto& obs : *this) obs.get().reset(); }
-  inline Observable& energy(void) { return energy_; }
+  void evaluate(const lattice::LatticeGraph& graph, 
+    const model::Hamiltonian& model, const SysConfig& config);
+  inline Observable& energy(void) { return Energy_; }
+  inline Energy& eenergy(void) { return energy_; }
   inline Observable& total_energy(void) { return total_energy_; }
-  inline Observable& energy_grad(void) { return energy_grad_; }
-  inline Observable& energy_grad2(void) { return energy_grad2_; }
+  inline Observable& energy_grad(void) { return Energy_grad_; }
+  inline Observable& energy_grad2(void) { return Energy_grad2_; }
   inline Observable& sr_coeffs(void) { return sr_coeffs_; }
-  inline Observable& sccf(void) { return sccf_; }
   inline SC_Correlation& sc_corr(void) { return sc_corr_; }
   const bool& need_energy(void) const { return need_energy_; }
   void print_heading(void);
@@ -119,12 +105,13 @@ private:
   std::stringstream headstream_;
   std::vector<std::string> xvars_;
   unsigned num_xvars_{0};
-  Observable energy_;
+  Observable Energy_;
+  Energy energy_;
+  EnergyGradient energy_grad_;
   Observable total_energy_;
-  Observable energy_grad_;
-  Observable energy_grad2_;
+  Observable Energy_grad_;
+  Observable Energy_grad2_;
   Observable sr_coeffs_;
-  Observable sccf_;
   SC_Correlation sc_corr_;
   bool need_energy_{false};
 };
