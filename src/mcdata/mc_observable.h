@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-05-06 11:14:26
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-05-10 23:19:29
+* Last Modified time: 2017-05-11 21:02:55
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef MC_OBSERVABLE_H
@@ -33,7 +33,7 @@ public:
   void set_file_mode(const bool& replace_mode) { replace_mode_=replace_mode; }
   void save_result(void);
   void set_have_total(void) { have_total_=true; }
-  void reset(void) { MC_Data::clear(); }
+  virtual void reset(void) { MC_Data::clear(); }
   void check_on(const input::Parameters& inputs, const bool& replace_mode); 
   void switch_on(void) { is_on_=true; }
   void switch_off(void) { is_on_=false; if (fs_.is_open()) fs_.close(); }

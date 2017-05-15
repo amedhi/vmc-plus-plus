@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:50
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-05-01 23:04:45
+* Last Modified time: 2017-05-15 23:59:20
 *----------------------------------------------------------------------------*/
 #include <iomanip>
 #include "simulator.h"
@@ -29,7 +29,7 @@ int Simulator::run(const input::Parameters& inputs)
         std::cout << " optimizing disorder config " << n;
         std::cout << " of " << vmc.num_disorder_configs() << "\n";
         if (vmc.optimal_parms_exists(n)) continue;
-        vmc.start(inputs, true, true);
+        vmc.start(inputs, run_mode::sr_function, true);
         vmc.set_disorder_config(n);
         if (sreconf.optimize(vmc)) {
           vmc.save_optimal_parms(sreconf.optimal_parms());
@@ -57,7 +57,7 @@ int Simulator::run(const input::Parameters& inputs)
   // optimization run
   if (optimization_mode_) {
     if (!inputs.have_option_quiet()) std::cout << " starting optimizing run\n";
-    vmc.start(inputs, true, true);
+    vmc.start(inputs, run_mode::sr_function, true);
     if (sreconf.optimize(vmc)) {
       vmc.run_simulation(sreconf.optimal_parms());
       vmc.print_results();
@@ -67,7 +67,7 @@ int Simulator::run(const input::Parameters& inputs)
 
   // normal run
   if (!inputs.have_option_quiet()) std::cout << " starting vmc run\n";
-  vmc.start(inputs);
+  vmc.start(inputs, run_mode::normal);
   vmc.run_simulation();
   vmc.print_results();
   return 0;
@@ -106,7 +106,7 @@ int Simulator::run(const input::Parameters& inputs,
         std::cout << " optimizing disorder config " << n;
         std::cout << " of " << vmc.num_disorder_configs() << "\n";
         if (vmc.optimal_parms_exists(n)) continue;
-        vmc.start(inputs, true, true);
+        vmc.start(inputs, run_mode::sr_function, true);
         vmc.set_disorder_config(n);
         if (sreconf.optimize(vmc)) {
           vmc.save_optimal_parms(sreconf.optimal_parms());

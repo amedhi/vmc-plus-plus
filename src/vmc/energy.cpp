@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-05-10 21:47:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-05-10 23:46:56
+* Last Modified time: 2017-05-15 23:35:34
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "./energy.h"
@@ -10,13 +10,18 @@
 namespace vmc {
 
 //-------------------ENERGY--------------------------------
-void Energy::setup(const model::Hamiltonian& model)
+void Energy::setup(const lattice::LatticeGraph& graph, 
+  const model::Hamiltonian& model)
 {
+  MC_Observable::switch_on();
+  if (setup_done_) return;
+  num_sites_ = graph.num_sites();
   std::vector<std::string> elem_names;
   model.get_term_names(elem_names);
   this->resize(elem_names.size(), elem_names);
   this->set_have_total();
   config_value_.resize(elem_names.size());
+  setup_done_ = true;
 }
   
 void Energy::measure(const lattice::LatticeGraph& graph, 
@@ -94,7 +99,7 @@ void Energy::measure(const lattice::LatticeGraph& graph,
     }
   }
   // energy per site
-  config_value_ /= graph.num_sites();
+  config_value_ /= num_sites_;
   // add to databin
   *this << config_value_;
 }
@@ -102,11 +107,14 @@ void Energy::measure(const lattice::LatticeGraph& graph,
 //-------------------ENERGY GRADIENT--------------------------------
 void EnergyGradient::setup(const SysConfig& config)
 {
+  MC_Observable::switch_on();
+  if (setup_done_) return;
   num_varp_ = config.num_varparms();
   this->resize(config.num_varparms(),config.varp_names());
   grad_logpsi_.resize(config.num_varparms());
   config_value_.resize(2*config.num_varparms());
   grad_terms_.resize(2*config.num_varparms());
+  setup_done_ = true;
 }
   
 void EnergyGradient::measure(const SysConfig& config, const double& config_energy)
@@ -138,7 +146,53 @@ void EnergyGradient::finalize(const double& mean_energy)
   *this << energy_grad;
 }
 
+//-------------------SR_Matrix (Stochastic Reconfiguration)---------------
+void SR_Matrix::setup(const lattice::LatticeGraph& graph, const SysConfig& config)
+{
+  MC_Observable::switch_on();
+  if (setup_done_) return;
+  num_sites_ = graph.num_sites();
+  num_varp_ = config.num_varparms();
+  // '\del(ln(psi))' plus upper triangular part of the sr_matrix 
+  unsigned n = num_varp_ + num_varp_*(num_varp_+1)/2;
+  this->resize(n);
+  config_value_.resize(n);
+  setup_done_ = true;
+}
 
+void SR_Matrix::measure(const RealVector& grad_logpsi)
+{
+  assert(grad_logpsi.size()==num_varp_);
+  // operator 'del(ln(psi))' terms
+  for (unsigned i=0; i<num_varp_; ++i) config_value_[i] = grad_logpsi[i];
+  // flatten the upper triangular part to a vector
+  unsigned k = num_varp_;
+  for (unsigned i=0; i<num_varp_; ++i) {
+    double x = grad_logpsi[i];
+    for (unsigned j=i; j<num_varp_; ++j) {
+      double y = grad_logpsi[j];
+      config_value_[k] = x * y;
+      ++k;
+    }
+  }
+  *this << config_value_;
+}
+
+void SR_Matrix::get_matrix(Eigen::MatrixXd& sr_matrix) const
+{
+  // 'config_value' is used as temporary storage
+  config_value_ = MC_Observable::mean_data();
+  unsigned k = num_varp_;
+  for (unsigned i=0; i<num_varp_; ++i) {
+    double x = config_value_[i];
+    for (unsigned j=i; j<num_varp_; ++j) {
+      double y = config_value_[j];
+      sr_matrix(i,j) = (config_value_[k] - x*y)/num_sites_;
+      sr_matrix(j,i) = sr_matrix(i,j);
+      ++k;
+    }
+  }
+}
 
 
 } // end namespace vmc
