@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:19:36
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-05-15 23:55:40
+* Last Modified time: 2017-05-16 20:55:39
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef VMC_H
@@ -78,7 +78,7 @@ private:
   int check_interval_{0};
   bool silent_mode_{false};
 
-  void print_progress(const int& num_measurement) const;
+  void print_progress(const int& num_measurement, const int& num_measure_steps) const;
 };
 
 } // end namespace vmc

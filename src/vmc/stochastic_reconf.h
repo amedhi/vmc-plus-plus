@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-09 15:07:37
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-05-11 00:31:33
+* Last Modified time: 2017-05-16 21:45:21
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef STOCHASTIC_RECONF_H
@@ -45,10 +45,11 @@ private:
   double start_tstep_{0.05};
   double grad_tol_{0.01};
   double mk_thresold_{0.30};
-  bool print_progress_{true};
+  bool print_progress_{false};
+  bool print_log_{true};
 
   // progress file
-  std::ofstream progress_;
+  std::ofstream logfile_;
 };
 
 

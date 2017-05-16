@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:20:56
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-05-16 00:33:50
+* Last Modified time: 2017-05-16 21:03:43
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "vmc.h"
@@ -77,9 +77,10 @@ int VMC::start(const input::Parameters& inputs, const run_mode& mode,
       observables.sr_matrix().setup(graph,config);
       break;
   }
-  return config.build(graph, inputs, with_psi_grad);
   silent_mode_ = silent;
   if (inputs.have_option_quiet()) silent_mode_ = true;
+  // build config
+  return config.build(graph, inputs, with_psi_grad);
 }
 
 double VMC::energy_function(const Eigen::VectorXd& varp, Eigen::VectorXd& grad)
@@ -137,12 +138,12 @@ int VMC::run_simulation(const int& sample_size)
   for (int n=0; n<num_warmup_steps_; ++n) config.update_state();
   if (!silent_mode_) std::cout << "done\n";
   // measuring run
-  int num_measurement = num_measure_steps_;
-  if (sample_size>0) num_measurement = sample_size;
+  int num_measure_steps = num_measure_steps_;
+  if (sample_size>0) num_measure_steps = sample_size;
   int measurement_count = 0;
   int skip_count = min_interval_;
   observables.reset();
-  while (measurement_count < num_measurement) {
+  while (measurement_count < num_measure_steps) {
     config.update_state();
     if (skip_count >= min_interval_) {
       if (config.accept_ratio()>0.5 || skip_count==max_interval_) {
@@ -150,7 +151,7 @@ int VMC::run_simulation(const int& sample_size)
         config.reset_accept_ratio();
         observables.do_measurement(graph,model,config);
         ++measurement_count;
-        if (!silent_mode_) print_progress(measurement_count);
+        if (!silent_mode_) print_progress(measurement_count, num_measure_steps);
       }
     }
     skip_count++;
@@ -173,10 +174,10 @@ void VMC::print_results(void)
   //std::cout << observables.energy().with_statistic() << "\n";
 }
 
-void VMC::print_progress(const int& num_measurement) const
+void VMC::print_progress(const int& num_measurement, const int& num_measure_steps) const
 {
   if (num_measurement%check_interval_==0)
-  std::cout<<" measurement = "<< double(100.0*num_measurement)/num_measure_steps_<<" %\n";
+  std::cout<<" measurement = "<< double(100.0*num_measurement)/num_measure_steps<<" %\n";
 }
 
 void VMC::copyright_msg(std::ostream& os)

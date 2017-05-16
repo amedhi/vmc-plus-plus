@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-09 15:19:43
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-05-11 00:31:29
+* Last Modified time: 2017-05-16 21:45:15
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include <string>
@@ -24,14 +24,15 @@ int StochasticReconf::init(const input::Parameters& inputs, const VMC& vmc)
 
   // optimization parameters
   int nowarn;
-  num_sim_samples_ = inputs.set_value("opt_measure_steps", 1000, nowarn);
-  num_opt_samples_ = inputs.set_value("num_opt_samples", 30, nowarn);
+  num_sim_samples_ = inputs.set_value("sr_measure_steps", 1000, nowarn);
+  num_opt_samples_ = inputs.set_value("sr_opt_samples", 30, nowarn);
   max_iter_ = inputs.set_value("sr_max_iter", 500, nowarn);
   start_tstep_ = inputs.set_value("sr_start_tstep", 0.05, nowarn);
   mk_series_len_ = inputs.set_value("sr_series_len", 40, nowarn);
   mk_thresold_ = inputs.set_value("sr_fluctuation_tol", 0.30, nowarn);
   grad_tol_ = inputs.set_value("sr_grad_tol", 0.05, nowarn);
-  print_progress_ = inputs.set_value("sr_print_progress", true, nowarn);
+  print_progress_ = inputs.set_value("sr_progress_stdout", false, nowarn);
+  print_log_ = inputs.set_value("sr_progress_log", true, nowarn);
   refinement_cycle_ = max_iter_/5;
   if (mk_series_len_ > refinement_cycle_) {
     throw std::domain_error("StochasticReconf::init: sr_series_len > sr_max_iter/5");
@@ -53,21 +54,32 @@ int StochasticReconf::init(const input::Parameters& inputs, const VMC& vmc)
   std::vector<std::string> as_funct_of{"x"};
   optimal_parms_.print_heading(heading.rdbuf()->str(), as_funct_of);
   // progress file
-  if (print_progress_) {
-    progress_.open("log_optimization.txt");
-    if (!progress_.is_open())
+  if (print_log_) {
+    logfile_.open("log_optimization.txt");
+    if (!logfile_.is_open())
       throw std::runtime_error("StochasticReconf::init: file open failed");
-    vmc.copyright_msg(progress_);
-    vmc.print_info(progress_);
-    progress_ << "#" << std::string(72, '-') << std::endl;
-    progress_ << "Stochastic Reconfiguration" << std::endl;
-    progress_ << "max_iter = " << max_iter_ << std::endl;
-    progress_ << "start_tstep = " << start_tstep_ << std::endl;
-    progress_ << "mk_series_len = " << mk_thresold_ << std::endl;
-    progress_ << "grad_tol = " << grad_tol_ << std::endl;
-    progress_ << "fluctuation_tol = " << mk_thresold_ << std::endl;
-    progress_ << "optimization samples = " << num_opt_samples_ << std::endl;
-    progress_ << "#" << std::string(72, '-') << std::endl;
+    vmc.copyright_msg(logfile_);
+    vmc.print_info(logfile_);
+    logfile_ << "#" << std::string(72, '-') << std::endl;
+    logfile_ << "Stochastic Reconfiguration" << std::endl;
+    logfile_ << "max_iter = " << max_iter_ << std::endl;
+    logfile_ << "start_tstep = " << start_tstep_ << std::endl;
+    logfile_ << "mk_series_len = " << mk_thresold_ << std::endl;
+    logfile_ << "grad_tol = " << grad_tol_ << std::endl;
+    logfile_ << "fluctuation_tol = " << mk_thresold_ << std::endl;
+    logfile_ << "optimization samples = " << num_opt_samples_ << std::endl;
+    logfile_ << "#" << std::string(72, '-') << std::endl;
+  }
+  if (print_progress_) {
+    std::cout << "#" << std::string(72, '-') << std::endl;
+    std::cout << "Stochastic Reconfiguration" << std::endl;
+    std::cout << "max_iter = " << max_iter_ << std::endl;
+    std::cout << "start_tstep = " << start_tstep_ << std::endl;
+    std::cout << "mk_series_len = " << mk_thresold_ << std::endl;
+    std::cout << "grad_tol = " << grad_tol_ << std::endl;
+    std::cout << "fluctuation_tol = " << mk_thresold_ << std::endl;
+    std::cout << "optimization samples = " << num_opt_samples_ << std::endl;
+    std::cout << "#" << std::string(72, '-') << std::endl;
   }
   return 0;
 }
@@ -78,8 +90,12 @@ int StochasticReconf::optimize(VMC& vmc)
   optimal_parms_.reset();
   for (unsigned n=0; n<num_opt_samples_; ++n) {
     //std::cout << " optimal sample = " << n << "\n";
+    if (print_log_) {
+      logfile_ << "Starting sample " << n << " of " 
+        << num_opt_samples_ << " ... " << std::flush;
+    }
     if (print_progress_) {
-      progress_ << "Starting sample " << n << " of " 
+      std::cout << "Starting sample " << n << " of " 
         << num_opt_samples_ << " ... " << std::flush;
     }
     // starting value of variational parameters
@@ -116,59 +132,85 @@ int StochasticReconf::optimize(VMC& vmc)
       //if (gnorm < grad_tol_) 
       mk_statistic_ << vparms_;
       double mk_trend = mk_statistic_.elem_max_trend();
-      /*
-      double gnorm = grad_.squaredNorm();
-      std::cout << " iter = " << iter << "\n";
-      std::cout << " search_dir = " << search_dir.transpose() << "\n";
-      std::cout << " varp = " << vparms_.transpose() << "\n";
-      std::cout << " energy = " << en << "\n";
-      std::cout << " grad = " << grad_.transpose() << "\n";
-      std::cout << " gnorm = " << gnorm << "\n";
-      std::cout << " trend = " << mk_trend << "\n"; 
-      */
+      if (print_progress_) {
+        double gnorm = grad_.squaredNorm();
+        std::cout << " iter = " << iter << "\n";
+        std::cout << " search_dir = " << search_dir.transpose() << "\n";
+        std::cout << " varp = " << vparms_.transpose() << "\n";
+        std::cout << " energy = " << en << "\n";
+        std::cout << " grad = " << grad_.transpose() << "\n";
+        std::cout << " gnorm = " << gnorm << "\n";
+        std::cout << " trend = " << mk_trend << "\n"; 
+      }
       // convergence criteria
       if (mk_statistic_.is_full() && mk_trend<mk_thresold_) {
         // converged, add data point to store
         mk_statistic_.get_series_avg(vparms_);
         optimal_parms_ << vparms_;
         // print
+        if (print_log_) {
+          double gnorm = grad_.squaredNorm();
+          logfile_ << "converged!" << std::endl;
+          logfile_ << "iteration = "<< iter << std::endl;
+          logfile_ << "MK trend = " << mk_statistic_.elem_max_trend() << "\n";
+          logfile_ << "gnorm = " << gnorm << std::endl;
+          if (num_parms_<10) {
+            logfile_ << "varp = " << vparms_.transpose() << std::endl;
+          }
+          logfile_ << "energy = " << en << std::endl;
+          logfile_ << std::endl;
+        }
         if (print_progress_) {
           double gnorm = grad_.squaredNorm();
-          progress_ << "converged!" << std::endl;
-          progress_ << "iteration = "<< iter << std::endl;
-          progress_ << "MK trend = " << mk_statistic_.elem_max_trend() << "\n";
-          progress_ << "gnorm = " << gnorm << std::endl;
+          std::cout << "converged!" << std::endl;
+          std::cout << "iteration = "<< iter << std::endl;
+          std::cout << "MK trend = " << mk_statistic_.elem_max_trend() << "\n";
+          std::cout << "gnorm = " << gnorm << std::endl;
           if (num_parms_<10) {
-            progress_ << "varp = " << vparms_.transpose() << std::endl;
+            std::cout << "varp = " << vparms_.transpose() << std::endl;
           }
-          progress_ << "energy = " << en << std::endl;
-          progress_ << std::endl;
+          std::cout << "energy = " << en << std::endl;
+          std::cout << std::endl;
         }
         break;
       }
       // refinement if not converged early
       if (iter % refinement_cycle_ == 0) {
+        if (print_log_) {
+          logfile_ << "next refinement cycle" << std::endl;
+        }
         if (print_progress_) {
-          progress_ << "next refinement cycle" << std::endl;
+          std::cout << "next refinement cycle" << std::endl;
         }
         mc_samples *= 2;
         //search_tstep *= 0.5;
       }
     }
+    if (iter>=max_iter_ && print_log_) {
+      logfile_ << "NOT converged):" << std::endl << std::endl;
+    }
     if (iter>=max_iter_ && print_progress_) {
-      progress_ << "NOT converged):" << std::endl << std::endl;
+      std::cout << "NOT converged):" << std::endl << std::endl;
     }
     // next sample
   }
+  if (print_log_) {
+    if (optimal_parms_.num_samples()==num_opt_samples_)
+      logfile_ << "All done!" << std::endl;
+    else if (optimal_parms_.num_samples()>0)
+      logfile_ << "Done. Some not converged." << std::endl;
+    else
+      logfile_ << "None converged):" << std::endl;
+  }
   if (print_progress_) {
     if (optimal_parms_.num_samples()==num_opt_samples_)
-      progress_ << "All done!" << std::endl;
+      std::cout << "All done!" << std::endl;
     else if (optimal_parms_.num_samples()>0)
-      progress_ << "Done. Some not converged." << std::endl;
+      std::cout << "Done. Some not converged." << std::endl;
     else
-      progress_ << "None converged):" << std::endl;
+      std::cout << "None converged):" << std::endl;
   }
-  progress_.close();
+  logfile_.close();
   // print results
   if (optimal_parms_.num_samples() > 0) {
     std::vector<double> xv({vmc.hole_doping()});

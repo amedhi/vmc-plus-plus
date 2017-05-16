@@ -97,12 +97,14 @@ void ObservableSet::switch_off(void) {
   energy_.switch_off();
   energy_grad_.switch_off();
   sc_corr_.switch_off();
+  sr_matrix_.switch_off();
 }
 
 void ObservableSet::print_heading(void)
 {
   energy_.print_heading(headstream_.rdbuf()->str(),xvars_);
   energy_grad_.print_heading(headstream_.rdbuf()->str(),xvars_);
+  sc_corr_.print_heading(headstream_.rdbuf()->str(),xvars_);
   sr_matrix_.print_heading(headstream_.rdbuf()->str(),xvars_);
 }
 
