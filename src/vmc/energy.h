@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-05-10 21:41:40
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-05-16 21:45:26
+* Last Modified time: 2017-05-17 07:22:22
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef OBS_ENERGY_H
@@ -12,6 +12,7 @@
 #include "../lattice/graph.h"
 #include "../model/model.h"
 #include "./sysconfig.h"
+#include "./disorder.h"
 
 namespace vmc {
 
@@ -21,7 +22,7 @@ public:
   using MC_Observable::MC_Observable;
   void setup(const lattice::LatticeGraph& graph, const model::Hamiltonian& model);
   void measure(const lattice::LatticeGraph& graph, const model::Hamiltonian& model,
-    const SysConfig& config);
+    const SysConfig& config, const SiteDisorder& site_disorder);
   const mcdata::data_t& config_value(void) const { return config_value_; }
 private:
   bool setup_done_{false};

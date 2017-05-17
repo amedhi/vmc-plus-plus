@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-13 11:23:45
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-04-13 10:46:51
+* Last Modified time: 2017-05-17 10:35:07
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 //#define BOOST_FILESYSTEM_NO_DEPRECATED
@@ -55,6 +55,7 @@ int SiteDisorder::init(const input::Parameters& inputs, const lattice::LatticeGr
       unsigned n = 0;
       while (fin>>x && n<num_sites_) {
         disorder_pot_[i][n++] = x;
+        //std::cout << i << "  " << x << "\n"; getchar();
       }
       fin.close();
       if (n != num_sites_) {
@@ -75,7 +76,11 @@ int SiteDisorder::init(const input::Parameters& inputs, const lattice::LatticeGr
       for (unsigned n=0; n<num_sites_; ++n) {
         double V = bandwidth_ * (rng.random_real()-0.50);
         //fout << std::setw(6) << n << std::setw(22) << V << std::endl;
+        // write to file
         fout << std::setw(22) << V << std::endl;
+        // also keep the data
+        disorder_pot_[i][n] = V;
+        //std::cout << i << "  " << V << "\n";
       }
       fout.close();
     }

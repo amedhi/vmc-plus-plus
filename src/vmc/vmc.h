@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:19:36
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-05-16 20:55:39
+* Last Modified time: 2017-05-16 23:21:14
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef VMC_H
@@ -50,7 +50,7 @@ public:
 
   // disordered case
   int disorder_start(const input::Parameters& inputs, const unsigned& disorder_config, 
-    const bool& optimizing_mode=false, const bool& silent=false);
+    const run_mode& mode=run_mode::normal, const bool& silent=false);
   void save_optimal_parms(const var::parm_vector& optimal_parms) 
     { site_disorder_.save_optimal_parms(optimal_parms); }
   bool optimal_parms_exists(const unsigned& config) 

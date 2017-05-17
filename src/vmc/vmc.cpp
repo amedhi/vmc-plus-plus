@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:20:56
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-05-16 21:03:43
+* Last Modified time: 2017-05-17 07:24:49
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "vmc.h"
@@ -40,20 +40,33 @@ VMC::VMC(const input::Parameters& inputs)
 }
 
 int VMC::disorder_start(const input::Parameters& inputs, 
-  const unsigned& disorder_config, const bool& optimizing_mode, const bool& silent)
+  const unsigned& disorder_config, const run_mode& mode, const bool& silent)
 {
   site_disorder_.set_current_config(disorder_config);
   //site_disorder_.save_optimal_parms(config.vparm_values());
+  run_mode_ = mode;
   bool with_psi_grad = false;
-  if (observables.energy_grad()) with_psi_grad = true;
-  if (optimizing_mode) {
-    observables.switch_off();
-    observables.energy().switch_on();
+  switch (mode) {
+    case run_mode::normal:
+      if (observables.energy_grad()) with_psi_grad = true;
+      break;
+    case run_mode::energy_function:
+      observables.switch_off();
+      observables.energy().setup(graph,model);
+      observables.energy_grad().setup(config);
+      break;
+    case run_mode::sr_function:
+      observables.switch_off();
+      observables.energy().setup(graph,model);
+      observables.energy_grad().setup(config);
+      observables.sr_matrix().setup(graph,config);
+      break;
   }
   silent_mode_ = silent;
-  site_disorder_.get_optimal_parms();
+  if (inputs.have_option_quiet()) silent_mode_ = true;
+  //site_disorder_.get_optimal_parms();
   //return config.build(graph, inputs, with_psi_grad);
-  return config.build(graph, site_disorder_.get_optimal_parms(), with_psi_grad);
+  return config.build(graph,site_disorder_.get_optimal_parms(),with_psi_grad);
 }
 
 int VMC::start(const input::Parameters& inputs, const run_mode& mode, 
@@ -149,7 +162,7 @@ int VMC::run_simulation(const int& sample_size)
       if (config.accept_ratio()>0.5 || skip_count==max_interval_) {
         skip_count = 0;
         config.reset_accept_ratio();
-        observables.do_measurement(graph,model,config);
+        observables.do_measurement(graph,model,config,site_disorder_);
         ++measurement_count;
         if (!silent_mode_) print_progress(measurement_count, num_measure_steps);
       }
