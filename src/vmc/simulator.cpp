@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-03-09 15:27:50
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-05-15 23:59:20
+* Last Modified time: 2017-05-20 11:14:38
 *----------------------------------------------------------------------------*/
 #include <iomanip>
 #include "simulator.h"
@@ -16,7 +16,11 @@ namespace vmc {
 Simulator::Simulator(const input::Parameters& inputs) : vmc(inputs)
 {
   optimization_mode_ = inputs.set_value("optimizing_run",false);
-  if (optimization_mode_) sreconf.init(inputs, vmc);
+  if (optimization_mode_) {
+    sreconf.init(inputs, vmc);
+    //vmc.set_box_constraints();
+    //nlopt_.init(inputs, vmc);
+  }
 }
 
 int Simulator::run(const input::Parameters& inputs) 
@@ -26,9 +30,9 @@ int Simulator::run(const input::Parameters& inputs)
     // optimizing run
     if (optimization_mode_) {
       for (unsigned n=0; n<vmc.num_disorder_configs(); ++n) {
+        if (vmc.optimal_parms_exists(n)) continue;
         std::cout << " optimizing disorder config " << n;
         std::cout << " of " << vmc.num_disorder_configs() << "\n";
-        if (vmc.optimal_parms_exists(n)) continue;
         vmc.start(inputs, run_mode::sr_function, true);
         vmc.set_disorder_config(n);
         if (sreconf.optimize(vmc)) {
@@ -57,6 +61,8 @@ int Simulator::run(const input::Parameters& inputs)
   // optimization run
   if (optimization_mode_) {
     if (!inputs.have_option_quiet()) std::cout << " starting optimizing run\n";
+    //vmc.start(inputs, run_mode::energy_function, false);
+    //nlopt_.optimize(vmc);
     vmc.start(inputs, run_mode::sr_function, true);
     if (sreconf.optimize(vmc)) {
       vmc.run_simulation(sreconf.optimal_parms());
@@ -103,9 +109,9 @@ int Simulator::run(const input::Parameters& inputs,
     // optimizing run
     if (optimization_mode_) {
       for (unsigned n=n1; n<n2; ++n) {
+        if (vmc.optimal_parms_exists(n)) continue;
         std::cout << " optimizing disorder config " << n;
         std::cout << " of " << vmc.num_disorder_configs() << "\n";
-        if (vmc.optimal_parms_exists(n)) continue;
         vmc.start(inputs, run_mode::sr_function, true);
         vmc.set_disorder_config(n);
         if (sreconf.optimize(vmc)) {

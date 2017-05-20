@@ -2,11 +2,14 @@
 * Author: Amal Medhi
 * Date:   2017-03-09 15:19:43
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-05-16 21:45:15
+* Last Modified time: 2017-05-20 18:17:51
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
+#include <iostream>
+#include <iomanip>
 #include <string>
 #include <stdexcept>
+#include <Eigen/SVD>
 #include <boost/algorithm/string.hpp>
 #include "./stochastic_reconf.h"
 
@@ -29,6 +32,7 @@ int StochasticReconf::init(const input::Parameters& inputs, const VMC& vmc)
   max_iter_ = inputs.set_value("sr_max_iter", 500, nowarn);
   start_tstep_ = inputs.set_value("sr_start_tstep", 0.05, nowarn);
   mk_series_len_ = inputs.set_value("sr_series_len", 40, nowarn);
+  stabilizer_ = inputs.set_value("sr_stabilizer", 1.0E-4, nowarn);
   mk_thresold_ = inputs.set_value("sr_fluctuation_tol", 0.30, nowarn);
   grad_tol_ = inputs.set_value("sr_grad_tol", 0.05, nowarn);
   print_progress_ = inputs.set_value("sr_progress_stdout", false, nowarn);
@@ -65,6 +69,7 @@ int StochasticReconf::init(const input::Parameters& inputs, const VMC& vmc)
     logfile_ << "max_iter = " << max_iter_ << std::endl;
     logfile_ << "start_tstep = " << start_tstep_ << std::endl;
     logfile_ << "mk_series_len = " << mk_thresold_ << std::endl;
+    logfile_ << "stabilizer = " << stabilizer_ << std::endl;
     logfile_ << "grad_tol = " << grad_tol_ << std::endl;
     logfile_ << "fluctuation_tol = " << mk_thresold_ << std::endl;
     logfile_ << "optimization samples = " << num_opt_samples_ << std::endl;
@@ -76,6 +81,7 @@ int StochasticReconf::init(const input::Parameters& inputs, const VMC& vmc)
     std::cout << "max_iter = " << max_iter_ << std::endl;
     std::cout << "start_tstep = " << start_tstep_ << std::endl;
     std::cout << "mk_series_len = " << mk_thresold_ << std::endl;
+    std::cout << "stabilizer = " << stabilizer_ << std::endl;
     std::cout << "grad_tol = " << grad_tol_ << std::endl;
     std::cout << "fluctuation_tol = " << mk_thresold_ << std::endl;
     std::cout << "optimization samples = " << num_opt_samples_ << std::endl;
@@ -99,21 +105,62 @@ int StochasticReconf::optimize(VMC& vmc)
         << num_opt_samples_ << " ... " << std::flush;
     }
     // starting value of variational parameters
+    //vparms_ = vmc.varp_values();
     vparms_ = lbound_+(ubound_-lbound_)*vmc.rng().random_real();
     // Stochastic reconfiguration iterations
     mk_statistic_.reset();
     double search_tstep = start_tstep_;
     int mc_samples = num_sim_samples_;
     unsigned iter;
-    for (iter=0; iter<max_iter_; ++iter) {
+    for (iter=1; iter<=max_iter_; ++iter) {
       double en = vmc.sr_function(vparms_, grad_, sr_matrix_, mc_samples);
-      // apply to stabiliser to sr matrix 
-      for (unsigned i=0; i<num_parms_; ++i) sr_matrix_(i,i) += 1.0E-4;
+      // apply to stabilizer to sr matrix 
+      for (unsigned i=0; i<num_parms_; ++i) sr_matrix_(i,i) += stabilizer_;
+      //for (unsigned i=0; i<num_parms_; ++i) 
+       // sr_matrix_(i,i) += sr_matrix_(i,i) * stabilizer_;
+
+      // stabilization by truncation of redundant direaction
+      // reciprocal conditioning number
+      Eigen::JacobiSVD<Eigen::MatrixXd> svd(sr_matrix_,
+        Eigen::ComputeFullU);
+      Eigen::VectorXd lambda_inv(num_parms_);
+      double lambda0_inv = 1.0/svd.singularValues()[0];
+      lambda_inv[0] = lambda0_inv;
+      unsigned num_kept = num_parms_;
+      for (int i=1; i<num_parms_; ++i) {
+        double lambdai = svd.singularValues()[i];
+        if (lambdai * lambda0_inv < 1.0E-3) {
+          num_kept = i; break;
+        }
+        lambda_inv[i] = 1.0/lambdai;
+      }
+      Eigen::VectorXd del_x(num_parms_);
+      for (unsigned k=0; k<num_parms_; ++k) {
+        double isum = 0.0;
+        for (unsigned i=0; i<num_parms_; ++i) {
+          double jsum = 0.0;
+          for (unsigned j=0; j<num_kept; ++j) {
+            jsum += lambda_inv[j] * svd.matrixU()(k,j) * svd.matrixU()(i,j);  
+          }
+          isum += jsum * grad_[i];
+        }
+        del_x[k] = -search_tstep * isum;
+      }
+      // update variables
+      vparms_ += del_x;
+      //std::cout << "singular values\n" << svd.singularValues() << "\n";
+      //std::cout << "num_kept \n" << num_kept << "\n";
+      //getchar();
+
+      /*
       // search direction
       Eigen::VectorXd search_dir = sr_matrix_.fullPivLu().solve(-grad_);
+      //Eigen::VectorXd search_dir = sr_matrix_.inverse()*(-grad_);
       //getchar();
       // update variables
       vparms_ += search_tstep * search_dir;
+      */
+      //vparms_ += search_tstep * (-grad_);
       // box constraint and max_norm (of components not hitting boundary) 
       vparms_ = lbound_.cwiseMax(vparms_.cwiseMin(ubound_));
       /*double gnorm = std::abs(grad_[0]);
@@ -129,16 +176,21 @@ int StochasticReconf::optimize(VMC& vmc)
         }
       } */
       // add data to Mann-Kendall statistic
-      //if (gnorm < grad_tol_) 
-      mk_statistic_ << vparms_;
+      double gnorm = grad_.squaredNorm();
+      if (gnorm/grad_.size() < 0.50) mk_statistic_ << vparms_;
       double mk_trend = mk_statistic_.elem_max_trend();
       if (print_progress_) {
-        double gnorm = grad_.squaredNorm();
+        std::ios  state(NULL);
+        state.copyfmt(std::cout);
+        //double gnorm = grad_.squaredNorm();
+        std::cout << std::fixed << std::setprecision(4);
         std::cout << " iter = " << iter << "\n";
-        std::cout << " search_dir = " << search_dir.transpose() << "\n";
-        std::cout << " varp = " << vparms_.transpose() << "\n";
-        std::cout << " energy = " << en << "\n";
         std::cout << " grad = " << grad_.transpose() << "\n";
+        std::cout << " search_dir = " << std::setw(6) << del_x.transpose() << "\n";
+        //std::cout << " search_dir = " << std::setw(6) << search_dir.transpose() << "\n";
+        std::cout << " varp =\n" << vparms_.transpose() << "\n";
+        std::cout.copyfmt(state);
+        std::cout << " energy = " << en << "\n";
         std::cout << " gnorm = " << gnorm << "\n";
         std::cout << " trend = " << mk_trend << "\n"; 
       }
@@ -149,7 +201,7 @@ int StochasticReconf::optimize(VMC& vmc)
         optimal_parms_ << vparms_;
         // print
         if (print_log_) {
-          double gnorm = grad_.squaredNorm();
+          //double gnorm = grad_.squaredNorm();
           logfile_ << "converged!" << std::endl;
           logfile_ << "iteration = "<< iter << std::endl;
           logfile_ << "MK trend = " << mk_statistic_.elem_max_trend() << "\n";
@@ -183,7 +235,7 @@ int StochasticReconf::optimize(VMC& vmc)
           std::cout << "next refinement cycle" << std::endl;
         }
         mc_samples *= 2;
-        //search_tstep *= 0.5;
+        search_tstep *= 0.5;
       }
     }
     if (iter>=max_iter_ && print_log_) {

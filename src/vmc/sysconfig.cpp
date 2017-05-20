@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-18 14:01:12
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-05-10 23:35:56
+* Last Modified time: 2017-05-20 11:16:31
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "./sysconfig.h"
@@ -314,7 +314,8 @@ amplitude_t SysConfig::apply(const model::op::quantum_op& qn_op, const unsigned&
       term+= apply_dnspin_hop(site_i,site_j,bc_phase);
       break;
     case model::op_id::sisj_plus:
-      term = apply_sisj_plus(site_i,site_j); break;
+      term = apply_sisj_plus(site_i,site_j); 
+      break;
     default: 
       throw std::range_error("SysConfig::apply: undefined bond operator.");
   }
@@ -456,13 +457,18 @@ amplitude_t SysConfig::apply_sisj_plus(const unsigned& i, const unsigned& j) con
   // det_ratio for the term
   wf.get_amplitudes(psi_row, up_tosite, dnspin_sites());
   amplitude_t det_ratio1 = psi_row.cwiseProduct(psi_inv.col(upspin)).sum();
-
   // now for dnspin hop 
   wf.get_amplitudes(psi_col, upspin_sites(), dn_tosite);
   // since the upspin should have moved
   wf.get_amplitudes(psi_col(upspin), up_tosite, dn_tosite);
   // updated 'dnspin'-th row of psi_inv
   amplitude_t ratio_inv = amplitude_t(1.0)/det_ratio1;
+
+  // for safety: if 'det_ratio1 == 0', result is zero
+  if (std::isinf(std::abs(ratio_inv))) {
+    return amplitude_t(ninj_term);
+  }
+
   // elements other than 'upspin'-th
   for (unsigned i=0; i<upspin; ++i) {
     amplitude_t beta = ratio_inv*psi_row.cwiseProduct(psi_inv.col(i)).sum();
@@ -476,6 +482,13 @@ amplitude_t SysConfig::apply_sisj_plus(const unsigned& i, const unsigned& j) con
   // ratio for the dnspin hop
   amplitude_t det_ratio2 = psi_col.cwiseProduct(inv_row).sum();
   amplitude_t det_ratio = ampl_part(std::conj(det_ratio1*det_ratio2));
+  /*
+  if (std::isnan(det_ratio)) {
+    std::cout << std::scientific<< det_ratio1 << "\n\n";
+    std::cout << std::scientific<< ratio_inv << "\n\n";
+    std::cout << std::scientific<< det_ratio2 << "\n\n";
+    std::cout << "NaN detected\n"; getchar();
+  }*/
   return -0.5 * det_ratio + amplitude_t(ninj_term);
 }
 

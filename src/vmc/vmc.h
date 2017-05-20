@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-12 13:19:36
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-05-16 23:21:14
+* Last Modified time: 2017-05-20 11:15:18
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef VMC_H
@@ -16,21 +16,24 @@
 #include "./observables.h"
 #include "./sysconfig.h"
 #include "./disorder.h"
+//#include "../optimizer/optimizer.h"
 
 namespace vmc {
 
 enum class run_mode {normal, energy_function, sr_function};
 
-class VMC 
+class VMC //: public optimizer::Problem
 {
 public:
   VMC(const input::Parameters& inputs); 
-  ~VMC() {}
+  virtual ~VMC() {}
   int start(const input::Parameters& inputs, const run_mode& mode=run_mode::normal, 
     const bool& silent=false);
   int run_simulation(const int& sample_size=-1);
   int run_simulation(const Eigen::VectorXd& varp);
   double energy_function(const Eigen::VectorXd& varp, Eigen::VectorXd& grad);
+  double operator()(const Eigen::VectorXd& varp, Eigen::VectorXd& grad) 
+    { return energy_function(varp, grad); }
   double sr_function(const Eigen::VectorXd& vparms, Eigen::VectorXd& grad, 
     Eigen::MatrixXd& sr_matrix, const int& sample_size=-1);
   //void get_vparm_values(var::parm_vector& varparms) 
@@ -57,6 +60,10 @@ public:
     { return site_disorder_.optimal_parms_exists(config); } 
   void set_disorder_config(const unsigned& config) 
     { site_disorder_.set_current_config(config); }
+
+  // optimizer
+  //void set_box_constraints(void) 
+  //  { Problem::setBoxConstraint(varp_lbound(), varp_ubound()); }
 private:
   run_mode run_mode_{run_mode::normal};
   lattice::LatticeGraph graph;

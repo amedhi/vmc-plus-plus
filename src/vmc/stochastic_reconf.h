@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-09 15:07:37
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-05-16 21:45:21
+* Last Modified time: 2017-05-18 12:33:52
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef STOCHASTIC_RECONF_H
@@ -43,6 +43,7 @@ private:
   unsigned refinement_cycle_{100};
   unsigned mk_series_len_{40};
   double start_tstep_{0.05};
+  double stabilizer_{1.0E-4};
   double grad_tol_{0.01};
   double mk_thresold_{0.30};
   bool print_progress_{false};

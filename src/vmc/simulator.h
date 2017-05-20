@@ -9,6 +9,7 @@
 #include <iostream>
 #include "./vmc.h"
 #include "./stochastic_reconf.h"
+//#include "../optimizer/optimizer.h"
 
 namespace vmc {
 
@@ -30,6 +31,7 @@ public:
 private:
   VMC vmc;
   StochasticReconf sreconf;
+  //optimizer::Optimizer nlopt_;
   bool optimization_mode_{false};
 
   //static double enfunc(const std::vector<double>& x, std::vector<double>& grad, 

@@ -42,6 +42,7 @@ SRCS+= vmc/energy.cpp
 SRCS+= vmc/sccorr.cpp
 SRCS+= vmc/observables.cpp
 SRCS+= vmc/stochastic_reconf.cpp
+SRCS+= optimizer/optimizer.cpp
 #SRCS+= vmc/measurement.cpp
 SRCS+= vmc/vmc.cpp
 SRCS+= vmc/simulator.cpp

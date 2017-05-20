@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-22 22:46:55
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-30 23:24:10
+* Last Modified time: 2017-05-20 11:47:01
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "./disordered_sc.h"
@@ -47,17 +47,19 @@ int DisorderedSC::init(const input::Parameters& inputs, const lattice::LatticeGr
   mu_start_ = varparms_.size();
   for (unsigned i=0; i<num_sites_; ++i) {
     name = "mu_" + std::to_string(i);
-    varparms_.add(name, defval=-0.50, lb=-1.5, ub=1.5, h=0.2);
+    //varparms_.add(name, defval=-0.50, lb=-2.5, ub=2.5, h=0.2);
+    varparms_.add(name, defval=-1.50, lb=-2.5, ub=2.5, h=0.2);
   }
   t_start_ = varparms_.size();
   for (unsigned i=0; i<num_bonds_; ++i) {
     name = "t_" + std::to_string(i);
-    varparms_.add(name, defval=1.0, lb=0.5, ub=1.2, h=0.01);
+    varparms_.add(name, defval=1.0, lb=0.1, ub=5.0, h=0.1);
   }
   delta_start_ = varparms_.size();
   for (unsigned i=0; i<num_bonds_; ++i) {
     name = "delta_" + std::to_string(i);
-    varparms_.add(name, defval=0.4, lb=0.0, ub=0.8, h=0.01);
+    //varparms_.add(name, defval=0.4, lb=0.0, ub=1.5, h=0.1);
+    varparms_.add(name, defval=0.4, lb=0.00, ub=1.52, h=0.1);
   }
   num_varparms_ = varparms_.size();
 
@@ -111,8 +113,15 @@ int DisorderedSC::init(const input::Parameters& inputs, const lattice::LatticeGr
 
   // HACK
 #ifdef HACK_ON
+  varparms_.clear();
   num_varparms_ = 1;
-  varparms_.resize(1);
+  double x = inputs.set_value("varp", 1.0);
+  varparms_.add("tv", defval=x, lb=0.1, ub=20.5, h=0.1);
+  for (unsigned i=t_start_; i<delta_start_; i++) {
+    auto coeff = quadratic_coeffs_[i];
+    coeff.change_value(varparms_[0].value());
+    quadratic_ham_(coeff.row(),coeff.col()) = -coeff.value()*coeff.bond_phase();
+  }
 #endif
 
   return 0;
@@ -122,15 +131,19 @@ void DisorderedSC::update(const input::Parameters& inputs)
 {
   // HACK
 #ifdef HACK_ON
+  unsigned start_p = t_start_;
+  unsigned end_p = delta_start_;
   double x = inputs.set_value("varp", 1.0);
-  for (unsigned i=0; i<num_sites_; i++) {
+  //for (unsigned i=0; i<num_sites_; i++) {
+  for (unsigned i=start_p; i<end_p; i++) {
     //varparms_[i].change_value(x);
     auto coeff = quadratic_coeffs_[i];
     coeff.change_value(x);
-    quadratic_ham_(coeff.row(),coeff.col()) = -coeff.value();
+    quadratic_ham_(coeff.row(),coeff.col()) = -coeff.value()*coeff.bond_phase();
     //std::cout << coeff.row() << " " << coeff.col() << " " << -x << "\n";
   }
   //std::cout << quadratic_ham_.diagonal().transpose() << "\n"; getchar();
+  //std::cout << quadratic_ham_ << "\n"; getchar();
 #endif
   // update from input parameters
   // hole doping might have changed
@@ -139,6 +152,25 @@ void DisorderedSC::update(const input::Parameters& inputs)
 
 void DisorderedSC::update(const var::parm_vector& pvector, const unsigned& start_pos)
 {
+  // HACK
+#ifdef HACK_ON
+  unsigned start_p = t_start_;
+  unsigned end_p = delta_start_;
+  double x = pvector[start_pos];
+  //for (unsigned i=0; i<num_sites_; i++) {
+  for (unsigned i=start_p; i<end_p; i++) {
+    //varparms_[i].change_value(x);
+    auto coeff = quadratic_coeffs_[i];
+    coeff.change_value(x);
+    quadratic_ham_(coeff.row(),coeff.col()) = -coeff.value()*coeff.bond_phase();
+    //std::cout << coeff.row() << " " << coeff.col() << " " << -x << "\n";
+  }
+  //std::cout << quadratic_ham_.diagonal().transpose() << "\n"; getchar();
+  //std::cout << quadratic_ham_ << "\n"; getchar();
+  return;
+#endif
+
+
   // update matrix elements
   // '-' sign because H = -\sum t_{ij} cicj - mu\sum_ni -sum_{ij}Delta_{ij}cicj etc
   unsigned i = 0;
@@ -159,6 +191,7 @@ void DisorderedSC::update(const var::parm_vector& pvector, const unsigned& start
     pairing_ham_(coeff.col(), coeff.row()) = val;
     ++i;
   }
+  //std::cout << "\n" << pairing_ham_ << "\n"; getchar();
 }
 
 void DisorderedSC::get_wf_amplitudes(Matrix& psi) 
@@ -180,33 +213,33 @@ void DisorderedSC::get_wf_amplitudes(Matrix& psi)
 void DisorderedSC::hack_gradient(std::vector<Matrix>& psi_gradient) 
 {
   //ComplexMatrix tmp(num_sites_,num_sites_);
-  unsigned i = 0;
-  double h = 0.2; // 5.0E-1;// varparms_[0].diff_h();
+  unsigned start_p = t_start_;
+  unsigned end_p = delta_start_;
+  double h = varparms_[0].diff_h();
   double inv_2h = 0.5/h;
-  auto coeff = quadratic_coeffs_[i];
-  double x = coeff.value();
-  std::cout << "x = " << x << "\n";
-  std::cout << "h = " << h << "\n";
-  std::cout << "1/2h = " << inv_2h << "\n"; 
-  for (unsigned j=0; j<num_sites_; ++j)
-  quadratic_ham_(j,j) = -(x+h);
-  //quadratic_ham_(coeff.col(),coeff.row()) = -(x+h);
-  //std::cout << quadratic_ham_ << "\n"; getchar();
-  get_wf_amplitudes(psi_gradient[i]);
-  for (unsigned j=0; j<num_sites_; ++j)
-  quadratic_ham_(j,j) = -(x-h);
-  //quadratic_ham_(coeff.col(),coeff.row()) = -(x-h);
-  //std::cout << quadratic_ham_ << "\n"; getchar();
+  auto coeff = quadratic_coeffs_[start_p];
+  double save = quadratic_ham_(coeff.row(),coeff.col());
+  for (unsigned i=start_p; i<end_p; i++) {
+    auto coeff = quadratic_coeffs_[i];
+    double x = coeff.value();
+    quadratic_ham_(coeff.row(),coeff.col()) = -(x+h)*coeff.bond_phase();
+  }
+  get_wf_amplitudes(psi_gradient[0]);
+  for (unsigned i=start_p; i<end_p; i++) {
+    auto coeff = quadratic_coeffs_[i];
+    double x = coeff.value();
+    quadratic_ham_(coeff.row(),coeff.col()) = -(x-h)*coeff.bond_phase();
+  }
   get_wf_amplitudes(psi_work_);
   // restore the hamtonian
-  for (unsigned j=0; j<num_sites_; ++j)
-  quadratic_ham_(j,j) = -x;
-  //quadratic_ham_(coeff.col(),coeff.row()) = -x;
+  for (unsigned i=start_p; i<end_p; i++) {
+    auto coeff = quadratic_coeffs_[i];
+    quadratic_ham_(coeff.row(),coeff.col()) = save;
+  }
   // gradient
-  psi_gradient[i] -= psi_work_;
-  //std::cout << psi_gradient[i] << "\n"; getchar();
+  psi_gradient[0] -= psi_work_;
+  psi_gradient[0] *= inv_2h;
   //std::cout << "-----hi-------" << "\n"; getchar();
-  psi_gradient[i] *= inv_2h;
 }
 
 void DisorderedSC::get_wf_gradient(std::vector<Matrix>& psi_gradient) 
