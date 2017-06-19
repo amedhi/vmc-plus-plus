@@ -4,7 +4,7 @@
 * Author: Amal Medhi
 * Date:   2016-01-25 18:05:03
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-05-03 10:43:50
+* Last Modified time: 2017-06-19 21:32:57
 *----------------------------------------------------------------------------*/
 #ifndef LATTICE_H
 #define LATTICE_H
@@ -212,8 +212,8 @@ public:
   unsigned num_basis_sites(void) const { return Unitcell::num_sites(); }
   unsigned num_basis_bonds(void) const { return Unitcell::num_bonds(); }
   const unsigned& dimension(void) const { return spatial_dim; }
-  const unsigned& num_sites(void) const { return num_total_sites; }
-  const unsigned& num_unitcells(void) const { return num_total_cells; }
+  const unsigned& num_sites(void) const { return num_total_sites_; }
+  const unsigned& num_unitcells(void) const { return num_total_cells_; }
   Vector3d basis_vector_a1(void) const { return Unitcell::vector_a1(); }
   Vector3d basis_vector_a2(void) const { return Unitcell::vector_a2(); }
   Vector3d basis_vector_a3(void) const { return Unitcell::vector_a3(); }
@@ -263,9 +263,10 @@ private:
                         };
   
   // number of unit cells in total and in one layer (for symmetrized lattice)
-  unsigned num_total_cells {1};
-  unsigned num_layer_cells {1};
-  unsigned num_total_sites {0};
+  unsigned num_total_cells_ {1};
+  unsigned num_layer_cells_ {1};
+  unsigned num_total_sites_ {0};
+  unsigned num_basis_sites_ {0};
 
   // for lattices with impurities
   std::vector<Site> impurity_sites_;

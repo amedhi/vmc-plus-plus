@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-22 22:41:54
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-04-13 09:43:27
+* Last Modified time: 2017-05-21 16:01:40
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #ifndef DISORDERED_SC_H
@@ -80,6 +80,8 @@ private:
   void hack_gradient(std::vector<Matrix>& psi_gradient); 
   void get_pair_amplitudes_sitebasis(const Eigen::VectorXd& es_eigenvalues, 
   const RealMatrix& es_eigenvectors, const Eigen::VectorXd& delta, Matrix& psi);
+  void get_gradient_pairing_coeff(std::vector<Matrix>& psi_gradient,
+    const unsigned& start_pos);
 };
 
 

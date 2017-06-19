@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-09 15:19:43
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-05-20 18:17:51
+* Last Modified time: 2017-05-21 17:40:34
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include <iostream>
@@ -105,8 +105,8 @@ int StochasticReconf::optimize(VMC& vmc)
         << num_opt_samples_ << " ... " << std::flush;
     }
     // starting value of variational parameters
-    //vparms_ = vmc.varp_values();
-    vparms_ = lbound_+(ubound_-lbound_)*vmc.rng().random_real();
+    vparms_ = vmc.varp_values();
+    //vparms_ = lbound_+(ubound_-lbound_)*vmc.rng().random_real();
     // Stochastic reconfiguration iterations
     mk_statistic_.reset();
     double search_tstep = start_tstep_;
@@ -119,6 +119,7 @@ int StochasticReconf::optimize(VMC& vmc)
       //for (unsigned i=0; i<num_parms_; ++i) 
        // sr_matrix_(i,i) += sr_matrix_(i,i) * stabilizer_;
 
+      /*
       // stabilization by truncation of redundant direaction
       // reciprocal conditioning number
       Eigen::JacobiSVD<Eigen::MatrixXd> svd(sr_matrix_,
@@ -129,7 +130,7 @@ int StochasticReconf::optimize(VMC& vmc)
       unsigned num_kept = num_parms_;
       for (int i=1; i<num_parms_; ++i) {
         double lambdai = svd.singularValues()[i];
-        if (lambdai * lambda0_inv < 1.0E-3) {
+        if (lambdai * lambda0_inv < 1.0E-4) {
           num_kept = i; break;
         }
         lambda_inv[i] = 1.0/lambdai;
@@ -151,15 +152,16 @@ int StochasticReconf::optimize(VMC& vmc)
       //std::cout << "singular values\n" << svd.singularValues() << "\n";
       //std::cout << "num_kept \n" << num_kept << "\n";
       //getchar();
+      */
 
-      /*
+      
       // search direction
       Eigen::VectorXd search_dir = sr_matrix_.fullPivLu().solve(-grad_);
       //Eigen::VectorXd search_dir = sr_matrix_.inverse()*(-grad_);
       //getchar();
       // update variables
       vparms_ += search_tstep * search_dir;
-      */
+      
       //vparms_ += search_tstep * (-grad_);
       // box constraint and max_norm (of components not hitting boundary) 
       vparms_ = lbound_.cwiseMax(vparms_.cwiseMin(ubound_));
@@ -186,8 +188,8 @@ int StochasticReconf::optimize(VMC& vmc)
         std::cout << std::fixed << std::setprecision(4);
         std::cout << " iter = " << iter << "\n";
         std::cout << " grad = " << grad_.transpose() << "\n";
-        std::cout << " search_dir = " << std::setw(6) << del_x.transpose() << "\n";
-        //std::cout << " search_dir = " << std::setw(6) << search_dir.transpose() << "\n";
+        //std::cout << " search_dir = " << std::setw(6) << del_x.transpose() << "\n";
+        std::cout << " search_dir = " << std::setw(6) << search_dir.transpose() << "\n";
         std::cout << " varp =\n" << vparms_.transpose() << "\n";
         std::cout.copyfmt(state);
         std::cout << " energy = " << en << "\n";

@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-03-19 23:06:41
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-05-17 17:18:25
+* Last Modified time: 2017-05-21 11:32:25
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "./bcs_state.h"
@@ -215,9 +215,10 @@ void BCS_State::get_pair_amplitudes_oneband(std::vector<ComplexMatrix>& phi_k)
     else {
       phi_k[k](0,0) = 2.0*delta_k/ek_plus_Ek;
     }
-    //std::cout << ek << "\n";
-    //std::cout << delta_k << "\n";
-    //std::cout << k << " " << cphi_k[k](0,0) << "\n";
+    //std::cout << "k = " << k << "\n";
+    //std::cout << "ek = " << 0.5*ek << "\n";
+    //std::cout << "delta_k = " << delta_k << "\n";
+    //std::cout << "phi_k = " << phi_k[k](0,0) << "\n";
     //getchar();
   }
 }

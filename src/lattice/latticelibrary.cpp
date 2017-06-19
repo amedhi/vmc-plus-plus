@@ -3,7 +3,7 @@
 * All rights reserved.
 * Date:   2016-01-17 21:32:15
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-12 09:24:06
+* Last Modified time: 2017-06-19 21:37:15
 *----------------------------------------------------------------------------*/
 #include <stdexcept>
 #include <iomanip>
@@ -144,9 +144,11 @@ int Lattice::finalize_lattice(void)
   }
 
   // number of unit cells & sites
-  num_layer_cells = extent[dim1].size * extent[dim2].size;
-  num_total_cells = num_layer_cells * extent[dim3].size;
-  num_total_sites = num_total_cells * num_basis_sites();
+  num_layer_cells_ = extent[dim1].size * extent[dim2].size;
+  num_total_cells_ = num_layer_cells_ * extent[dim3].size;
+  num_basis_sites_ = Unitcell::num_sites();
+  num_total_sites_ = num_total_cells_ * num_basis_sites_;
+
 
   // check
   /*std::cout << "------Sites-------\n";
@@ -163,7 +165,7 @@ int Lattice::finalize_lattice(void)
   unsigned id=0;
   for (unsigned i=0; i<Unitcell::num_bonds(); ++i) {
     Vector3i ivec = Unitcell::bond(i).tgt().bravindex()-Unitcell::bond(i).src().bravindex();
-    int key = ivec[0] + ivec[1]*extent[dim1].size + ivec[2]*num_layer_cells;
+    int key = ivec[0] + ivec[1]*extent[dim1].size + ivec[2]*num_layer_cells_;
     auto it = vecid_map.find(key);
     if (it != vecid_map.end()) Unitcell::bond(i).set_vector_id(it->second);
     else {
@@ -204,16 +206,17 @@ int Lattice::symmetrize_lattice(void)
   }
 
   // number of unit cells & sites
-  num_layer_cells = extent[dim1].size * extent[dim2].size;
-  num_total_cells = num_layer_cells * extent[dim3].size;
-  num_total_sites = num_total_cells * num_basis_sites();
+  num_layer_cells_ = extent[dim1].size * extent[dim2].size;
+  num_total_cells_ = num_layer_cells_ * extent[dim3].size;
+  num_basis_sites_ = Unitcell::num_sites();
+  num_total_sites_ = num_total_cells_ * num_basis_sites_;
 
   // Add the sites & the bonds to the symmetrized unitcell
   std::vector<Site> sites;
   std::vector<Bond> bonds;
   Unitcell translated_cell;
   Vector3i bravindex(0,0,0);
-  for (unsigned i=0; i<num_total_cells; ++i) {
+  for (unsigned i=0; i<num_total_cells_; ++i) {
     translated_cell = get_translated_cell(bravindex);
     // collect the sites
     for (unsigned n=0; n<translated_cell.num_sites(); ++n) 

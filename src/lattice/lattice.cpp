@@ -3,7 +3,7 @@
 * All rights reserved.
 * Date:   2016-01-17 21:32:15
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-05-03 10:43:53
+* Last Modified time: 2017-06-19 21:31:43
 *----------------------------------------------------------------------------*/
 #include <iomanip>
 #include "lattice.h"
@@ -314,7 +314,7 @@ Unitcell Lattice::get_translated_cell(const Vector3i& bravindex_offset) const
 {
   Unitcell newcell(*this);
   int cell_id_offset = bravindex_offset[0] + bravindex_offset[1] * extent[dim1].size 
-                     + bravindex_offset[2] * num_layer_cells;
+                     + bravindex_offset[2] * num_layer_cells_;
   newcell.translate_by(bravindex_offset, cell_id_offset);
   return newcell;
 }
@@ -423,9 +423,11 @@ std::pair<Vector3i, int> Lattice::boundary_wrap(const Vector3i& cell_idx) const
 
 int Lattice::mapped_site_id(const unsigned& local_id, const Vector3i& bravindex) const
 {
-  int cell_id = bravindex[0] + bravindex[1] * extent[dim1].size + bravindex[2] * num_layer_cells;
+  int cell_id = bravindex[0] + bravindex[1] * extent[dim1].size + bravindex[2] * num_layer_cells_;
   if (cell_id < 0) return -1;
-  return (static_cast<int>(local_id) + cell_id * num_basis_sites());
+  //return (static_cast<int>(local_id) + cell_id * num_basis_sites());
+  // the above line caused a bug
+  return (static_cast<int>(local_id) + cell_id * num_basis_sites_);
 }
 
 unsigned Lattice::translation_mapped_site(const unsigned& uid, 
@@ -436,7 +438,7 @@ unsigned Lattice::translation_mapped_site(const unsigned& uid,
   int sign;
   boost::tie(translated_cell, sign) = boundary_wrap(translated_cell);
   unsigned cell_id = translated_cell[0] + translated_cell[1] * extent[dim1].size 
-                   + translated_cell[2] * num_layer_cells;
+                   + translated_cell[2] * num_layer_cells_;
   unsigned mapped_id = uid + cell_id * num_basis_sites();
   if (mapped_id < this->num_sites()) return mapped_id;
   else return uid;

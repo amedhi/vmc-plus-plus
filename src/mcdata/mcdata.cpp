@@ -2,7 +2,7 @@
 * Author: Amal Medhi
 * Date:   2017-02-24 08:54:44
 * Last Modified by:   Amal Medhi, amedhi@macbook
-* Last Modified time: 2017-03-07 22:25:32
+* Last Modified time: 2017-05-23 00:06:47
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include "./mcdata.h"
@@ -111,7 +111,8 @@ void MC_Data::add_sample(const data_t& sample)
   data_t new_sample(sample);
   while (this_bin->add_sample(new_sample)) {
     new_sample = this_bin->carry();
-    if (this_bin++ == end_bin) break;
+    //if (this_bin++ == end_bin) break; // wrong logic?
+    if (++this_bin == end_bin) break;
   }
 }
 
