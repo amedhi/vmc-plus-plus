@@ -11,7 +11,7 @@
 #ifndef MATRIX_H
 #define MATRIX_H
 
-#define REAL_WAVEFUNCTION
+//#define REAL_WAVEFUNCTION
 
 using Vector3i = Eigen::Vector3i;
 using Vector3d = Eigen::Vector3d;

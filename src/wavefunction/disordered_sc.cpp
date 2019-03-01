@@ -61,7 +61,7 @@ int DisorderedSC::init(const input::Parameters& inputs, const lattice::LatticeGr
   for (unsigned i=0; i<num_bonds_; ++i) {
     name = "delta_" + std::to_string(i);
     //varparms_.add(name, defval=0.4, lb=0.0, ub=1.5, h=0.1);
-    varparms_.add(name, defval=0.4, lb=0.00, ub=2.0, h=0.1);
+    varparms_.add(name, defval=1.0, lb=0.00, ub=2.0, h=0.1);
   }
   num_varparms_ = varparms_.size();
 
@@ -119,8 +119,8 @@ int DisorderedSC::init(const input::Parameters& inputs, const lattice::LatticeGr
   num_varparms_ = 1;
   double x = inputs.set_value("varp", 1.0);
   varparms_.add("tv", defval=x, lb=0.1, ub=10.5, h=0.1);
-  //for (unsigned i=t_start_; i<delta_start_; i++) {
-  for (unsigned i=t_start_; i<t_start_+1; i++) {
+  for (unsigned i=t_start_; i<delta_start_; i++) {
+  //for (unsigned i=t_start_; i<t_start_+1; i++) {
     auto coeff = quadratic_coeffs_[i];
     coeff.change_value(varparms_[0].value());
     quadratic_ham_(coeff.row(),coeff.col()) = -coeff.value()*coeff.bond_phase();
@@ -130,14 +130,10 @@ int DisorderedSC::init(const input::Parameters& inputs, const lattice::LatticeGr
   varparms_.clear();
   num_varparms_ = 1;
   double x = inputs.set_value("varp", 1.0);
-  varparms_.add("d", defval=x, lb=0.0, ub=2.5, h=0.1);
-  //for (unsigned i=t_start_; i<delta_start_; i++) {
-  //for (unsigned i=0; i<1; i++) {
-  //  auto coeff = pairing_coeffs_[i];
-  //  coeff.change_value(varparms_[0].value());
-  //}
+  varparms_.add("d", defval=x, lb=0.0, ub=2.0, h=0.1);
   //for (auto& coeff : pairing_coeffs_) coeff.change_value(x);
   pairing_coeffs_[0].change_value(x);
+  //for (int i=0; i<10; ++i) pairing_coeffs_[i].change_value(x);
 #endif
 
   return 0;
@@ -150,9 +146,8 @@ void DisorderedSC::update(const input::Parameters& inputs)
   unsigned start_p = t_start_;
   unsigned end_p = delta_start_;
   double x = inputs.set_value("varp", 1.0);
-  //for (unsigned i=0; i<num_sites_; i++) {
-  //for (unsigned i=start_p; i<end_p; i++) {
-  for (unsigned i=start_p; i<start_p+1; i++) {
+  for (unsigned i=start_p; i<end_p; i++) {
+  //for (unsigned i=start_p; i<start_p+1; i++) {
     //varparms_[i].change_value(x);
     auto coeff = quadratic_coeffs_[i];
     coeff.change_value(x);
@@ -166,8 +161,8 @@ void DisorderedSC::update(const input::Parameters& inputs)
   double x = inputs.set_value("varp", 1.0);
   //for (auto& coeff : pairing_coeffs_) coeff.change_value(x);
   pairing_coeffs_[0].change_value(x);
+  //for (int i=0; i<10; ++i) pairing_coeffs_[i].change_value(x);
 #endif
-
 
   // update from input parameters
   // hole doping might have changed
