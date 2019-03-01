@@ -33,6 +33,7 @@ private:
   // ground state
   bool have_TP_symmetry_{true};
   double fermi_energy_;
+  double total_energy_;
   bool degeneracy_warning_{false};
   struct kshell_t {unsigned k; unsigned nmin; unsigned nmax;};
   std::vector<kshell_t> kshells_up_;

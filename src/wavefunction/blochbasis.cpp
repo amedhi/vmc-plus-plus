@@ -124,8 +124,8 @@ void BlochBasis::make_kpoints(const lattice::Lattice& lattice)
     x2 = static_cast<double>(m(1)+n(1))/lattice.size2() + antipb_shift(1);
     x3 = static_cast<double>(m(2)+n(2))/lattice.size3() + antipb_shift(2);
     this->push_back(x1*b1 + x2*b2 + x3*b3);
-    //kpoints[i] = x1 * b1 + x2 * b2 + x3 * b3;
-    //std::cout << i << ": " << kpoints[i](0) << " " << kpoints[i](1) << " " << kpoints[i](2) << "\n";
+    //auto kvec = x1 * b1 + x2 * b2 + x3 * b3;
+    //std::cout << i << ": " << kvec.transpose() << "\n";
     //translation_vectors.push_back(n);
     n = lattice.get_next_bravindex(n);
   }

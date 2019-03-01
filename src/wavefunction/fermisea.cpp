@@ -2,7 +2,7 @@
 * @Author: Amal Medhi, amedhi@mbpro
 * @Date:   2019-02-20 12:21:42
 * @Last Modified by:   Amal Medhi, amedhi@mbpro
-* @Last Modified time: 2019-03-01 11:32:51
+* @Last Modified time: 2019-03-01 23:05:46
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include <numeric>
@@ -92,6 +92,8 @@ void Fermisea::get_pair_amplitudes(std::vector<ComplexMatrix>& phi_k)
     es_minusk_up.compute(mf_model_.quadratic_spinup_block());
     phi_k[k] = es_k_up.eigenvectors().block(0,0,kblock_dim_,m)
       		 * es_minusk_up.eigenvectors().conjugate().block(0,0,m,kblock_dim_);
+    //std::cout << kvec.transpose() << "\n"; 
+    //std::cout << phi_k[k] << "\n"; getchar();
   }
 }
 
@@ -178,9 +180,16 @@ void Fermisea::construct_groundstate(void)
     // check for degeneracy 
     double degeneracy_tol = 1.0E-12;
     int top_filled_level = num_upspins()-1;
-    fermi_energy_ = ek[idx[top_filled_level]];
     int num_degen_states = 1;
     int num_valence_particle = 1;
+    fermi_energy_ = ek[idx[top_filled_level]];
+    total_energy_ = 0.0;
+    for (int i=0; i<=top_filled_level; ++i) {
+      total_energy_ += ek[idx[i]];
+    }
+    total_energy_ = 2.0*total_energy_/num_sites_;
+    std::cout << "Total KE =" << total_energy_ << "\n";
+
     // look upward in energy
     for (int i=top_filled_level+1; i<ek.size(); ++i) {
       if (std::abs(fermi_energy_-ek[idx[i]])>degeneracy_tol) break;
