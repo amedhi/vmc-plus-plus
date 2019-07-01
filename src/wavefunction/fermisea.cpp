@@ -2,7 +2,7 @@
 * @Author: Amal Medhi, amedhi@mbpro
 * @Date:   2019-02-20 12:21:42
 * @Last Modified by:   Amal Medhi, amedhi@mbpro
-* @Last Modified time: 2019-03-01 23:05:46
+* @Last Modified time: 2019-07-01 09:22:07
 * Copyright (C) Amal Medhi, amedhi@iisertvm.ac.in
 *----------------------------------------------------------------------------*/
 #include <numeric>
@@ -188,7 +188,7 @@ void Fermisea::construct_groundstate(void)
       total_energy_ += ek[idx[i]];
     }
     total_energy_ = 2.0*total_energy_/num_sites_;
-    std::cout << "Total KE =" << total_energy_ << "\n";
+    //std::cout << "Total KE =" << total_energy_ << "\n";
 
     // look upward in energy
     for (int i=top_filled_level+1; i<ek.size(); ++i) {

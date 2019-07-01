@@ -180,6 +180,71 @@ void BasisState::set_random(void)
   }
 }
 
+void BasisState::set_custom(void)
+{
+  std::vector<unsigned> all_sites(num_sites_);
+  for (unsigned i=0; i<num_sites_; ++i) all_sites[i] = i;
+  //std::shuffle(all_sites.begin(),all_sites.end(),rng_);
+
+  // UP spins & holes
+  for (unsigned i=0; i<num_upspins_; ++i) {
+    unsigned site = all_sites[i];
+    operator[](site).put_upspin(i);
+    upspin_sites_[i] = site;
+  }
+  unsigned uh = 0;
+  for (unsigned i=num_upspins_; i<num_sites_; ++i) {
+    unsigned site = all_sites[i];
+    operator[](site).put_uphole(uh);
+    uphole_sites_[uh] = site;
+    uh++;
+  }
+
+  // DN spins & holes
+  unsigned last_site = num_sites_-1;
+  for (unsigned i=0; i<num_dnspins_; ++i) {
+    unsigned site = all_sites[last_site-i];
+    operator[](site).put_dnspin(i);
+    dnspin_sites_[i] = site;
+  }
+  unsigned dh = 0;
+  for (unsigned i=num_dnspins_; i<num_sites_; ++i) {
+    unsigned site = all_sites[last_site-i];
+    operator[](site).put_dnhole(dh);
+    dnhole_sites_[dh] = site;
+    dh++;
+  }
+
+  // in addition, in case of 'no double occupancy' 
+  // (put block on singly occupied sites):
+  if (!double_occupancy_) {
+    for (unsigned i=0; i<num_upspins_; ++i) {
+      if (operator[](uphole_sites_[i]).have_dnspin())
+        uphole_sites_[i] = -1;
+    }
+    for (unsigned i=0; i<num_dnspins_; ++i) {
+      if (operator[](dnhole_sites_[i]).have_upspin())
+        dnhole_sites_[i] = -1;
+    }
+  }
+  // in case there are no holes
+  if (num_upholes_==0) {
+    uphole_sites_.resize(1);
+    upspin_sites_[0] = -1;
+  }
+  if (num_dnholes_==0) {
+    dnhole_sites_.resize(1);
+    dnspin_sites_[0] = -1;
+  }
+  // number of doublely occupied sites
+  num_dblocc_sites_ = 0;
+  if (double_occupancy_) {
+    for (const auto& s : *this) 
+      if (s.count()==2) num_dblocc_sites_++;
+  }
+}
+
+
 std::pair<int,int> BasisState::gen_upspin_hop(void)
 {
   mv_upspin_ = rng_.random_upspin();

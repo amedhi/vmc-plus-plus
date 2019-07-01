@@ -188,6 +188,13 @@ void BCS_State::get_pair_amplitudes_sitebasis(const std::vector<ComplexMatrix>& 
     }
     p += kblock_dim_;
   }
+  /*
+  for (unsigned i=0; i<num_sites_; ++i) {
+    for (unsigned j=0; j<num_sites_; ++j) {
+      std::cout << "psi["<<i<<","<<j<<"] = "<<psi(i,j)<<"\n";
+      getchar();
+    }
+  }*/
 }
 
 void BCS_State::get_pair_amplitudes_oneband(std::vector<ComplexMatrix>& phi_k)
@@ -215,11 +222,14 @@ void BCS_State::get_pair_amplitudes_oneband(std::vector<ComplexMatrix>& phi_k)
     else {
       phi_k[k](0,0) = 2.0*delta_k/ek_plus_Ek;
     }
-    //std::cout << "k = " << k << "\n";
-    //std::cout << "ek = " << 0.5*ek << "\n";
-    //std::cout << "delta_k = " << delta_k << "\n";
-    //std::cout << "phi_k = " << phi_k[k](0,0) << "\n";
-    //getchar();
+    /*
+    std::cout << "k = " << k << "\n";
+    std::cout << "kvec = " << kvec.transpose() << "\n";
+    std::cout << "ek = " << 0.5*ek << "\n";
+    std::cout << "delta_k = " << delta_k << "\n";
+    std::cout << "phi_k = " << phi_k[k](0,0) << "\n";
+    getchar();
+    */
   }
 }
 

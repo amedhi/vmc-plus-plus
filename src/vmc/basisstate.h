@@ -69,6 +69,7 @@ public:
   void allow_double_occupancy(const bool& allow);
   void init_spins(const unsigned& num_upspins, const unsigned& num_dnspins);
   void set_random(void);
+  void set_custom(void);
   const bool& double_occupancy(void) const { return double_occupancy_; }
   std::pair<int,int> gen_upspin_hop(void);
   std::pair<int,int> gen_dnspin_hop(void);

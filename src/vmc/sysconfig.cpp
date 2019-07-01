@@ -109,8 +109,7 @@ int SysConfig::init_config(void)
     }
   }
   if (tmp_restriction) allow_double_occupancy(original_state);
-  //std::cout << psi_mat;
-  //std::cout << bstate;
+
   // amplitude matrix invers
   psi_inv = psi_mat.inverse();
   // run parameters
