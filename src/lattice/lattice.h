@@ -27,7 +27,7 @@ const unsigned MAX_BOND_TYPES = 40;
 
 /*---------------lattice types-----------------*/
 enum class lattice_id {
-  UNDEFINED, SQUARE, CHAIN, HONEYCOMB, SIMPLECUBIC, SYS_NIMNX
+  UNDEFINED, SQUARE, CHAIN, HONEYCOMB, SW_HONEYCOMB, SIMPLECUBIC, SYS_NIMNX
 };
 
 /*---------------Lattice site class-----------------*/
@@ -172,7 +172,7 @@ public:
   void rotate_by(const Eigen::Matrix3d& matrix);
 
 private:
-  int id {0};
+  //int id {0};
   unsigned max_site_type_val {0};
   unsigned max_bond_type_val {0};
   unsigned max_neighb_val {0};

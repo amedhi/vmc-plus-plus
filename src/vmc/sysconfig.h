@@ -28,6 +28,7 @@ public:
   SysConfig(const input::Parameters& parms, const lattice::LatticeGraph& graph, 
     const model::Hamiltonian& model);
   ~SysConfig() {}
+  std::string info_str(void) const; 
   int build(const lattice::LatticeGraph& graph, const input::Parameters& inputs, 
     const bool& with_gradient=false);
   int build(const lattice::LatticeGraph& graph, const var::parm_vector& vparms, 
@@ -85,6 +86,7 @@ private:
   int num_uphop_moves_{0};
   int num_dnhop_moves_{0};
   int num_exchange_moves_{0};
+  int num_iterations_{0};
   int refresh_cycle_{100};
   long num_proposed_moves_[move_t::end];
   long num_accepted_moves_[move_t::end];

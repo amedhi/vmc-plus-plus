@@ -32,12 +32,26 @@ int Hamiltonian::define_model(const input::Parameters& inputs,
 
   if (model_name == "HUBBARD") {
     mid = model_id::HUBBARD;
-    // model parameters
-    add_parameter(name="t", defval=1.0, inputs);
-    add_parameter(name="U", defval=0.0, inputs);
-    // bond operator terms
-    add_bondterm(name="hopping", cc="-t", op::spin_hop());
-    add_siteterm(name="hubbard", cc="U", op::hubbard_int());
+    switch (lattice.id()) {
+      default:
+        // model parameters
+        add_parameter(name="t", defval=1.0, inputs);
+        add_parameter(name="U", defval=0.0, inputs);
+        // bond operator terms
+        add_bondterm(name="hopping", cc="-t", op::spin_hop());
+        add_siteterm(name="hubbard", cc="U", op::hubbard_int());
+        break;
+
+      case lattice::lattice_id::SW_HONEYCOMB:
+        add_parameter(name="t", defval=1.0, inputs);
+        add_parameter(name="t2", defval=1.0, inputs);
+        add_parameter(name="U", defval=0.0, inputs);
+        // bond operator terms
+        cc = CouplingConstant({0,"-t"}, {1,"-t2"});
+        add_bondterm(name="hopping", cc, op::spin_hop());
+        add_siteterm(name="hubbard", cc="U", op::hubbard_int());
+        break;
+    }
   }
 
   else if (model_name == "TJ") {

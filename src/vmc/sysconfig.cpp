@@ -53,6 +53,20 @@ const std::vector<double>& SysConfig::vparm_vector(void)
   return vparm_vector_;
 }
 
+std::string SysConfig::info_str(void) const
+{
+  std::ostringstream info;
+  info << wf.info_str();
+  info.precision(6);
+  info.setf(std::ios_base::fixed);
+  info << "# Variational parameters:\n";
+  for (const auto& v : wf.varparms()) 
+    info << "# " << v.name() << " = " << v.value() << "\n";
+  for (const auto& v : pj.varparms()) 
+    info << "# " << v.name() << " = " << v.value() << "\n";
+  return info.str();
+}
+
 int SysConfig::build(const lattice::LatticeGraph& graph, const input::Parameters& inputs,
     const bool& with_gradient)
 {
@@ -120,6 +134,7 @@ int SysConfig::init_config(void)
 int SysConfig::set_run_parameters(void)
 {
   num_updates_ = 0;
+  num_iterations_ = 0;
   refresh_cycle_ = 100;
   // number of moves per mcstep
   int n_up = static_cast<int>(num_upspins_);
@@ -158,8 +173,10 @@ int SysConfig::update_state(void)
   for (int n=0; n<num_dnhop_moves_; ++n) do_dnspin_hop();
   for (int n=0; n<num_exchange_moves_; ++n) do_spin_exchange();
   num_updates_++;
-  if (num_updates_ % refresh_cycle_ == 0) {
+  num_iterations_++;
+  if (num_iterations_ == refresh_cycle_) {
     psi_inv = psi_mat.inverse();
+    num_iterations_ = 0;
   }
   return 0;
 }

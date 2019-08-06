@@ -19,6 +19,7 @@ BCS_State::BCS_State(const bcs& order_type, const input::Parameters& inputs,
 int BCS_State::init(const bcs& order_type, const input::Parameters& inputs, 
   const lattice::LatticeGraph& graph)
 {
+  name_ = "BCS";
   // sites & bonds
   num_sites_ = graph.num_sites();
   num_bonds_ = graph.num_bonds();
@@ -36,20 +37,53 @@ int BCS_State::init(const bcs& order_type, const input::Parameters& inputs,
   using namespace model;
   model::CouplingConstant cc;
   if (order_type_==bcs::swave) {
-    mf_model_.add_parameter(name="t", defval=1.0, inputs);
-    mf_model_.add_parameter(name="delta_sc", defval=1.0, inputs);
-    mf_model_.add_bondterm(name="hopping", cc="-t", op::spin_hop());
-    mf_model_.add_bondterm(name="pairing", cc="delta_sc", op::pair_create());
-    mf_model_.add_siteterm(name="mu_term", cc="-mu", op::ni_sigma());
-    // variational parameters
-    varparms_.add("delta_sc", defval=1.0, lb=0.0, ub=2.0);
+    order_name_ = "s-wave";
+    switch (graph.lattice().id()) {
+      default:
+        mf_model_.add_parameter(name="t", defval=1.0, inputs);
+        mf_model_.add_parameter(name="delta_sc", defval=1.0, inputs);
+        mf_model_.add_bondterm(name="hopping", cc="-t", op::spin_hop());
+        mf_model_.add_bondterm(name="pairing", cc="delta_sc", op::pair_create());
+        mf_model_.add_siteterm(name="mu_term", cc="-mu", op::ni_sigma());
+        // variational parameters
+        varparms_.add("delta_sc", defval=1.0, lb=0.0, ub=2.0);
+        break;
+      case lattice::lattice_id::SW_HONEYCOMB:
+        mf_model_.add_parameter(name="t", defval=1.0, inputs);
+        mf_model_.add_parameter(name="t2", defval=1.0, inputs);
+        mf_model_.add_parameter(name="delta_sc", defval=1.0, inputs);
+        // bond operator terms
+        cc = CouplingConstant({0,"-t"}, {1,"-t2"});
+        mf_model_.add_bondterm(name="hopping", cc, op::spin_hop());
+        mf_model_.add_bondterm(name="pairing", cc="delta_sc", op::pair_create());
+        mf_model_.add_siteterm(name="mu_term", cc="-mu", op::ni_sigma());
+        // variational parameters
+        varparms_.add("delta_sc", defval=1.0, lb=0.0, ub=2.0);
+    }
   }
   else if (order_type_==bcs::dwave) {
+    order_name_ = "d-wave";
     mf_model_.add_parameter(name="t", defval=1.0, inputs);
     mf_model_.add_parameter(name="delta_sc", defval=1.0, inputs);
     mf_model_.add_bondterm(name="hopping", cc="-t", op::spin_hop());
     mf_model_.add_siteterm(name="mu_term", cc="-mu", op::ni_sigma());
     cc = CouplingConstant({0, "delta_sc"}, {1, "-delta_sc"});
+    mf_model_.add_bondterm(name="pairing", cc, op::pair_create());
+    // variational parameters
+    varparms_.add("delta_sc", defval=1.0, lb=0.0, ub=2.0);
+  }
+  else if (order_type_==bcs::d_plus_id) {
+    order_name_ = "d+id";
+    mf_model_.add_parameter(name="t", defval=1.0, inputs);
+    mf_model_.add_parameter(name="delta_sc", defval=1.0, inputs);
+    mf_model_.add_bondterm(name="hopping", cc="-t", op::spin_hop());
+    mf_model_.add_siteterm(name="mu_term", cc="-mu", op::ni_sigma());
+    // pairing term
+    double theta = 2.0*pi()/3.0;
+    double theta2 = 2.0*theta;
+    mf_model_.add_constant("theta",theta);
+    mf_model_.add_constant("theta2",theta2);
+    cc = CouplingConstant({0,"delta_sc"}, {1,"i*theta*delta_sc"}, {2,"i*theta2*delta_sc"});
     mf_model_.add_bondterm(name="pairing", cc, op::pair_create());
     // variational parameters
     varparms_.add("delta_sc", defval=1.0, lb=0.0, ub=2.0);
@@ -85,6 +119,21 @@ int BCS_State::init(const bcs& order_type, const input::Parameters& inputs,
     work_k_[k].resize(kblock_dim_,kblock_dim_);
   } 
   return 0;
+}
+
+std::string BCS_State::info_str(void) const
+{
+  std::ostringstream info;
+  info << "# Ground State: '"<<name_<<" ("<<order_name_<<")'\n";
+  info << "# Hole doping = "<<hole_doping()<<"\n";
+  info << "# Particles = "<< num_upspins()+num_dnspins();
+  info << " (Nup = "<<num_upspins()<<", Ndn="<<num_dnspins()<<")\n";
+  info.precision(6);
+  info.setf(std::ios_base::fixed);
+  if (noninteracting_mu_)
+    info << "# mu = non-interacting value\n";
+  else info << "# mu = "<<mf_model_.get_parameter_value("mu")<<"\n";
+  return info.str();
 }
 
 void BCS_State::update(const input::Parameters& inputs)

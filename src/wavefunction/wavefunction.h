@@ -37,13 +37,14 @@ public:
     const bool& site_disorder=false);
   ~Wavefunction() {}
   const VariationalParms& varparms(void) const { return groundstate_->varparms(); }
+  std::string info_str(void) const { return groundstate_->info_str(); } 
   int compute(const lattice::LatticeGraph& graph, const input::Parameters& inputs, 
     const bool& psi_gradient=false);
   int compute(const lattice::LatticeGraph& graph, const var::parm_vector& pvector,
     const unsigned& start_pos, const bool& psi_gradient=false);
   //int compute_gradients(const lattice::LatticeGraph& graph);
-  const unsigned& num_upspins(void) const { return groundstate_->num_upspins(); }
-  const unsigned& num_dnspins(void) const { return groundstate_->num_dnspins(); }
+  const int& num_upspins(void) const { return groundstate_->num_upspins(); }
+  const int& num_dnspins(void) const { return groundstate_->num_dnspins(); }
   const double& hole_doping(void) const { return groundstate_->hole_doping(); }
   std::string signature_str(void) const; 
   void get_vparm_names(std::vector<std::string>& names, unsigned start_pos) const; 
