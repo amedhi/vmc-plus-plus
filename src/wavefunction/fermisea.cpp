@@ -19,6 +19,7 @@ Fermisea::Fermisea(const input::Parameters& inputs, const lattice::LatticeGraph&
 int Fermisea::init(const input::Parameters& inputs, 
   const lattice::LatticeGraph& graph)
 {
+  name_ = "Fermisea";
   // sites & bonds
   num_sites_ = graph.num_sites();
   num_bonds_ = graph.num_bonds();
@@ -53,6 +54,17 @@ int Fermisea::init(const input::Parameters& inputs,
     phi_k_[k].resize(kblock_dim_,kblock_dim_);
   } 
   return 0;
+}
+
+std::string Fermisea::info_str(void) const
+{
+  std::ostringstream info;
+  info << "# Ground State: '"<<name_<<"'\n";
+  info << "# Hole doping = "<<hole_doping()<<"\n";
+  info << "# Particles = "<< num_upspins()+num_dnspins();
+  info << " (Nup = "<<num_upspins()<<", Ndn="<<num_dnspins()<<")\n";
+  info.precision(6);
+  return info.str();
 }
 
 void Fermisea::update(const input::Parameters& inputs)
@@ -188,7 +200,7 @@ void Fermisea::construct_groundstate(void)
       total_energy_ += ek[idx[i]];
     }
     total_energy_ = 2.0*total_energy_/num_sites_;
-    //std::cout << "Total KE =" << total_energy_ << "\n";
+    std::cout << "Total KE =" << total_energy_ << "\n";
 
     // look upward in energy
     for (int i=top_filled_level+1; i<ek.size(); ++i) {

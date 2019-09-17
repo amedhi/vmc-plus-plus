@@ -209,7 +209,7 @@ double Hamiltonian::get_parameter_value(const std::string& pname) const
 {
   auto it = parms_.find(pname);
   if (it != parms_.end()) return it->second;
-  else throw std::logic_error("Hamiltonian::get_parameter_value: parameter does not exist");
+  else throw std::logic_error("Hamiltonian::get_parameter_value: parameter '"+pname+"' does not exist");
 }
 
 void Hamiltonian::get_term_names(std::vector<std::string>& term_names) const

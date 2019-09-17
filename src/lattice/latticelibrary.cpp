@@ -82,6 +82,58 @@ int Lattice::define_lattice(void)
     add_bond(type=2, ngb=1, src=1, src_offset=pos(0,0,0), tgt=0, tgt_offset=pos(0,1,0));
   }
 
+  else if (lname == "NICKELATE") {
+    lid = lattice_id::NICKELATE;
+    // basis vectors
+    set_basis_vectors(a1=vec(1,0,0), a2=vec(0,1,0), a3=vec(0,0,1));
+    // sites
+    add_basis_site(type=0, coord=vec(0,0,0));
+    add_basis_site(type=1, coord=0.5*(basis_vector_a1()+
+      basis_vector_a2()+basis_vector_a3()));
+
+    // inter-cell Ni-Ni bonds
+    add_bond(type=0,ngb=1,src=0,src_offset=pos(0,0,0),tgt=0,tgt_offset=pos(1,0,0));
+    add_bond(type=1,ngb=1,src=0,src_offset=pos(0,0,0),tgt=0,tgt_offset=pos(0,1,0));
+
+    add_bond(type=2,ngb=2,src=0,src_offset=pos(0,0,0),tgt=0,tgt_offset=pos(1,1,0));
+    add_bond(type=2,ngb=2,src=0,src_offset=pos(0,0,0),tgt=0,tgt_offset=pos(1,-1,0));
+
+    add_bond(type=3,ngb=3,src=0,src_offset=pos(0,0,0),tgt=0,tgt_offset=pos(2,0,0));
+    add_bond(type=3,ngb=3,src=0,src_offset=pos(0,0,0),tgt=0,tgt_offset=pos(0,2,0));
+
+    add_bond(type=4,ngb=1,src=0,src_offset=pos(0,0,0),tgt=0,tgt_offset=pos(0,0,1));
+
+    // inter-cell R-R bonds
+    add_bond(type=5,ngb=1,src=1,src_offset=pos(0,0,0),tgt=1,tgt_offset=pos(1,0,0));
+    add_bond(type=5,ngb=1,src=1,src_offset=pos(0,0,0),tgt=1,tgt_offset=pos(0,1,0));
+
+    add_bond(type=6,ngb=1,src=1,src_offset=pos(0,0,0),tgt=1,tgt_offset=pos(0,0,1));
+
+    add_bond(type=7,ngb=2,src=1,src_offset=pos(0,0,0),tgt=1,tgt_offset=pos(1,0,1));
+    add_bond(type=7,ngb=2,src=1,src_offset=pos(0,0,0),tgt=1,tgt_offset=pos(-1,0,1));
+    add_bond(type=7,ngb=2,src=1,src_offset=pos(0,0,0),tgt=1,tgt_offset=pos(0,1,1));
+    add_bond(type=7,ngb=2,src=1,src_offset=pos(0,0,0),tgt=1,tgt_offset=pos(0,-1,1));
+
+    add_bond(type=8,ngb=4,src=1,src_offset=pos(0,0,0),tgt=1,tgt_offset=pos(1,0,2));
+    add_bond(type=8,ngb=4,src=1,src_offset=pos(0,0,0),tgt=1,tgt_offset=pos(-1,0,2));
+    add_bond(type=8,ngb=4,src=1,src_offset=pos(0,0,0),tgt=1,tgt_offset=pos(0,1,2));
+    add_bond(type=8,ngb=4,src=1,src_offset=pos(0,0,0),tgt=1,tgt_offset=pos(0,-1,2));
+
+    add_bond(type=9,ngb=2,src=1,src_offset=pos(0,0,0),tgt=1,tgt_offset=pos(1,1,0));
+    add_bond(type=9,ngb=2,src=1,src_offset=pos(0,0,0),tgt=1,tgt_offset=pos(1,-1,0));
+
+    add_bond(type=10,ngb=3,src=1,src_offset=pos(0,0,0),tgt=1,tgt_offset=pos(0,0,2));
+
+    // inter-cell Ni-R bonds
+    add_bond(type=11,ngb=3,src=1,src_offset=pos(0,0,0),tgt=0,tgt_offset=pos(2,0,0));
+    add_bond(type=11,ngb=3,src=1,src_offset=pos(0,0,0),tgt=0,tgt_offset=pos(0,2,0));
+
+    add_bond(type=12,ngb=5,src=1,src_offset=pos(0,0,0),tgt=0,tgt_offset=pos(2,0,2));
+    add_bond(type=12,ngb=5,src=1,src_offset=pos(0,0,0),tgt=0,tgt_offset=pos(-2,0,2));
+    add_bond(type=12,ngb=5,src=1,src_offset=pos(0,0,0),tgt=0,tgt_offset=pos(0,2,2));
+    add_bond(type=12,ngb=5,src=1,src_offset=pos(0,0,0),tgt=0,tgt_offset=pos(0,-2,2));
+  }
+
   else if (lname == "SW_HONEYCOMB") {
     // type
     lid = lattice_id::SW_HONEYCOMB;

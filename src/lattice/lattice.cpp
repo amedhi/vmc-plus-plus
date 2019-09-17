@@ -158,7 +158,7 @@ void Unitcell::set_basis(const Vector3d& av1, const Vector3d& av2, const Vector3
 int Unitcell::add_site(const unsigned& type, const unsigned& atomid, const Vector3d& site_coord)
 {
   if (atomid > sites.size()) {
-    throw std::range_error("error: add_site:: out-of-range value for argument-3");
+    throw std::range_error("error: Unitcell::add_site:: out-of-range value for argument-3");
   }
   unsigned uid = sites.size();
   sites.push_back(Site(uid, type, atomid, bravindex(), site_coord, coord())); 

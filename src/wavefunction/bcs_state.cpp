@@ -88,16 +88,89 @@ int BCS_State::init(const bcs& order_type, const input::Parameters& inputs,
     // variational parameters
     varparms_.add("delta_sc", defval=1.0, lb=0.0, ub=2.0);
   }
+  else if (order_type_==bcs::custom_sc) {
+    order_name_ = "custom_sc";
+    if (graph.lattice().id()==lattice::lattice_id::NICKELATE) {
+        mf_model_.add_parameter(name="e_N", defval=0.0, inputs);
+        mf_model_.add_parameter(name="e_R", defval=0.0, inputs);
+        mf_model_.add_parameter(name="t_NN_100", defval=0.0, inputs);
+        mf_model_.add_parameter(name="t_NN_001", defval=0.0, inputs);
+        mf_model_.add_parameter(name="t_NN_110", defval=0.0, inputs);
+        mf_model_.add_parameter(name="t_NN_200", defval=0.0, inputs);
+        mf_model_.add_parameter(name="t_NN_001", defval=0.0, inputs);
+        mf_model_.add_parameter(name="t_RR_100", defval=0.0, inputs);
+        mf_model_.add_parameter(name="t_RR_001", defval=0.0, inputs);
+        mf_model_.add_parameter(name="t_RR_101", defval=0.0, inputs);
+        mf_model_.add_parameter(name="t_RR_102", defval=0.0, inputs);
+        mf_model_.add_parameter(name="t_RR_110", defval=0.0, inputs);
+        mf_model_.add_parameter(name="t_RR_002", defval=0.0, inputs);
+        mf_model_.add_parameter(name="t_RN_200", defval=0.0, inputs);
+        mf_model_.add_parameter(name="t_RN_202", defval=0.0, inputs);
+        mf_model_.add_parameter(name="delta_d", defval=1.0, inputs);
+        mf_model_.add_parameter(name="delta_s", defval=1.0, inputs);
+        mf_model_.add_parameter(name="mu_N", defval=0.0, inputs);
+        mf_model_.add_parameter(name="mu_R", defval=0.0, inputs);
+
+        // bond operators
+        cc.create(13);
+        cc.add_type(0, "t_NN_100");
+        cc.add_type(1, "t_NN_100");
+        cc.add_type(2, "t_NN_110");
+        cc.add_type(3, "t_NN_200");
+        cc.add_type(4, "t_NN_001");
+        cc.add_type(5, "t_RR_100");
+        cc.add_type(6, "t_RR_001");
+        cc.add_type(7, "t_RR_101");
+        cc.add_type(8, "t_RR_102");
+        cc.add_type(9, "t_RR_110");
+        cc.add_type(10, "t_RR_002");
+        cc.add_type(11, "t_RN_200");
+        cc.add_type(12, "t_RN_202");
+        mf_model_.add_bondterm(name="hopping", cc, op::spin_hop());
+
+        // site operators
+        cc.create(2);
+        cc.add_type(0, "e_N-mu_N");
+        cc.add_type(1, "e_R-mu_R");
+        mf_model_.add_siteterm(name="ni_sigma", cc, op::ni_sigma());
+
+        // pairing term
+        // d-wave paring in Ni-layer
+        cc.create(13);
+        for (int i=0; i<13; ++i) cc.add_type(i, "0");
+        cc.add_type(0, "delta_d");
+        cc.add_type(1, "-delta_d");
+        mf_model_.add_bondterm(name="bond_singlet", cc, op::pair_create());
+        // local s-wave at R-sites
+        cc.create(2);
+        cc.add_type(0, "0");
+        cc.add_type(1, "delta_s");
+        mf_model_.add_siteterm(name="site_singlet", cc, op::pair_create());
+
+        // variational parameters
+        varparms_.add("delta_d", defval=1.0, lb=0.0, ub=2.0);
+        varparms_.add("delta_s", defval=1.0, lb=0.0, ub=2.0);
+        varparms_.add("mu_N", defval=0.0, -2.0, +1.0);
+        varparms_.add("mu_R", defval=0.0, -2.0, +1.0);
+        noninteracting_mu_ = false;
+    }
+    else {
+      throw std::range_error("BCS_State::BCS_State: state undefined for this lattice");
+    }
+  }
   else {
     throw std::range_error("BCS_State::BCS_State: unidefined bcs order");
   }
   // chemical potential
-  int info;
-  mf_model_.add_parameter(name="mu", defval=0.0, inputs, info);
-  if (info == 0) noninteracting_mu_ = false;
-  else noninteracting_mu_ = true;
-  if (inputs.set_value("mu_variational", false, info)) 
-    varparms_.add("mu", defval=0.0, -2.0, +1.0);
+  if (graph.lattice().id()!=lattice::lattice_id::NICKELATE) {
+    int info;
+    mf_model_.add_parameter(name="mu", defval=0.0, inputs, info);
+    if (info == 0) noninteracting_mu_ = false;
+    else noninteracting_mu_ = true;
+    if (inputs.set_value("mu_variational", false, info)) 
+      varparms_.add("mu", defval=0.0, -2.0, +1.0);
+  }
+
   // finalize MF Hamiltonian
   mf_model_.finalize(graph);
   num_varparms_ = varparms_.size();
@@ -132,7 +205,7 @@ std::string BCS_State::info_str(void) const
   info.setf(std::ios_base::fixed);
   if (noninteracting_mu_)
     info << "# mu = non-interacting value\n";
-  else info << "# mu = "<<mf_model_.get_parameter_value("mu")<<"\n";
+  //else info << "# mu = "<<mf_model_.get_parameter_value("mu")<<"\n";
   return info.str();
 }
 
@@ -238,8 +311,8 @@ void BCS_State::get_pair_amplitudes_sitebasis(const std::vector<ComplexMatrix>& 
     p += kblock_dim_;
   }
   /*
-  for (unsigned i=0; i<num_sites_; ++i) {
-    for (unsigned j=0; j<num_sites_; ++j) {
+  for (int i=0; i<num_sites_; ++i) {
+    for (int j=0; j<num_sites_; ++j) {
       std::cout << "psi["<<i<<","<<j<<"] = "<<psi(i,j)<<"\n";
       getchar();
     }
@@ -254,6 +327,7 @@ void BCS_State::get_pair_amplitudes_oneband(std::vector<ComplexMatrix>& phi_k)
     mf_model_.construct_kspace_block(kvec);
     double ek = std::real(mf_model_.quadratic_spinup_block()(0,0)); 
     auto delta_k = mf_model_.pairing_part()(0,0);
+    //std::cout<<"delta_k="<<delta_k<<"\n"; getchar();
     mf_model_.construct_kspace_block(-kvec);
     ek += std::real(mf_model_.quadratic_spinup_block()(0,0));;
     delta_k += mf_model_.pairing_part()(0,0);

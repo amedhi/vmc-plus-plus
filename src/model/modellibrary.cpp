@@ -51,6 +51,54 @@ int Hamiltonian::define_model(const input::Parameters& inputs,
         add_bondterm(name="hopping", cc, op::spin_hop());
         add_siteterm(name="hubbard", cc="U", op::hubbard_int());
         break;
+
+      case lattice::lattice_id::NICKELATE:
+        // model parameters
+        add_parameter(name="U", defval=0.0, inputs);
+        add_parameter(name="e_N", defval=0.0, inputs);
+        add_parameter(name="e_R", defval=0.0, inputs);
+        add_parameter(name="t_NN_100", defval=0.0, inputs);
+        add_parameter(name="t_NN_001", defval=0.0, inputs);
+        add_parameter(name="t_NN_110", defval=0.0, inputs);
+        add_parameter(name="t_NN_200", defval=0.0, inputs);
+        add_parameter(name="t_NN_001", defval=0.0, inputs);
+        add_parameter(name="t_RR_100", defval=0.0, inputs);
+        add_parameter(name="t_RR_001", defval=0.0, inputs);
+        add_parameter(name="t_RR_101", defval=0.0, inputs);
+        add_parameter(name="t_RR_102", defval=0.0, inputs);
+        add_parameter(name="t_RR_110", defval=0.0, inputs);
+        add_parameter(name="t_RR_002", defval=0.0, inputs);
+        add_parameter(name="t_RN_200", defval=0.0, inputs);
+        add_parameter(name="t_RN_202", defval=0.0, inputs);
+
+        // bond operators
+        cc.create(13);
+        cc.add_type(0, "t_NN_100");
+        cc.add_type(1, "t_NN_100");
+        cc.add_type(2, "t_NN_110");
+        cc.add_type(3, "t_NN_200");
+        cc.add_type(4, "t_NN_001");
+        cc.add_type(5, "t_RR_100");
+        cc.add_type(6, "t_RR_001");
+        cc.add_type(7, "t_RR_101");
+        cc.add_type(8, "t_RR_102");
+        cc.add_type(9, "t_RR_110");
+        cc.add_type(10, "t_RR_002");
+        cc.add_type(11, "t_RN_200");
+        cc.add_type(12, "t_RN_202");
+        add_bondterm(name="hopping", cc, op::spin_hop());
+
+        // site operators
+        cc.create(2);
+        cc.add_type(0, "e_N");
+        cc.add_type(1, "e_R");
+        add_siteterm(name="ni_sigma", cc, op::ni_sigma());
+
+        // interaction
+        cc.add_type(0, "U");
+        cc.add_type(1, "0");
+        add_siteterm(name="hubbard", cc, op::hubbard_int());
+        break;
     }
   }
 

@@ -29,6 +29,9 @@ Wavefunction::Wavefunction(const lattice::LatticeGraph& graph,
   else if (name_ == "SC_D+ID") {
     groundstate_.reset(new BCS_State(bcs::d_plus_id,inputs,graph));
   }
+  else if (name_ == "CUSTOM_SC") {
+    groundstate_.reset(new BCS_State(bcs::custom_sc,inputs,graph));
+  }
   else if (name_ == "DISORDERED_SC") {
     groundstate_.reset(new DisorderedSC(inputs,graph));
   }

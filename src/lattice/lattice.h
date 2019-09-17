@@ -27,7 +27,7 @@ const unsigned MAX_BOND_TYPES = 40;
 
 /*---------------lattice types-----------------*/
 enum class lattice_id {
-  UNDEFINED, SQUARE, CHAIN, HONEYCOMB, SW_HONEYCOMB, SIMPLECUBIC, SYS_NIMNX
+  UNDEFINED, SQUARE, CHAIN, HONEYCOMB, SW_HONEYCOMB, SIMPLECUBIC, NICKELATE
 };
 
 /*---------------Lattice site class-----------------*/

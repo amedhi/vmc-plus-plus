@@ -78,6 +78,7 @@ void Energy::measure(const lattice::LatticeGraph& graph,
           unsigned site = graph.site(s);
           unsigned type = graph.site_type(s);
           matrix_elem(term,type) += config.apply(it->qn_operator(), site);
+          //std::cout << matrix_elem(term,type) << "\n"; 
         }
       }
       term++;
@@ -93,7 +94,9 @@ void Energy::measure(const lattice::LatticeGraph& graph,
       }
       else {
         for (unsigned stype=0; stype<graph.num_site_types(); ++stype) {
-          config_value_(n+i) += std::real(it->coupling(stype)*matrix_elem(i,stype));
+          config_value_(n+i) += std::real(it->coupling(stype)*matrix_elem(n+i,stype));
+          //std::cout << config_value_(n+i) << it->coupling(stype) << "\n"; 
+          //getchar();
         }
       }
       i++;
