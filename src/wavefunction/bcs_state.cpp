@@ -137,9 +137,9 @@ int BCS_State::init(const bcs& order_type, const input::Parameters& inputs,
         // pairing term
         // d-wave paring in Ni-layer
         cc.create(13);
-        for (int i=0; i<13; ++i) cc.add_type(i, "0");
         cc.add_type(0, "delta_d");
         cc.add_type(1, "-delta_d");
+        for (int i=2; i<13; ++i) cc.add_type(i, "0");
         mf_model_.add_bondterm(name="bond_singlet", cc, op::pair_create());
         // local s-wave at R-sites
         cc.create(2);
@@ -181,6 +181,7 @@ int BCS_State::init(const bcs& order_type, const input::Parameters& inputs,
   kblock_dim_ = blochbasis_.subspace_dimension();
   // FT matrix for transformation from 'site basis' to k-basis
   set_ft_matrix(graph);
+
   // work arrays
   work_.resize(kblock_dim_,kblock_dim_);
   delta_k_.resize(kblock_dim_,kblock_dim_);
@@ -376,14 +377,20 @@ void BCS_State::get_pair_amplitudes_multiband(std::vector<ComplexMatrix>& phi_k)
     // transform pairing part
     delta_k_ = es_k_up.eigenvectors().adjoint() * work_ * 
       es_minusk_up.eigenvectors().conjugate();
+    //std::cout << "delta_k = " << delta_k_ << "\n"; getchar();
     // bcs ampitudes in rotated basis (assuming INTRABAND pairing only)
     dphi_k_.setZero();
     for (unsigned i=0; i<kblock_dim_; ++i) {
       double ek = es_k_up.eigenvalues()[i] + es_minusk_up.eigenvalues()[i];
       double deltak_sq = std::norm(delta_k_(i,i));
       double ek_plus_Ek = ek + std::sqrt(ek*ek + 4.0*deltak_sq);
+      /*
+      if (ek<0.0) dphi_k_(i,i) = 1.0;
+      else dphi_k_(i,i) = 0.0;
+      */
       if (std::sqrt(deltak_sq)<1.0E-12 && ek<0.0) {
         dphi_k_(i,i) = large_number_ * std::exp(ii()*std::arg(delta_k_(i,i)));
+        //std::cout << "large_number \n";
       }
       else {
         dphi_k_(i,i) = 2.0*delta_k_(i,i)/ek_plus_Ek;
@@ -393,7 +400,6 @@ void BCS_State::get_pair_amplitudes_multiband(std::vector<ComplexMatrix>& phi_k)
     for (unsigned i=0; i<kblock_dim_; ++i) 
       work_.col(i) = es_k_up.eigenvectors().col(i) * dphi_k_(i,i);
     phi_k[k] = work_ * es_minusk_up.eigenvectors().transpose();
-    //std::cout << delta_k << "\n";
   } 
 }
 

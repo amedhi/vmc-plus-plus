@@ -118,6 +118,7 @@ void MF_Model::construct_kspace_block(const Vector3d& kvec)
       pairing_block_ += term.coeff_matrix();
     }
   }
+  //std::cout << "pairing_block = " << pairing_block_ << "\n"; getchar();
   //quadratic_block_up_ += work1.adjoint();
   //pairing_block_ = work2;
   //pairing_block_ += work2.adjoint();

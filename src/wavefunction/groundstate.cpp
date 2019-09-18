@@ -52,6 +52,13 @@ void GroundState::set_particle_num(const input::Parameters& inputs)
     num_dnspins_ = num_upspins_;
     num_spins_ = num_upspins_ + num_dnspins_;
     band_filling_ = static_cast<double>(2*n)/num_sites;
+    /*
+    std::cout << "num_sites = " << num_sites_ << "\n";
+    std::cout << "num_upspins = " << num_upspins_ << "\n";
+    std::cout << "num_dnspins = " << num_dnspins_ << "\n";
+    std::cout << "band_filling = " << band_filling_ << "\n";
+    getchar();
+    */
   }
   else{
     int n = static_cast<int>(std::round(band_filling_*num_sites));
@@ -69,7 +76,7 @@ void GroundState::set_particle_num(const input::Parameters& inputs)
 double GroundState::get_noninteracting_mu(void)
 {
   std::vector<double> ek;
-  for (unsigned k=0; k<num_kpoints_; ++k) {
+  for (int k=0; k<num_kpoints_; ++k) {
     Vector3d kvec = blochbasis_.kvector(k);
     mf_model_.construct_kspace_block(kvec);
     es_k_up.compute(mf_model_.quadratic_spinup_block(), Eigen::EigenvaluesOnly);
@@ -79,12 +86,11 @@ double GroundState::get_noninteracting_mu(void)
   std::sort(ek.begin(),ek.end());
   //for (const auto& e : ek) std::cout << e << "\n";
   //double e = 0.0;
-  //for (unsigned i=0; i<num_upspins_; ++i) e += ek[i];
+  //for (int i=0; i<num_upspins_; ++i) e += ek[i];
   //std::cout << "energy = " << 2*e/num_sites_ << "\n";
   //std::cout << "upspins = " << num_upspins_ << "\n";
   double mu;
   if (num_upspins_ < num_sites_) {
-    //std::cout << 0.5*(ek[num_upspins_-1]+ek[num_upspins_]) << "\n";
     mu = 0.5*(ek[num_upspins_-1]+ek[num_upspins_]);
   }
   else mu = ek[num_upspins_-1];
