@@ -103,7 +103,7 @@ void Fermisea::get_pair_amplitudes(std::vector<ComplexMatrix>& phi_k)
     mf_model_.construct_kspace_block(-kvec);
     es_minusk_up.compute(mf_model_.quadratic_spinup_block());
     phi_k[k] = es_k_up.eigenvectors().block(0,0,kblock_dim_,m)
-      		 * es_minusk_up.eigenvectors().conjugate().block(0,0,m,kblock_dim_);
+      		 * es_minusk_up.eigenvectors().transpose().block(0,0,m,kblock_dim_);
     //std::cout << kvec.transpose() << "\n"; 
     //std::cout << phi_k[k] << "\n"; getchar();
   }
